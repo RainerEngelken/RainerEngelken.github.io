@@ -1,12 +1,13 @@
 ---
 layout: page
+title: Teaching
 permalink: /teaching/
-title: teaching
-description: Materials for courses you taught. Replace this text with your description.
-nav: true
-nav_order: 6
 ---
 
-For now, this page is assumed to be a static description of your courses. You can convert it to a collection similar to `_projects/` so that you can have a dedicated page for each course.
+### ECE 598, Special Topics: Dynamical Systems and Neural Networks
+We connect stability, attractors, bifurcations, chaos, and control to learning and computation in ML models and neural circuits. The course mixes theory and code and ends with a research style final project.
 
-Organize your courses by years, topics, or universities, however you like!
+- **Term:** Fall 2025
+- **Instructor:** Rainer Engelken, Incoming Assistant Professor at UIUC ECE
+- **Contact:** re2365@columbia.edu
+- **Syllabus:** add a PDF link here when ready

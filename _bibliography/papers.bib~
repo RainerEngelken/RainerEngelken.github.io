@@ -14,7 +14,7 @@
 @inproceedings{engelken2023flossing,
   author    = {Engelken, Rainer},
   title     = {Gradient Flossing: Improving Gradient Descent through Dynamic Control of Jacobians},
-  booktitle = {Advances in Neural Information Processing Systems},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year      = {2023},
   url       = {https://neurips.cc/virtual/2023/poster/70698},
   selected  = {true}
@@ -22,8 +22,8 @@
 
 @inproceedings{engelken2023sparseprop,
   author    = {Engelken, Rainer},
-  title     = {SparseProp: Efficient Event Based Simulation and Training of Sparse Recurrent Spiking Neural Networks},
-  booktitle = {Advances in Neural Information Processing Systems},
+  title     = {SparseProp: Efficient Event-Based Simulation and Training of Sparse Recurrent Spiking Neural Networks},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year      = {2023},
   url       = {https://neurips.cc/virtual/2023/poster/69919},
   selected  = {true}
@@ -55,8 +55,8 @@
 
 @inproceedings{engelken2022trie,
   author    = {Engelken, Rainer and Goedeke, Sven},
-  title     = {A time resolved theory of information encoding in recurrent neural networks},
-  booktitle = {Advances in Neural Information Processing Systems},
+  title     = {A time-resolved theory of information encoding in recurrent neural networks},
+  booktitle = {Advances in Neural Information Processing Systems (NeurIPS)},
   year      = {2022},
   url       = {https://proceedings.neurips.cc/paper/2022/hash/e6f29fb27bb400f89f5584c175005679-Abstract-Conference.html}
 }
