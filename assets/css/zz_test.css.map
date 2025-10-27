@@ -1,1 +1,1 @@
-{"version":3,"sourceRoot":"","sources":["zz_test.scss"],"names":[],"mappings":"AACA,WADI","sourcesContent":["$c: red;\nbody { color: $c; }\n"],"file":"zz_test.css"}
+{"version":3,"sourceRoot":"","sources":["zz_test.scss"],"names":[],"mappings":"AACA,KACE,MAFE","sourcesContent":["$c: red;\nbody {\n color: $c;\n}\n"],"file":"zz_test.css"}
