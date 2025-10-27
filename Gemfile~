@@ -38,3 +38,4 @@ group :other_plugins do
 end
 
 gem "jekyll-sass-converter", "~> 3.0"
+gem "sass-embedded", "~> 1.79"   # newer than 1.69.5

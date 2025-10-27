@@ -13,9 +13,6 @@ and computation in brains and machines.
 
 - **[Visit the Course Website for details &raquo;](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**
 
-**Time & Location:** Tue/Thu 11:00–12:20 • ECEB 4070  
-**Office Hours:** CSL 314, time TBD 
-
 #### Course Description
 In this course, we will analyze how stability, attractors, bifurcations, and chaos govern the behavior and learning capabilities of neural networks. The course covers foundational discrete and continuous-time dynamical systems, applying them to the analysis of modern machine learning models (including training dynamics) and complex neural circuits (both rate-based and spiking). The course culminates in a research project applying these interdisciplinary concepts.
 

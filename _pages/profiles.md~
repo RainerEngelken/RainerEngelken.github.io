@@ -3,7 +3,7 @@ layout: page
 permalink: /people/
 title: People
 description: "Meet the team"
-nav: false
+nav: true
 ---
 
 Our lab is just getting started in the Fall of 2025 at the University of Illinois Urbana-Champaign.
