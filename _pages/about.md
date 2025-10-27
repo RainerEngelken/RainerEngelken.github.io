@@ -4,7 +4,6 @@ title: About
 permalink: /
 subtitle: Bridging dynamical systems and neuroscience to reveal principles of learning in neural circuits.
 
-
 profile:
   align: right
   image: RainerEngelken.jpg
@@ -15,6 +14,7 @@ news: true
 selected_papers: true
 social: true
 ---
+
 Welcome! We are a computational neuroscience lab working at the interface of **dynamical systems**, **neuroscience**, and **machine learning**. Our mission is to uncover the theoretical principles that govern how neural circuits learn, process information, and compute.
 
 We bridge biophysics to collective dynamics, developing tools from stats physics and dynamical systems to probe learning in biological and artificial networks.
@@ -31,13 +31,15 @@ Our research bridges from the biophysics of single neurons to the collective beh
 
 ### Research Focus Areas
 
-*   **The Dynamics of Learning:** How do neural representations and synaptic weights evolve during learning, and how does network stability enable credit assignment over long time scales?
-*   **The Role of Chaos and Stability in Computation:** Characterizing the rich dynamics of recurrent networks (RNNs), from sparse chaos in spiking circuits to the full Lyapunov spectra of rate networks. We seek to understand when chaos is beneficial for computation and when it must be tamed for stable learning.
+- **The Dynamics of Learning:** How do neural representations and synaptic weights evolve during learning, and how does network stability enable credit assignment over long time scales?
+- **The Role of Chaos and Stability in Computation:** Characterizing the rich dynamics of recurrent networks (RNNs), from sparse chaos in spiking circuits to the full Lyapunov spectra of rate networks. We seek to understand when chaos is beneficial for computation and when it must be tamed for stable learning.
 
-*   **Building Brain-Inspired, Efficient Algorithms:** Developing highly scalable, event-based simulation and training algorithms (like *SparseProp*) to enable the study of large, brain-inspired systems.
+- **Building Brain-Inspired, Efficient Algorithms:** Developing highly scalable, event-based simulation and training algorithms (like _SparseProp_) to enable the study of large, brain-inspired systems.
 
 **Quick links**
+
 ### Quick Links
+
 - 🔬 [Research](/research/)
 - 📚 [Publications](/publications/)
 - 👨‍🏫 [Teaching](/teaching/)

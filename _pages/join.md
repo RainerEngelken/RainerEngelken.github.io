@@ -9,6 +9,7 @@ nav_order: 4
 We're seeking self-driven, quantitatively strong students/postdocs who thrive on theory + code. Excited about dynamics, chaos, spiking nets, or neural manifolds? Undergrads welcome.
 
 ### How to Apply
+
 Email me at **engelken@illinois.edu** and include your CV, a short introduction, and one or two short paragraphs on what you would like to build here and why. Indicate time commitment and earliest start date.
 
 Funded MS/PhD spots available.

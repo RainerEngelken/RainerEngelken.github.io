@@ -7,22 +7,21 @@ nav: true
 
 ### Fall 2025: ECE 598 RE - Dynamical Systems and Neural Networks
 
-This graduate-level course explores the deep interplay between dynamical systems theory and neural networks. We move beyond treating neural networks as "black boxes" to understand *why* they work, using the tools of chaos, stability, and attractor dynamics. The course emphasizes hands-on computational analysis to build a strong theoretical and intuitive understanding of learning 
+This graduate-level course explores the deep interplay between dynamical systems theory and neural networks. We move beyond treating neural networks as "black boxes" to understand _why_ they work, using the tools of chaos, stability, and attractor dynamics. The course emphasizes hands-on computational analysis to build a strong theoretical and intuitive understanding of learning
 and computation in brains and machines.
-
 
 - **[Visit the Course Website for details &raquo;](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**
 
 **Time & Location:** Tue/Thu 11:00–12:20 • ECEB 4070  
-**Office Hours:** CSL 314, time TBD 
+**Office Hours:** CSL 314, time TBD
 
 #### Course Description
+
 In this course, we will analyze how stability, attractors, bifurcations, and chaos govern the behavior and learning capabilities of neural networks. The course covers foundational discrete and continuous-time dynamical systems, applying them to the analysis of modern machine learning models (including training dynamics) and complex neural circuits (both rate-based and spiking). The course culminates in a research project applying these interdisciplinary concepts.
 
 #### Prerequisites
+
 - **Required:** Multivariate calculus, linear algebra, and basic proficiency in Python or Julia.
 - **Recommended:** Familiarity with ordinary differential equations and foundational machine learning concepts.
 
 ---
-
-
