@@ -44,4 +44,4 @@ Our research bridges from the biophysics of single neurons to the collective beh
 - 📚 [Publications](/publications/)
 - 👨‍🏫 [Teaching](/teaching/)
 - 🚀 [Open Positions](/join/)
-- 📄 [CV](/cv/)
+<!-- - 📄 [CV](/cv/)-->
