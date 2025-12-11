@@ -12,7 +12,6 @@ I am actively recruiting **1–3 fully funded PhD students** to join my new lab 
 
 **⚠️ Important Deadlines:**
 *   **CS (Siebel School):** December 15, 2025
-*   **ECE (Priority/Early):** December 15, 2025
 *   **ECE (Final):** January 15, 2026
 
 ---
@@ -27,13 +26,13 @@ I am looking for self-driven, quantitatively strong students who enjoy opening t
 Our work combines large-scale simulations with rigorous mathematical analysis. Current project directions include:
 
 **1. Learning Dynamics & Mechanistic Interpretability**
-How do neural manifolds emerge from disordered activity? Using longitudinal neural recordings (in collaboration with the Harvey Lab) and RNN theory, we model how synapses change and representations evolve over behavioral timescales.
+Understanding how brains and neural networks learn over time: how synapses change, how activity patterns evolve, and how useful internal representations emerge, with an eye toward opening the black box of both biological and artificial systems (PLoS Comput Biol 2022, NeurIPS 2022).
 
 **2. Spiking Neural Networks (SNNs) at Scale**
-We develop next-generation algorithms (like **SparseProp**) and stabilization techniques (like **Gradient Flossing**) to make biologically detailed spiking networks trainable. We aim to scale these models to solve complex temporal credit assignment tasks efficiently.
+Exploring how network structure and inputs shape complex activity patterns, including chaotic regimes, and how these patterns can be harnessed for computation in both brain-inspired and artificial networks (Phys Rev Research 2023).
 
 **3. Dynamical Systems & AI Safety**
-We view adversarial vulnerability as a problem of dynamical instability. By analyzing Lyapunov spectra and controlling the "chaos" in neural circuits, we aim to engineer AI systems that are provably robust by design.
+Developing new ways to train spiking neural networks so that they are both efficient and easy to optimize, building on ideas like Gradient Flossing and fast event-based simulation methods such as SparseProp (NeurIPS 2023: Gradient Flossing, SparseProp).
 
 ---
 
@@ -41,8 +40,8 @@ We view adversarial vulnerability as a problem of dynamical instability. By anal
 
 **Step 1: Formal Application**
 You must apply through the official UIUC portals.
-*   **[Apply to ECE](https://ece.illinois.edu/academics/grad/admissions)**
-*   **[Apply to CS (Siebel School)](https://siebelschool.illinois.edu/academics/graduate/application-process-requirements)**
+*   **[Apply to ECE](https://ece.illinois.edu/admissions/graduate/phd)**
+*   **[Apply to CS (Siebel School)](https://siebelschool.illinois.edu/academics/graduate/phd-program/phd-requirements)**
 
 **Crucial:** In your application, list **Dr. Rainer Engelken** in the "Faculty of Interest" field and mention our specific research alignment in your Statement of Purpose.
 
@@ -62,5 +61,6 @@ I am always interested in hearing from high-caliber postdocs with expertise in t
 
 **UIUC Undergraduates**
 If you are a current UIUC student with strong math/coding skills interested in research:
+0. Consider auditing my course ECE598RE on **[Dynamical Systems and Neural Networks]](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**.
 1.  Read 1–2 of my [recent papers](/publications/).
 2.  Email me with your CV/Transcript and a paragraph explaining what specific topic you want to work on.
