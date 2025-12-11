@@ -61,6 +61,6 @@ I am always interested in hearing from high-caliber postdocs with expertise in t
 
 **UIUC Undergraduates**
 If you are a current UIUC student with strong math/coding skills interested in research:
-0. Consider auditing my course ECE598RE on **[Dynamical Systems and Neural Networks]](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**.
+0. Consider auditing my course ECE598RE on **[Dynamical Systems and Neural Networks](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**.
 1.  Read 1–2 of my [recent papers](/publications/).
 2.  Email me with your CV/Transcript and a paragraph explaining what specific topic you want to work on.
