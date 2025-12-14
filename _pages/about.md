@@ -17,7 +17,27 @@ social: true
 
 Welcome! We are a computational neuroscience lab working at the interface of **dynamical systems**, **neuroscience**, and **machine learning**. Our mission is to uncover the theoretical principles that govern how neural circuits learn, process information, and compute.
 
-We bridge biophysics to collective dynamics, developing tools from stats physics and dynamical systems to probe learning in biological and artificial networks.
+---
+
+###  PhD Recruitment: Fall 2026
+
+I am recruiting **1–3 fully funded PhD students** to join my lab at UIUC.
+
+**Application paths and deadlines:**
+- **ECE (Electrical & Computer Engineering):**  
+  Priority deadline **December 15, 2025** · Final deadline **January 15, 2026**
+- **CS (Siebel School of Computing and Data Science):**  
+  Deadline **December 15, 2025**
+
+I particularly encourage applications from students with strong backgrounds in **physics, mathematics, computer science, or engineering**, who enjoy thinking deeply with **equations and code**.
+
+**[Details on how to apply and what I’m looking for → Join the Lab](/join/)**
+
+---
+
+
+
+We bridge biophysics to collective dynamics, developing tools from statistical physics and dynamical systems to probe learning in biological and artificial networks.
 
 Our research bridges from the biophysics of single neurons to the collective behavior of large-scale circuits. Using and developing tools from statistical physics and dynamical systems theory, we investigate how neural circuits learn, process information, and maintain stability.
 
@@ -36,7 +56,7 @@ Our research bridges from the biophysics of single neurons to the collective beh
 
 - **Building Brain-Inspired, Efficient Algorithms:** Developing highly scalable, event-based simulation and training algorithms (like _SparseProp_) to enable the study of large, brain-inspired systems.
 
-**Quick links**
+
 
 ### Quick Links
 
@@ -44,4 +64,4 @@ Our research bridges from the biophysics of single neurons to the collective beh
 - 📚 [Publications](/publications/)
 - 👨‍🏫 [Teaching](/teaching/)
 - 🚀 [Open Positions](/join/)
-<!-- - 📄 [CV](/cv/)-->
+- 📄 [CV](/cv/)
