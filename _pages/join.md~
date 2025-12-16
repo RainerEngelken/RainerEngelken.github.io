@@ -11,8 +11,7 @@ nav_order: 4
 I am actively recruiting **1–3 fully funded PhD students** to join my new lab at the University of Illinois Urbana-Champaign (UIUC). I can advise students through **ECE** (Electrical & Computer Engineering) and **CS** (Siebel School of Computing and Data Science).
 
 **⚠️ Important Deadlines:**
-*   **CS (Siebel School):** December 15, 2025
-*   **ECE (Final):** January 15, 2026
+*   **ECE:** January 15, 2026
 
 ---
 
