@@ -6,15 +6,15 @@ nav: true
 nav_order: 4
 ---
 
-# Open Positions for Fall 2026
+# Open Positions
 
-I am actively recruiting **1–3 fully funded PhD students** to join my new lab at the University of Illinois Urbana-Champaign (UIUC). I can advise students through **ECE** (Electrical & Computer Engineering) and **CS** (Siebel School of Computing and Data Science).
+I am actively recruiting **fully funded PhD students** to join my new lab at the University of Illinois Urbana-Champaign (UIUC). I can advise students through **ECE** (Electrical & Computer Engineering) and **CS** (Siebel School of Computing and Data Science).
 
 ---
 
 ### Who I Am Looking For
 I am looking for self-driven, quantitatively strong students who enjoy opening the black box of neural computation. You are a good fit if:
-*   **You think in equations and code.** You are comfortable with calculus, linear algebra, and probability, and you prefer writing custom simulation code (Julia, JAX, Python) over just using high-level APIs.
+*   **You think in equations and code.** You are comfortable with calculus, linear algebra, and probability, and you prefer writing custom simulation code (e.g. Julia, JAX, Python) over just using high-level APIs.
 *   **You bridge fields.** You have a background in Physics, Mathematics, CS, or Engineering, but you are driven to understand the brain.
 *   **You want to understand *why*.** You care about mechanistic interpretability, stability analysis, and the fundamental principles of learning, not just leaderboard metrics.
 
