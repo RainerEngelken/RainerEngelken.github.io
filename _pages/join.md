@@ -8,7 +8,7 @@ nav_order: 4
 
 # Open Positions
 
-I am actively recruiting **fully funded PhD students** to join my new lab at the University of Illinois Urbana-Champaign (UIUC). I can advise students through **ECE** (Electrical & Computer Engineering) and **CS** (Siebel School of Computing and Data Science).
+I am actively recruiting **fully funded PhD students** to join my new lab at the University of Illinois Urbana-Champaign (UIUC). I can advise students through **ECE** (Electrical & Computer Engineering) and **CS** (Siebel School of Computing and Data Science). 
 
 ---
 
@@ -44,7 +44,7 @@ You must apply through the official UIUC portals.
 **Step 2: Informal Inquiry**
 If you think you are a strong fit, you are welcome to email me directly.
 *   **Email:** `echo 'ude.sionilli@neklegne' | rev`
-*   **Subject:** `PhD Inquiry 2026: [Your Name]`
+*   **Subject:** `PhD Inquiry: [Your Name]`
 *   **Attach:** Your CV and Transcripts.
 *   **Body:** A brief note on your background (math/physics/CS) and which of the research themes above excites you most.
 
@@ -57,6 +57,6 @@ I am always interested in hearing from high-caliber postdocs with expertise in t
 
 **UIUC Undergraduates**
 If you are a current UIUC student with strong math/coding skills interested in research:
-0. Consider auditing my course ECE598RE on **[Dynamical Systems and Neural Networks](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**.
+0. Consider auditing my course ECE598RE on **[Dynamical Systems and Neural Networks](https://courses.grainger.illinois.edu/ECE598RE/fa2025/)**. It will happen again in Fall 2026.
 1.  Read 1–2 of my [recent papers](/publications/).
 2.  Email me with your CV/Transcript and a paragraph explaining what specific topic you want to work on.
