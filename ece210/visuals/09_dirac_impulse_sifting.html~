@@ -311,10 +311,10 @@
     <ul>
         <li><strong>The Impulse as a Limit:</strong> By sliding the Pulse Width ($\epsilon$) to 0, students observe the rectangular pulse $p_\epsilon(t)$ getting narrower and taller. The visual reinforcement shows that the <em>area</em> remains constant at 1, converging to the ideal Dirac delta $\delta(t)$.</li>
         <li><strong>The Sifting Property:</strong> The integral of $f(t)\delta(t-t_0)$ "sifts" out the value of $f(t_0)$. The approximation integral physically calculates the <em>average height</em> of $f(t)$ across the pulse width.</li>
-        <li><strong>Integration Limits Matter:</strong> A common mistake is blindly applying $f(t_0)$ without checking limits. Dragging $t_0$ outside the shaded integration window $[a,b]$ instantly drops the integral to 0.</li>
+        <li><strong>Integration Limits Matter:</strong> A common student mistake is blindly applying $f(t_0)$ without checking limits. Dragging $t_0$ outside the shaded integration window $[a,b]$ instantly drops the integral to 0.</li>
     </ul>
 
-    <h3>Typical Misconceptions</h3>
+    <h3>Addressed Misconceptions</h3>
     <ul>
         <li><em>"The impulse evaluates to infinity, so the integral blows up."</em> - The applet clearly distinguishes the height ($1/\epsilon$) from the area (1). The highlight of the overlap region maps to the actual numerical value.</li>
         <li><em>"Sifting works unconditionally."</em> - The live equation explicitly zeros out when $t_0$ exits the $[a,b]$ bounds, enforcing boundary awareness.</li>

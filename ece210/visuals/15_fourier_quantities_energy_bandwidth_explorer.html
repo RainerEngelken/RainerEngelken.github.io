@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ECE 210 Fourier Quantities Explorer</title>
+<style>
+  :root{
+    --bg:#f6f8fc;
+    --card:#ffffff;
+    --ink:#172033;
+    --muted:#5f6b85;
+    --line:#dbe3f2;
+    --accent:#2458d3;
+    --accent2:#0f9d7a;
+    --warn:#b45309;
+    --bad:#b42318;
+    --soft:#eef4ff;
+    --soft2:#eefaf6;
+    --shadow:0 12px 30px rgba(18,33,69,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    color:var(--ink);
+    background:linear-gradient(180deg,#f8fbff 0%,#f6f8fc 100%);
+  }
+  .wrap{
+    max-width:1500px;
+    margin:0 auto;
+    padding:24px;
+  }
+  .hero{
+    background:linear-gradient(135deg,#ffffff 0%,#f0f5ff 100%);
+    border:1px solid var(--line);
+    border-radius:24px;
+    padding:22px 24px;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+  .hero h1{
+    margin:0 0 6px 0;
+    font-size:clamp(1.6rem,2vw,2.4rem);
+    line-height:1.1;
+  }
+  .hero p{
+    margin:6px 0 0 0;
+    color:var(--muted);
+    max-width:1000px;
+  }
+  .subchips{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-top:14px;
+  }
+  .chip{
+    padding:8px 12px;
+    border-radius:999px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  .controls{
+    display:grid;
+    grid-template-columns: 1.45fr 1fr 1fr;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .controls .card{
+    padding:16px 18px;
+  }
+  .section-title{
+    font-size:.95rem;
+    font-weight:700;
+    letter-spacing:.02em;
+    margin-bottom:12px;
+  }
+  .preset-grid{
+    display:grid;
+    grid-template-columns: repeat(5, minmax(100px,1fr));
+    gap:10px;
+  }
+  .preset-btn{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:14px;
+    padding:10px 10px;
+    text-align:left;
+    cursor:pointer;
+    transition:.18s transform, .18s border-color, .18s background;
+    min-height:72px;
+  }
+  .preset-btn:hover{ transform:translateY(-1px); border-color:#b7c8f0; background:#fbfdff; }
+  .preset-btn.active{
+    background:var(--soft);
+    border-color:#a9bff5;
+    box-shadow: inset 0 0 0 1px rgba(36,88,211,.1);
+  }
+  .preset-btn strong{
+    display:block;
+    font-size:.96rem;
+    margin-bottom:5px;
+  }
+  .preset-btn span{
+    font-size:.83rem;
+    color:var(--muted);
+    line-height:1.25;
+  }
+
+  .slider-row{
+    margin-bottom:14px;
+  }
+  .slider-row:last-child{ margin-bottom:0; }
+  .slider-head{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:6px;
+    font-size:.95rem;
+  }
+  .slider-head .label{
+    font-weight:600;
+  }
+  .slider-head .value{
+    color:var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  input[type=range]{
+    width:100%;
+    accent-color:var(--accent);
+  }
+  .segmented{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .segmented button{
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    padding:8px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .segmented button.active{
+    background:var(--soft);
+    border-color:#a9bff5;
+    color:var(--accent);
+  }
+  .mini-actions{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-top:10px;
+  }
+  .mini-actions button{
+    border:1px solid var(--line);
+    background:#fff;
+    padding:8px 10px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .mini-actions button:hover{
+    background:#fbfdff;
+  }
+
+  .alert{
+    border:1px solid #f1d8ab;
+    background:#fff9ec;
+    color:#754b00;
+    border-radius:16px;
+    padding:13px 15px;
+    margin-bottom:14px;
+    line-height:1.35;
+  }
+  .alert strong{ color:#7a4b00; }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1.25fr 1.05fr 1.05fr;
+    gap:14px;
+  }
+  .panel{
+    padding:14px 14px 12px 14px;
+    min-height:320px;
+  }
+  .panel.tall{
+    min-height:360px;
+  }
+  .panel-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:12px;
+    margin-bottom:10px;
+  }
+  .panel-head h2{
+    margin:0;
+    font-size:1.02rem;
+  }
+  .panel-head p{
+    margin:4px 0 0 0;
+    color:var(--muted);
+    font-size:.88rem;
+  }
+  .badge{
+    border-radius:999px;
+    padding:6px 10px;
+    font-size:.82rem;
+    font-weight:700;
+    white-space:nowrap;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--muted);
+  }
+  .badge.active{
+    background:var(--soft);
+    color:var(--accent);
+    border-color:#a9bff5;
+  }
+  .plot{
+    width:100%;
+    height:255px;
+    border-radius:14px;
+    border:1px solid #edf1fa;
+    background:linear-gradient(180deg,#fff 0%,#fbfcff 100%);
+    display:block;
+  }
+  .plot.small{ height:220px; }
+  .underplot{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:8px;
+    font-size:.84rem;
+    color:var(--muted);
+    flex-wrap:wrap;
+  }
+  .readout{
+    padding:16px 18px;
+  }
+  .readout-grid{
+    display:grid;
+    grid-template-columns: repeat(2,minmax(200px,1fr));
+    gap:12px;
+  }
+  .metric{
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:12px 13px;
+    background:#fff;
+  }
+  .metric .k{
+    color:var(--muted);
+    font-size:.86rem;
+    margin-bottom:5px;
+  }
+  .metric .v{
+    font-size:1.08rem;
+    font-weight:800;
+    font-variant-numeric: tabular-nums;
+  }
+  .metric .s{
+    color:var(--muted);
+    font-size:.84rem;
+    margin-top:4px;
+    line-height:1.3;
+  }
+  .metric.good{
+    background:var(--soft2);
+    border-color:#cdeee1;
+  }
+  .metric.warn{
+    background:#fff8ee;
+    border-color:#f3dfbb;
+  }
+  .formula{
+    margin-top:14px;
+    border:1px dashed #cdd7ea;
+    border-radius:14px;
+    padding:12px 13px;
+    background:#fbfcff;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:.94rem;
+    overflow:auto;
+  }
+  .explain{
+    padding:16px 18px;
+    line-height:1.48;
+  }
+  .explain .step{
+    border-left:4px solid #dbe7ff;
+    padding:2px 0 2px 11px;
+    margin:0 0 12px 0;
+  }
+  .explain .step strong{
+    color:var(--ink);
+  }
+  .explain .mini{
+    color:var(--muted);
+    font-size:.92rem;
+  }
+  .foot{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:14px;
+    margin-top:14px;
+  }
+  details{
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:14px 16px;
+    background:#fff;
+    box-shadow:var(--shadow);
+  }
+  summary{
+    cursor:pointer;
+    font-weight:800;
+    font-size:1.02rem;
+  }
+  details .content{
+    margin-top:10px;
+    color:var(--ink);
+    line-height:1.5;
+  }
+  details ul{
+    margin:8px 0 0 18px;
+    padding:0;
+  }
+  details li{
+    margin:7px 0;
+  }
+  .tiny{
+    font-size:.82rem;
+    color:var(--muted);
+  }
+  .legend-inline{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-top:6px;
+    font-size:.82rem;
+    color:var(--muted);
+  }
+  .legend-inline span::before{
+    content:"";
+    display:inline-block;
+    width:10px;height:10px;border-radius:50%;
+    margin-right:6px;vertical-align:middle;
+  }
+  .legend-area::before{ background:rgba(36,88,211,.28); }
+  .legend-line::before{ background:#2458d3; }
+  .legend-threshold::before{ background:#b45309; }
+  @media (max-width: 1180px){
+    .controls{ grid-template-columns: 1fr; }
+    .grid{ grid-template-columns: 1fr; }
+    .foot{ grid-template-columns: 1fr; }
+    .preset-grid{ grid-template-columns: repeat(2,minmax(120px,1fr)); }
+    .readout-grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="hero">
+    <h1>ECE 210 Fourier Quantities Explorer</h1>
+    <p>
+      Explore what <strong>X(0)</strong>, the <strong>energy spectrum</strong>, <strong>total energy</strong>, and <strong>3-dB bandwidth</strong> really mean.
+      The applet deliberately separates <strong>amplitude spectrum</strong> from <strong>energy spectrum</strong>, and it keeps the Parseval normalization
+      visible so students do not treat these as interchangeable pictures.
+    </p>
+    <div class="subchips">
+      <div class="chip">X(0) = signed time-domain area</div>
+      <div class="chip">W = ∫|x(t)|²dt = (1/2π)∫|X(ω)|²dω</div>
+      <div class="chip">3-dB means half power, not half amplitude</div>
+      <div class="chip">Time shift changes phase, not energy spectrum</div>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="card">
+      <div class="section-title">Presets</div>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Signal controls</div>
+      <div class="slider-row">
+        <div class="slider-head">
+          <div class="label" id="ampLabel">Amplitude A</div>
+          <div class="value" id="ampValue"></div>
+        </div>
+        <input id="ampSlider" type="range" min="0.2" max="3" step="0.05" value="1">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-head">
+          <div class="label" id="widthLabel">Width parameter</div>
+          <div class="value" id="widthValue"></div>
+        </div>
+        <input id="widthSlider" type="range" min="0.5" max="8" step="0.05" value="2">
+      </div>
+
+      <div class="slider-row">
+        <div class="slider-head">
+          <div class="label" id="extraLabel">Extra parameter</div>
+          <div class="value" id="extraValue"></div>
+        </div>
+        <input id="extraSlider" type="range" min="0" max="5" step="0.05" value="1.5">
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">Analysis mode</div>
+      <div class="segmented">
+        <button id="modeAmpBtn">Use amplitude panel as active view</button>
+        <button id="modeEnergyBtn" class="active">Use energy panel as active view</button>
+      </div>
+      <div class="mini-actions">
+        <button id="snapBtn">Snap crosshair to 3-dB point</button>
+        <button id="resetCrosshairBtn">Release crosshair</button>
+      </div>
+      <div class="tiny" style="margin-top:10px;">
+        The active view controls which spectrum panel gets the main crosshair and threshold emphasis.
+        The 3-dB definition always comes from the energy or power level. On the amplitude plot, that same point sits at
+        <strong>1/√2</strong> of the peak, not at <strong>1/2</strong> of the peak.
+      </div>
+    </div>
+  </section>
+
+  <div class="alert" id="misconceptionAlert"></div>
+
+  <section class="grid">
+    <div class="card panel tall">
+      <div class="panel-head">
+        <div>
+          <h2>1. Time-domain signal x(t)</h2>
+          <p>Shaded signed area illustrates why <strong>X(0) = ∫x(t)dt</strong>.</p>
+        </div>
+        <div class="badge" id="dcBadge">DC readout</div>
+      </div>
+      <canvas class="plot" id="timeCanvas"></canvas>
+      <div class="legend-inline">
+        <span class="legend-line">signal x(t)</span>
+        <span class="legend-area">signed area contributing to X(0)</span>
+      </div>
+      <div class="underplot">
+        <div id="timeCaption"></div>
+        <div id="timeHint">Positive and negative regions both count. X(0) is a signed area, not an absolute area.</div>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <div class="panel-head">
+        <div>
+          <h2>2. Fourier transform magnitude |X(ω)|</h2>
+          <p>Use this view to compare half-height with the correct 3-dB amplitude level <strong>|X|/|X|<sub>max</sub> = 1/√2</strong>.</p>
+        </div>
+        <div class="badge" id="ampBadge">view</div>
+      </div>
+      <canvas class="plot small" id="magCanvas"></canvas>
+      <div class="underplot">
+        <div id="magCaption"></div>
+        <div id="magCrosshairText"></div>
+      </div>
+    </div>
+
+    <div class="card panel">
+      <div class="panel-head">
+        <div>
+          <h2>3. Energy spectrum |X(ω)|²</h2>
+          <p>This is the object that integrates to total energy after multiplying by <strong>1/(2π)</strong>.</p>
+        </div>
+        <div class="badge active" id="energyBadge">view</div>
+      </div>
+      <canvas class="plot small" id="energyCanvas"></canvas>
+      <div class="underplot">
+        <div id="energyCaption"></div>
+        <div id="energyCrosshairText"></div>
+      </div>
+    </div>
+
+    <div class="card readout">
+      <div class="panel-head">
+        <div>
+          <h2>4. Readout box</h2>
+          <p>Core quantities and the current Parseval check.</p>
+        </div>
+      </div>
+      <div class="readout-grid">
+        <div class="metric">
+          <div class="k">X(0)</div>
+          <div class="v" id="x0Metric"></div>
+          <div class="s" id="x0MetricSub"></div>
+        </div>
+
+        <div class="metric">
+          <div class="k">Signed area ∫x(t)dt</div>
+          <div class="v" id="areaMetric"></div>
+          <div class="s">This should match X(0) exactly for the current signal.</div>
+        </div>
+
+        <div class="metric good">
+          <div class="k">Total energy in time</div>
+          <div class="v" id="wtMetric"></div>
+          <div class="s">W<sub>t</sub> = ∫|x(t)|²dt</div>
+        </div>
+
+        <div class="metric good">
+          <div class="k">Total energy in frequency</div>
+          <div class="v" id="wfMetric"></div>
+          <div class="s">W<sub>f</sub> = (1/2π)∫|X(ω)|²dω</div>
+        </div>
+
+        <div class="metric" id="bwMetricCard">
+          <div class="k">3-dB bandwidth</div>
+          <div class="v" id="bwMetric"></div>
+          <div class="s" id="bwMetricSub"></div>
+        </div>
+
+        <div class="metric warn">
+          <div class="k">Half-height vs half-power</div>
+          <div class="v" id="halfCompareMetric"></div>
+          <div class="s" id="halfCompareSub"></div>
+        </div>
+      </div>
+
+      <div class="formula" id="parsevalFormula"></div>
+    </div>
+
+    <div class="card explain">
+      <div class="panel-head">
+        <div>
+          <h2>5. Explanation panel with current reasoning</h2>
+          <p>Use this as the “why” panel during teaching or self-study.</p>
+        </div>
+      </div>
+      <div id="explanationBox"></div>
+    </div>
+  </section>
+
+  <section class="foot">
+    <details open>
+      <summary>Instructor notes</summary>
+      <div class="content">
+        <p><strong>Suggested classroom sequence.</strong></p>
+        <ul>
+          <li>Start with <strong>rectangle</strong>. Ask students what X(0) should be before showing the readout. The right answer is “the shaded signed area”, not “x(0)”.</li>
+          <li>Then switch to <strong>shifted pulse</strong>. Ask what changes in frequency. Students often guess the spectrum magnitude shifts. It does not. Only the phase changes, so the energy spectrum stays the same.</li>
+          <li>Use <strong>low-pass spectrum</strong> to attack the common 3-dB mistake. On the amplitude plot, the half-height point is wrong. The correct 3-dB point is where the energy drops to one-half, equivalently where the amplitude drops to 1/√2 of the peak.</li>
+          <li>Use <strong>sinc</strong> to show that some spectra make the usual “3-dB bandwidth” idea awkward. A brick-wall spectrum has an abrupt edge, so the smooth half-power crossing is not the right mental model.</li>
+          <li>Use <strong>modulated band</strong> to show that band-pass signals can have nearly zero DC area and yet plenty of energy. This helps separate “DC content” from “total energy”.</li>
+          <li>Keep returning to the Parseval line. Students need repeated exposure to the fact that the energy spectrum contributes only after the <strong>1/(2π)</strong> normalization.</li>
+        </ul>
+        <p><strong>Good prompts to ask live.</strong></p>
+        <ul>
+          <li>“If I double the amplitude, which quantities double and which quadruple?”</li>
+          <li>“If I shift the signal in time, what happens to X(0), |X(ω)|, and |X(ω)|²?”</li>
+          <li>“At the 3-dB point, what is halved: amplitude, power, or energy density?”</li>
+          <li>“Why can a band-pass signal have X(0) close to zero but still carry a lot of energy?”</li>
+        </ul>
+      </div>
+    </details>
+
+    <details open>
+      <summary>Misconceptions list</summary>
+      <div class="content">
+        <ul>
+          <li><strong>Confusing X(0) with x(0).</strong> X(0) is the zero-frequency Fourier coefficient, equal to the signed area under x(t). It is not the value of the signal at t = 0.</li>
+          <li><strong>Thinking the energy spectrum is just the amplitude spectrum with a different label.</strong> The energy spectrum is |X(ω)|², so its shape weights large Fourier components more strongly.</li>
+          <li><strong>Forgetting the 1/(2π) factor in Parseval.</strong> Without that normalization, the frequency-domain energy is wrong.</li>
+          <li><strong>Using half-height instead of half-power for 3-dB bandwidth.</strong> On the amplitude plot the correct threshold is peak/√2, not peak/2.</li>
+          <li><strong>Thinking time shift changes energy spectrum.</strong> A pure time shift multiplies X(ω) by a phase factor e<sup>-jωt₀</sup>, leaving |X(ω)| and |X(ω)|² unchanged.</li>
+          <li><strong>Thinking zero DC means zero energy.</strong> A band-pass signal can have X(0) ≈ 0 while still having substantial total energy.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+</div>
+
+<script>
+(function(){
+  const PRESETS = {
+    rectangle: {
+      key:'rectangle',
+      name:'Rectangle',
+      short:'Finite-duration pulse',
+      widthLabel:'Pulse width T',
+      extraLabel:'Center t₀',
+      ampLabel:'Amplitude A',
+      defaultAmp:1.2,
+      defaultWidth:2.4,
+      defaultExtra:0.0,
+      widthMin:0.4, widthMax:8.0, widthStep:0.05,
+      extraMin:-4.0, extraMax:4.0, extraStep:0.05,
+      x: (t,p) => p.A * rect((t-p.t0)/p.T),
+      mag: (w,p) => Math.abs(p.A*p.T*sinc(w*p.T/2)),
+      x0: p => p.A*p.T,
+      area: p => p.A*p.T,
+      wt: p => p.A*p.A*p.T,
+      wf: p => p.A*p.A*p.T,
+      bw: p => ({value: 2*SINC_HALFPOWER_ROOT/p.T, type:'lowpass'}),
+      halfHeight: p => ({value: 2*SINC_HALFHEIGHT_ROOT/p.T, type:'lowpass'}),
+      explanation: p => [
+        `For a rectangle, X(0) = A·T because setting ω = 0 in X(ω) = A T sinc(ωT/2) gives the pulse area directly.`,
+        `The signal is time-limited, but its spectrum is not. The sinc tails matter for energy, even though the main lobe dominates visually.`,
+        `The 3-dB bandwidth solves sinc²(ωT/2) = 1/2, so the correct crossing is not at the point where |X(ω)| halves.`,
+      ],
+      timeHint: 'Because the pulse is nonnegative, the signed area and geometric area are the same here.'
+    },
+    shifted: {
+      key:'shifted',
+      name:'Shifted pulse',
+      short:'Same magnitude, new phase',
+      widthLabel:'Pulse width T',
+      extraLabel:'Shift t₀',
+      ampLabel:'Amplitude A',
+      defaultAmp:1.2,
+      defaultWidth:2.4,
+      defaultExtra:1.8,
+      widthMin:0.4, widthMax:8.0, widthStep:0.05,
+      extraMin:-5.0, extraMax:5.0, extraStep:0.05,
+      x: (t,p) => p.A * rect((t-p.t0)/p.T),
+      mag: (w,p) => Math.abs(p.A*p.T*sinc(w*p.T/2)),
+      x0: p => p.A*p.T,
+      area: p => p.A*p.T,
+      wt: p => p.A*p.A*p.T,
+      wf: p => p.A*p.A*p.T,
+      bw: p => ({value: 2*SINC_HALFPOWER_ROOT/p.T, type:'lowpass'}),
+      halfHeight: p => ({value: 2*SINC_HALFHEIGHT_ROOT/p.T, type:'lowpass'}),
+      explanation: p => [
+        `A time shift multiplies X(ω) by e^{-jωt₀}. That factor changes phase, but its magnitude is 1.`,
+        `So |X(ω)| and |X(ω)|² stay exactly the same as for the unshifted rectangle. This is the cleanest counterexample to the claim that “moving a signal in time changes its energy spectrum.”`,
+        `X(0) is still just the pulse area A·T. Shifting the pulse left or right does not change the signed area.`,
+      ],
+      timeHint: 'Watch the pulse move in time while the magnitude and energy panels stay unchanged.'
+    },
+    sinc: {
+      key:'sinc',
+      name:'Sinc',
+      short:'Brick-wall low-pass spectrum',
+      widthLabel:'Band edge Ωc',
+      extraLabel:'Center t₀',
+      ampLabel:'Amplitude level in X(ω)',
+      defaultAmp:1.0,
+      defaultWidth:3.6,
+      defaultExtra:0.0,
+      widthMin:0.8, widthMax:8.0, widthStep:0.05,
+      extraMin:0.0, extraMax:0.0, extraStep:0.05,
+      x: (t,p) => p.A*(p.Oc/Math.PI)*sinc(p.Oc*t),
+      mag: (w,p) => Math.abs(w) <= p.Oc ? p.A : 0,
+      x0: p => p.A,
+      area: p => p.A,
+      wt: p => p.A*p.A*p.Oc/Math.PI,
+      wf: p => p.A*p.A*p.Oc/Math.PI,
+      bw: p => ({value: null, type:'brickwall'}),
+      halfHeight: p => ({value: null, type:'brickwall'}),
+      explanation: p => [
+        `This preset is built from a rectangular spectrum: |X(ω)| = A for |ω| ≤ Ωc and 0 outside.`,
+        `That makes X(0) especially easy: at ω = 0 the spectrum equals A, so the signed time-domain area is A.`,
+        `The usual “smooth 3-dB crossing” intuition breaks down here because the spectrum is flat and then drops discontinuously. This is useful precisely because it exposes sloppy bandwidth language.`,
+      ],
+      timeHint: 'Infinite support in time does not prevent finite total energy.'
+    },
+    lowpass: {
+      key:'lowpass',
+      name:'Low-pass spectrum',
+      short:'Triangular amplitude spectrum',
+      widthLabel:'Triangular edge Ωc',
+      extraLabel:'Center t₀',
+      ampLabel:'Peak |X(0)|',
+      defaultAmp:1.2,
+      defaultWidth:5.0,
+      defaultExtra:0.0,
+      widthMin:0.8, widthMax:9.0, widthStep:0.05,
+      extraMin:0.0, extraMax:0.0, extraStep:0.05,
+      x: (t,p) => p.A*(p.Oc/(2*Math.PI))*Math.pow(sinc(p.Oc*t/2),2),
+      mag: (w,p) => p.A * tri(w/p.Oc),
+      x0: p => p.A,
+      area: p => p.A,
+      wt: p => p.A*p.A*p.Oc/(3*Math.PI),
+      wf: p => p.A*p.A*p.Oc/(3*Math.PI),
+      bw: p => ({value: p.Oc*(1-1/Math.sqrt(2)), type:'lowpass'}),
+      halfHeight: p => ({value: p.Oc/2, type:'lowpass'}),
+      explanation: p => [
+        `Here the amplitude spectrum is triangular, so the energy spectrum is the square of a triangle.`,
+        `That is exactly why the half-height point on |X(ω)| is not the 3-dB point. The correct threshold is |X(ω)| = |X(0)|/√2, equivalently |X(ω)|² = |X(0)|²/2.`,
+        `This preset is ideal for forcing the distinction between “amplitude picture” and “energy picture.”`,
+      ],
+      timeHint: 'This time-domain signal is nonnegative, so again the shaded signed area equals the ordinary area.'
+    },
+    modulated: {
+      key:'modulated',
+      name:'Modulated band',
+      short:'Band-pass with nearly zero DC',
+      widthLabel:'Lobe half-width B',
+      extraLabel:'Band center ω₀',
+      ampLabel:'Lobe peak amplitude A',
+      defaultAmp:1.0,
+      defaultWidth:1.8,
+      defaultExtra:5.2,
+      widthMin:0.4, widthMax:3.5, widthStep:0.05,
+      extraMin:1.2, extraMax:10.0, extraStep:0.05,
+      x: (t,p) => p.A*(p.B/Math.PI)*Math.pow(sinc(p.B*t/2),2)*Math.cos(p.w0*t),
+      mag: (w,p) => p.A*(tri((w-p.w0)/p.B)+tri((w+p.w0)/p.B)),
+      x0: p => {
+        const overlap = tri((0-p.w0)/p.B)+tri((0+p.w0)/p.B);
+        return p.A*overlap;
+      },
+      area: p => {
+        const overlap = tri((0-p.w0)/p.B)+tri((0+p.w0)/p.B);
+        return p.A*overlap;
+      },
+      wt: p => bandEnergyNoOverlap(p),
+      wf: p => bandEnergyNoOverlap(p),
+      bw: p => ({value: 2*p.B*(1-1/Math.sqrt(2)), type:'bandpass'}),
+      halfHeight: p => ({value: p.B, type:'bandpassHalfWidth'}),
+      explanation: p => [
+        `This signal is band-pass: its energy lives around ±ω₀ rather than near zero.`,
+        `Because the two lobes are away from DC, X(0) is close to zero. That does not mean the signal has small energy. It only means the signed time-domain area nearly cancels.`,
+        `The 3-dB bandwidth here is measured around one lobe. Locally, you can treat the lobe like a shifted low-pass shape and measure the full width between its half-power points.`,
+      ],
+      timeHint: 'Oscillations create cancellation in the signed area, so X(0) can be tiny even when the waveform looks large.'
+    }
+  };
+
+  const SINC_HALFPOWER_ROOT = 1.3915573782515103; // solve sinc(x)^2 = 1/2 for first positive x
+  const SINC_HALFHEIGHT_ROOT = 1.895494267033981; // solve |sinc(x)| = 1/2 for first positive x
+
+  const presetGrid = document.getElementById('presetGrid');
+  const ampSlider = document.getElementById('ampSlider');
+  const widthSlider = document.getElementById('widthSlider');
+  const extraSlider = document.getElementById('extraSlider');
+  const ampValue = document.getElementById('ampValue');
+  const widthValue = document.getElementById('widthValue');
+  const extraValue = document.getElementById('extraValue');
+  const widthLabel = document.getElementById('widthLabel');
+  const extraLabel = document.getElementById('extraLabel');
+  const ampLabel = document.getElementById('ampLabel');
+
+  const modeAmpBtn = document.getElementById('modeAmpBtn');
+  const modeEnergyBtn = document.getElementById('modeEnergyBtn');
+  const snapBtn = document.getElementById('snapBtn');
+  const resetCrosshairBtn = document.getElementById('resetCrosshairBtn');
+
+  const timeCanvas = document.getElementById('timeCanvas');
+  const magCanvas = document.getElementById('magCanvas');
+  const energyCanvas = document.getElementById('energyCanvas');
+
+  const ampBadge = document.getElementById('ampBadge');
+  const energyBadge = document.getElementById('energyBadge');
+  const dcBadge = document.getElementById('dcBadge');
+
+  const timeCaption = document.getElementById('timeCaption');
+  const magCaption = document.getElementById('magCaption');
+  const energyCaption = document.getElementById('energyCaption');
+  const magCrosshairText = document.getElementById('magCrosshairText');
+  const energyCrosshairText = document.getElementById('energyCrosshairText');
+
+  const x0Metric = document.getElementById('x0Metric');
+  const x0MetricSub = document.getElementById('x0MetricSub');
+  const areaMetric = document.getElementById('areaMetric');
+  const wtMetric = document.getElementById('wtMetric');
+  const wfMetric = document.getElementById('wfMetric');
+  const bwMetric = document.getElementById('bwMetric');
+  const bwMetricSub = document.getElementById('bwMetricSub');
+  const halfCompareMetric = document.getElementById('halfCompareMetric');
+  const halfCompareSub = document.getElementById('halfCompareSub');
+  const parsevalFormula = document.getElementById('parsevalFormula');
+  const misconceptionAlert = document.getElementById('misconceptionAlert');
+  const explanationBox = document.getElementById('explanationBox');
+  const bwMetricCard = document.getElementById('bwMetricCard');
+
+  let state = {
+    preset:'rectangle',
+    mode:'energy',
+    crosshair: {
+      activeCanvas:'energy',
+      locked:false,
+      w: null
+    }
+  };
+
+  function bandEnergyNoOverlap(p){
+    return 2*p.A*p.A*p.B/(3*Math.PI);
+  }
+
+  function rect(u){ return Math.abs(u) <= 0.5 ? 1 : 0; }
+  function tri(u){ return Math.max(1-Math.abs(u), 0); }
+  function sinc(x){ return Math.abs(x) < 1e-8 ? 1 : Math.sin(x)/x; }
+  function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+  function fmt(v, digits=3){
+    if (v === null || Number.isNaN(v)) return '—';
+    const av = Math.abs(v);
+    if (av > 0 && (av >= 1000 || av < 1e-3)) return v.toExponential(2);
+    return Number(v).toFixed(digits).replace(/\.?0+$/,'');
+  }
+
+  function currentPresetObj(){ return PRESETS[state.preset]; }
+
+  function currentParams(){
+    const preset = currentPresetObj();
+    const A = parseFloat(ampSlider.value);
+    const width = parseFloat(widthSlider.value);
+    const extra = parseFloat(extraSlider.value);
+    const p = {A};
+    if (state.preset === 'rectangle' || state.preset === 'shifted'){
+      p.T = width;
+      p.t0 = extra;
+    } else if (state.preset === 'sinc' || state.preset === 'lowpass'){
+      p.Oc = width;
+      p.t0 = 0;
+    } else if (state.preset === 'modulated'){
+      p.B = width;
+      p.w0 = Math.max(extra, 1.05*width);
+    }
+    return p;
+  }
+
+  function updateSliderConfig(){
+    const p = currentPresetObj();
+    ampLabel.textContent = p.ampLabel;
+    widthLabel.textContent = p.widthLabel;
+    extraLabel.textContent = p.extraLabel;
+
+    ampSlider.value = p.defaultAmp;
+    widthSlider.min = p.widthMin;
+    widthSlider.max = p.widthMax;
+    widthSlider.step = p.widthStep;
+    widthSlider.value = p.defaultWidth;
+
+    extraSlider.min = p.extraMin;
+    extraSlider.max = p.extraMax;
+    extraSlider.step = p.extraStep;
+    extraSlider.value = p.defaultExtra;
+    extraSlider.disabled = (p.extraMin === p.extraMax);
+  }
+
+  function buildPresetButtons(){
+    presetGrid.innerHTML = '';
+    Object.values(PRESETS).forEach(p => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn' + (p.key === state.preset ? ' active' : '');
+      btn.innerHTML = `<strong>${p.name}</strong><span>${p.short}</span>`;
+      btn.addEventListener('click', () => {
+        state.preset = p.key;
+        buildPresetButtons();
+        updateSliderConfig();
+        releaseCrosshair();
+        render();
+      });
+      presetGrid.appendChild(btn);
+    });
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    modeAmpBtn.classList.toggle('active', mode === 'amplitude');
+    modeEnergyBtn.classList.toggle('active', mode === 'energy');
+    ampBadge.classList.toggle('active', mode === 'amplitude');
+    energyBadge.classList.toggle('active', mode === 'energy');
+    state.crosshair.activeCanvas = (mode === 'amplitude') ? 'mag' : 'energy';
+    render();
+  }
+
+  modeAmpBtn.addEventListener('click', () => setMode('amplitude'));
+  modeEnergyBtn.addEventListener('click', () => setMode('energy'));
+
+  [ampSlider, widthSlider, extraSlider].forEach(el => el.addEventListener('input', () => {
+    if (state.preset === 'modulated') {
+      if (parseFloat(extraSlider.value) < 1.05*parseFloat(widthSlider.value)) {
+        extraSlider.value = (1.05*parseFloat(widthSlider.value)).toFixed(2);
+      }
+    }
+    releaseCrosshair(false);
+    render();
+  }));
+
+  snapBtn.addEventListener('click', () => {
+    const preset = currentPresetObj();
+    const p = currentParams();
+    const bw = preset.bw(p);
+    if (bw.value !== null){
+      state.crosshair.locked = true;
+      state.crosshair.w = bw.type === 'bandpass' ? (p.w0 + bw.value/2) : bw.value;
+    }
+    render();
+  });
+
+  resetCrosshairBtn.addEventListener('click', () => {
+    releaseCrosshair();
+    render();
+  });
+
+  function releaseCrosshair(clearValue=true){
+    state.crosshair.locked = false;
+    if (clearValue) state.crosshair.w = null;
+  }
+
+  function canvasInfo(canvas){
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = Math.round(rect.width*dpr);
+    canvas.height = Math.round(rect.height*dpr);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    return {ctx, w: rect.width, h: rect.height};
+  }
+
+  function getRanges(presetKey, p){
+    let tMax=6, wMax=10;
+    if (presetKey === 'rectangle' || presetKey === 'shifted'){
+      tMax = Math.max(6, Math.abs(p.t0)+1.8*p.T);
+      wMax = Math.max(12, 18/p.T);
+    } else if (presetKey === 'sinc'){
+      tMax = Math.max(8, 24/p.Oc);
+      wMax = Math.max(8, 1.3*p.Oc);
+    } else if (presetKey === 'lowpass'){
+      tMax = Math.max(8, 22/p.Oc);
+      wMax = Math.max(8, 1.2*p.Oc);
+    } else if (presetKey === 'modulated'){
+      tMax = Math.max(8, 24/p.B);
+      wMax = p.w0 + 1.35*p.B + 1;
+    }
+    return {tMin:-tMax, tMax, wMin:-wMax, wMax};
+  }
+
+  function sampleData(preset, p, ranges){
+    const Nt = 800;
+    const Nw = 1100;
+    const t = [];
+    const x = [];
+    const w = [];
+    const mag = [];
+    const en = [];
+    for (let i=0;i<=Nt;i++){
+      const tt = ranges.tMin + (ranges.tMax-ranges.tMin)*i/Nt;
+      t.push(tt);
+      x.push(preset.x(tt,p));
+    }
+    for (let i=0;i<=Nw;i++){
+      const ww = ranges.wMin + (ranges.wMax-ranges.wMin)*i/Nw;
+      const m = preset.mag(ww,p);
+      w.push(ww);
+      mag.push(m);
+      en.push(m*m);
+    }
+    return {t,x,w,mag,en};
+  }
+
+  function integrate(xs, ys){
+    let s = 0;
+    for (let i=0;i<xs.length-1;i++){
+      const dx = xs[i+1]-xs[i];
+      s += 0.5*(ys[i]+ys[i+1])*dx;
+    }
+    return s;
+  }
+
+  function mapLinear(v, a, b, c, d){
+    return c + (v-a)*(d-c)/(b-a);
+  }
+
+  function nearestIndex(arr, value){
+    let lo = 0, hi = arr.length-1;
+    while (hi-lo > 1){
+      const mid = (lo+hi)>>1;
+      if (arr[mid] < value) lo = mid; else hi = mid;
+    }
+    return Math.abs(arr[lo]-value) < Math.abs(arr[hi]-value) ? lo : hi;
+  }
+
+  function setupCrosshair(canvas, kind){
+    canvas.addEventListener('mousemove', (ev) => {
+      if (state.crosshair.locked) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = ev.clientX - rect.left;
+      const preset = currentPresetObj();
+      const p = currentParams();
+      const ranges = getRanges(state.preset, p);
+      state.crosshair.activeCanvas = kind;
+      state.crosshair.w = clamp(mapLinear(x, 46, rect.width-14, ranges.wMin, ranges.wMax), ranges.wMin, ranges.wMax);
+      render();
+    });
+    canvas.addEventListener('mouseleave', () => {
+      if (!state.crosshair.locked){
+        state.crosshair.w = null;
+        render();
+      }
+    });
+    canvas.addEventListener('click', () => {
+      state.crosshair.locked = !state.crosshair.locked;
+      state.crosshair.activeCanvas = kind;
+      render();
+    });
+  }
+  setupCrosshair(magCanvas, 'mag');
+  setupCrosshair(energyCanvas, 'energy');
+
+  function drawAxes(ctx, W, H, xr, yr, labels){
+    const L=46, R=14, T=14, B=30;
+    const PW = W-L-R, PH = H-T-B;
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle = '#cfd9ec';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for (let i=0;i<=4;i++){
+      const y = T + PH*i/4;
+      ctx.moveTo(L,y); ctx.lineTo(W-R,y);
+    }
+    for (let i=0;i<=6;i++){
+      const x = L + PW*i/6;
+      ctx.moveTo(x,T); ctx.lineTo(x,H-B);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle = '#6c7a96';
+    ctx.lineWidth = 1.3;
+    const x0 = (xr[0] <= 0 && xr[1] >= 0) ? mapLinear(0, xr[0], xr[1], L, W-R) : null;
+    const y0 = (yr[0] <= 0 && yr[1] >= 0) ? mapLinear(0, yr[0], yr[1], H-B, T) : null;
+    ctx.beginPath();
+    if (x0 !== null){ ctx.moveTo(x0,T); ctx.lineTo(x0,H-B); }
+    if (y0 !== null){ ctx.moveTo(L,y0); ctx.lineTo(W-R,y0); }
+    ctx.stroke();
+
+    ctx.fillStyle = '#5f6b85';
+    ctx.font = '12px Inter, system-ui, sans-serif';
+    ctx.fillText(labels.x || '', W-38, H-8);
+    ctx.fillText(labels.y || '', 8, 14);
+
+    ctx.fillStyle = '#6c7a96';
+    ctx.textAlign = 'center';
+    for (let i=0;i<=6;i++){
+      const xv = xr[0] + (xr[1]-xr[0])*i/6;
+      const x = L + PW*i/6;
+      ctx.fillText(trimTick(xv), x, H-10);
+    }
+    ctx.textAlign = 'right';
+    for (let i=0;i<=4;i++){
+      const yv = yr[0] + (yr[1]-yr[0])*(4-i)/4;
+      const y = T + PH*i/4 + 4;
+      ctx.fillText(trimTick(yv), L-7, y);
+    }
+    ctx.textAlign = 'left';
+    return {L,R,T,B,PW,PH};
+  }
+
+  function trimTick(v){
+    if (Math.abs(v) < 1e-12) return '0';
+    const av = Math.abs(v);
+    if (av >= 100 || av < 0.01) return v.toExponential(1);
+    return Number(v).toFixed(av >= 10 ? 1 : 2).replace(/\.?0+$/,'');
+  }
+
+  function drawCurve(ctx, box, xs, ys, xr, yr, opts={}){
+    const {L,T,PW,PH} = box;
+    ctx.save();
+    if (opts.fillToZero){
+      const yZero = mapLinear(0, yr[0], yr[1], PH+T, T);
+      ctx.beginPath();
+      ctx.moveTo(mapLinear(xs[0], xr[0], xr[1], L, L+PW), yZero);
+      for (let i=0;i<xs.length;i++){
+        const px = mapLinear(xs[i], xr[0], xr[1], L, L+PW);
+        const py = mapLinear(ys[i], yr[0], yr[1], PH+T, T);
+        ctx.lineTo(px, py);
+      }
+      ctx.lineTo(mapLinear(xs[xs.length-1], xr[0], xr[1], L, L+PW), yZero);
+      ctx.closePath();
+      ctx.fillStyle = opts.fillStyle || 'rgba(36,88,211,.12)';
+      ctx.fill();
+    }
+    ctx.beginPath();
+    for (let i=0;i<xs.length;i++){
+      const px = mapLinear(xs[i], xr[0], xr[1], L, L+PW);
+      const py = mapLinear(ys[i], yr[0], yr[1], PH+T, T);
+      if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+    }
+    ctx.strokeStyle = opts.strokeStyle || '#2458d3';
+    ctx.lineWidth = opts.lineWidth || 2.3;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawSignedArea(ctx, box, xs, ys, xr, yr){
+    const {L,T,PW,PH} = box;
+    const yZero = mapLinear(0, yr[0], yr[1], PH+T, T);
+    ctx.save();
+    for (let i=0;i<xs.length-1;i++){
+      const x1 = mapLinear(xs[i], xr[0], xr[1], L, L+PW);
+      const x2 = mapLinear(xs[i+1], xr[0], xr[1], L, L+PW);
+      const y1 = mapLinear(ys[i], yr[0], yr[1], PH+T, T);
+      const y2 = mapLinear(ys[i+1], yr[0], yr[1], PH+T, T);
+      ctx.beginPath();
+      ctx.moveTo(x1, yZero);
+      ctx.lineTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(x2, yZero);
+      ctx.closePath();
+      const avg = 0.5*(ys[i]+ys[i+1]);
+      ctx.fillStyle = avg >= 0 ? 'rgba(36,88,211,.22)' : 'rgba(180,35,24,.18)';
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function drawThreshold(ctx, box, value, xr, yr, label){
+    const {L,T,PW,PH} = box;
+    const py = mapLinear(value, yr[0], yr[1], PH+T, T);
+    ctx.save();
+    ctx.setLineDash([6,6]);
+    ctx.strokeStyle = '#b45309';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(L,py); ctx.lineTo(L+PW,py);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#8a5b08';
+    ctx.font = '12px Inter, system-ui, sans-serif';
+    ctx.fillText(label, L+8, py-6);
+    ctx.restore();
+  }
+
+  function drawCrosshair(ctx, box, w, y, xr, yr, color){
+    if (w === null || y === null) return;
+    const {L,T,PW,PH} = box;
+    const px = mapLinear(w, xr[0], xr[1], L, L+PW);
+    const py = mapLinear(y, yr[0], yr[1], PH+T, T);
+    ctx.save();
+    ctx.setLineDash([5,5]);
+    ctx.strokeStyle = color || '#0f9d7a';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(px,T); ctx.lineTo(px,PH+T);
+    ctx.moveTo(L,py); ctx.lineTo(L+PW,py);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = color || '#0f9d7a';
+    ctx.beginPath();
+    ctx.arc(px,py,4,0,2*Math.PI);
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawBandwidthMarkers(ctx, box, bwInfo, xr, yr, presetKey, params, targetY, bandLabel){
+    if (bwInfo.value === null) return;
+    const {L,T,PW,PH} = box;
+    ctx.save();
+    ctx.strokeStyle = '#7c4dff';
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([4,4]);
+
+    if (bwInfo.type === 'lowpass'){
+      const px = mapLinear(bwInfo.value, xr[0], xr[1], L, L+PW);
+      const mx = mapLinear(-bwInfo.value, xr[0], xr[1], L, L+PW);
+      const py = mapLinear(targetY, yr[0], yr[1], PH+T, T);
+      [px,mx].forEach(xx => {
+        ctx.beginPath();
+        ctx.moveTo(xx, PH+T); ctx.lineTo(xx, py);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#6b49dc';
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.fillText('±ω₃dB', px+4, T+14);
+    } else if (bwInfo.type === 'bandpass'){
+      const left = params.w0 - bwInfo.value/2;
+      const right = params.w0 + bwInfo.value/2;
+      const px1 = mapLinear(left, xr[0], xr[1], L, L+PW);
+      const px2 = mapLinear(right, xr[0], xr[1], L, L+PW);
+      const py = mapLinear(targetY, yr[0], yr[1], PH+T, T);
+      [px1,px2].forEach(xx => {
+        ctx.beginPath();
+        ctx.moveTo(xx, PH+T); ctx.lineTo(xx, py);
+        ctx.stroke();
+      });
+      ctx.setLineDash([]);
+      ctx.strokeStyle = '#6b49dc';
+      ctx.beginPath();
+      ctx.moveTo(px1, PH+T-14);
+      ctx.lineTo(px2, PH+T-14);
+      ctx.stroke();
+      ctx.fillStyle = '#6b49dc';
+      ctx.font = '12px Inter, system-ui, sans-serif';
+      ctx.fillText(bandLabel || '3-dB BW', (px1+px2)/2 - 22, PH+T-18);
+    }
+    ctx.restore();
+  }
+
+  function render(){
+    const preset = currentPresetObj();
+    const p = currentParams();
+    ampValue.textContent = fmt(p.A,2);
+    if ('T' in p) widthValue.textContent = fmt(p.T,2);
+    if ('Oc' in p) widthValue.textContent = fmt(p.Oc,2) + ' rad/s';
+    if ('B' in p) widthValue.textContent = fmt(p.B,2) + ' rad/s';
+    if ('t0' in p) extraValue.textContent = fmt(p.t0,2);
+    if ('w0' in p) extraValue.textContent = fmt(p.w0,2) + ' rad/s';
+    if (extraSlider.disabled) extraValue.textContent = '—';
+
+    const ranges = getRanges(state.preset, p);
+    const data = sampleData(preset, p, ranges);
+
+    const maxX = Math.max(...data.x.map(v => Math.abs(v)));
+    const yTimeMax = Math.max(0.35, 1.15*maxX);
+    const maxMag = Math.max(...data.mag);
+    const maxEn = Math.max(...data.en);
+
+    const bwInfo = preset.bw(p);
+    const hhInfo = preset.halfHeight(p);
+
+    const X0 = preset.x0(p);
+    const AREA = preset.area(p);
+    const Wt = preset.wt(p);
+    const Wf = preset.wf(p);
+    const parsevalErr = Math.abs(Wt-Wf)/(Math.abs(Wf)+1e-12);
+
+    renderTimePlot(data, ranges, yTimeMax);
+    renderMagPlot(data, ranges, maxMag, bwInfo, hhInfo, p);
+    renderEnergyPlot(data, ranges, maxEn, bwInfo, p);
+    renderReadout({preset,p,X0,AREA,Wt,Wf,parsevalErr,bwInfo,hhInfo,maxMag,maxEn});
+    renderExplanation({preset,p,X0,AREA,Wt,Wf,bwInfo,hhInfo});
+    renderAlert({preset,p,bwInfo,hhInfo,X0});
+    timeCaption.textContent = preset.timeHint;
+    dcBadge.textContent = `X(0) = ${fmt(X0,3)}`;
+  }
+
+  function renderTimePlot(data, ranges, yTimeMax){
+    const {ctx,w,h} = canvasInfo(timeCanvas);
+    const box = drawAxes(ctx,w,h,[ranges.tMin, ranges.tMax],[-yTimeMax,yTimeMax],{x:'t', y:'x(t)'});
+    drawSignedArea(ctx, box, data.t, data.x, [ranges.tMin, ranges.tMax], [-yTimeMax,yTimeMax]);
+    drawCurve(ctx, box, data.t, data.x, [ranges.tMin, ranges.tMax], [-yTimeMax,yTimeMax], {
+      strokeStyle:'#2458d3',
+      lineWidth:2.5
+    });
+  }
+
+  function renderMagPlot(data, ranges, maxMag, bwInfo, hhInfo, p){
+    const {ctx,w,h} = canvasInfo(magCanvas);
+    const box = drawAxes(ctx,w,h,[ranges.wMin, ranges.wMax],[0,1.12*maxMag],{x:'ω', y:'|X|'});
+
+    drawCurve(ctx, box, data.w, data.mag, [ranges.wMin, ranges.wMax], [0,1.12*maxMag], {
+      strokeStyle:'#2458d3', lineWidth:2.4
+    });
+
+    drawThreshold(ctx, box, maxMag/Math.sqrt(2), [ranges.wMin,ranges.wMax], [0,1.12*maxMag], '3-dB amplitude = peak/√2');
+    if (hhInfo.value !== null){
+      drawThreshold(ctx, box, maxMag/2, [ranges.wMin,ranges.wMax], [0,1.12*maxMag], 'half-height = peak/2');
+    }
+
+    if (bwInfo.value !== null){
+      drawBandwidthMarkers(ctx, box, bwInfo, [ranges.wMin,ranges.wMax], [0,1.12*maxMag], state.preset, p, maxMag/Math.sqrt(2), '3-dB BW');
+    }
+
+    const show = (state.crosshair.w !== null) && (state.mode === 'amplitude' || state.crosshair.activeCanvas === 'mag' || state.crosshair.locked);
+    if (show){
+      const idx = nearestIndex(data.w, state.crosshair.w);
+      drawCrosshair(ctx, box, data.w[idx], data.mag[idx], [ranges.wMin, ranges.wMax], [0,1.12*maxMag], '#0f9d7a');
+      magCrosshairText.textContent = `ω = ${fmt(data.w[idx],3)}, |X(ω)| = ${fmt(data.mag[idx],3)}, ratio = ${fmt(data.mag[idx]/maxMag,3)} of peak`;
+    } else {
+      magCrosshairText.textContent = 'Hover or click for a crosshair readout.';
+    }
+
+    if (state.preset === 'shifted'){
+      magCaption.textContent = 'Same magnitude as the unshifted pulse. Only phase changes.';
+    } else if (state.preset === 'sinc'){
+      magCaption.textContent = 'Brick-wall spectrum: flat top, abrupt edge.';
+    } else {
+      magCaption.textContent = 'Use this panel to see why half-height and 3-dB are different.';
+    }
+  }
+
+  function renderEnergyPlot(data, ranges, maxEn, bwInfo, p){
+    const {ctx,w,h} = canvasInfo(energyCanvas);
+    const box = drawAxes(ctx,w,h,[ranges.wMin, ranges.wMax],[0,1.15*maxEn],{x:'ω', y:'|X|²'});
+    drawCurve(ctx, box, data.w, data.en, [ranges.wMin, ranges.wMax], [0,1.15*maxEn], {
+      strokeStyle:'#0f9d7a', lineWidth:2.3, fillToZero:true, fillStyle:'rgba(15,157,122,.14)'
+    });
+
+    drawThreshold(ctx, box, maxEn/2, [ranges.wMin,ranges.wMax], [0,1.15*maxEn], '3-dB energy = peak/2');
+    if (bwInfo.value !== null){
+      let target = maxEn/2;
+      drawBandwidthMarkers(ctx, box, bwInfo, [ranges.wMin,ranges.wMax], [0,1.15*maxEn], state.preset, p, target, '3-dB BW');
+    }
+
+    const show = (state.crosshair.w !== null) && (state.mode === 'energy' || state.crosshair.activeCanvas === 'energy' || state.crosshair.locked);
+    if (show){
+      const idx = nearestIndex(data.w, state.crosshair.w);
+      drawCrosshair(ctx, box, data.w[idx], data.en[idx], [ranges.wMin, ranges.wMax], [0,1.15*maxEn], '#0f9d7a');
+      energyCrosshairText.textContent = `ω = ${fmt(data.w[idx],3)}, |X(ω)|² = ${fmt(data.en[idx],3)}, ratio = ${fmt(data.en[idx]/maxEn,3)} of peak`;
+    } else {
+      energyCrosshairText.textContent = 'Hover or click for a crosshair readout.';
+    }
+
+    const totalApproxOnWindow = integrate(data.w, data.en)/(2*Math.PI);
+    energyCaption.textContent = `Green area over the plotted window gives approximately ${fmt(totalApproxOnWindow,3)} of the total energy after the 1/(2π) factor.`;
+  }
+
+  function renderReadout(obj){
+    const {preset,p,X0,AREA,Wt,Wf,parsevalErr,bwInfo,hhInfo} = obj;
+    x0Metric.textContent = fmt(X0,4);
+    x0MetricSub.innerHTML = (Math.abs(X0) < 1e-8)
+      ? 'Near zero DC. That means the signed area nearly cancels.'
+      : 'Zero-frequency Fourier value. This equals the signed area under x(t).';
+
+    areaMetric.textContent = fmt(AREA,4);
+    wtMetric.textContent = fmt(Wt,4);
+    wfMetric.textContent = fmt(Wf,4);
+
+    if (bwInfo.value === null){
+      bwMetric.textContent = 'No smooth 3-dB crossing';
+      bwMetricSub.innerHTML = 'For this preset the spectrum is effectively brick-wall, so the usual smooth half-power crossing is not the right concept.';
+      bwMetricCard.classList.add('warn');
+    } else if (bwInfo.type === 'bandpass'){
+      bwMetric.textContent = fmt(bwInfo.value,4) + ' rad/s';
+      bwMetricSub.innerHTML = 'Measured across one lobe: the full width between its half-power points.';
+      bwMetricCard.classList.remove('warn');
+    } else {
+      bwMetric.textContent = fmt(bwInfo.value,4) + ' rad/s';
+      bwMetricSub.innerHTML = 'Positive half-power crossing on the low-pass shape. The full symmetric width would be 2ω₃dB.';
+      bwMetricCard.classList.remove('warn');
+    }
+
+    if (hhInfo.value === null){
+      halfCompareMetric.textContent = 'Half-height not useful here';
+      halfCompareSub.innerHTML = 'A flat-top spectrum does not teach the usual half-height-versus-half-power distinction well.';
+    } else if (preset.key === 'modulated'){
+      halfCompareMetric.textContent = `Half-height full width = ${fmt(2*p.B,4)} rad/s`;
+      halfCompareSub.innerHTML = `Correct 3-dB width = ${fmt(bwInfo.value,4)} rad/s. On an amplitude plot, half-height is much too wide.`;
+    } else {
+      halfCompareMetric.textContent = `ω(half-height) = ${fmt(hhInfo.value,4)} rad/s`;
+      halfCompareSub.innerHTML = bwInfo.value !== null
+        ? `Correct ω₃dB = ${fmt(bwInfo.value,4)} rad/s. At 3 dB, amplitude is down to 1/√2, not 1/2.`
+        : `There is no interior smooth 3-dB crossing even though the edge sits at Ωc.`;
+    }
+
+    parsevalFormula.innerHTML =
+      `Parseval check: &nbsp; W = ∫|x(t)|²dt = (1/2π)∫|X(ω)|²dω<br>` +
+      `Current values: &nbsp; ${fmt(Wt,5)} = ${fmt(Wf,5)} &nbsp;&nbsp;` +
+      `relative mismatch = ${fmt(parsevalErr,6)}`;
+  }
+
+  function renderAlert(obj){
+    const {preset, p, bwInfo, X0} = obj;
+    let text = '';
+    if (preset.key === 'shifted'){
+      text = `<strong>Misconception alert:</strong> shifting the pulse in time does <em>not</em> shift the magnitude spectrum. It only adds a phase factor e<sup>-jωt₀</sup>, so |X(ω)| and |X(ω)|² stay unchanged.`;
+    } else if (preset.key === 'lowpass'){
+      text = `<strong>Misconception alert:</strong> the half-height point on |X(ω)| is <em>not</em> the 3-dB point. The correct 3-dB rule is |X(ω)|² = |X(0)|²/2, equivalently |X(ω)| = |X(0)|/√2.`;
+    } else if (preset.key === 'sinc'){
+      text = `<strong>Misconception alert:</strong> X(0) = ${fmt(X0,3)} here, but x(0) is much larger. X(0) is a Fourier-domain quantity, not the waveform value at t = 0.`;
+    } else if (preset.key === 'modulated'){
+      text = `<strong>Misconception alert:</strong> a small X(0) does not mean small energy. This band-pass signal can have almost zero signed area while still carrying substantial total energy.`;
+    } else {
+      text = `<strong>Misconception alert:</strong> X(0) is the signed area under x(t). It is <em>not</em> the same thing as x(0), the signal value at the time origin.`;
+    }
+    misconceptionAlert.innerHTML = text;
+  }
+
+  function renderExplanation(obj){
+    const {preset, p, X0, AREA, Wt, Wf, bwInfo} = obj;
+    const steps = [];
+
+    steps.push(`
+      <div class="step">
+        <strong>1. Read X(0) from the time-domain picture.</strong><br>
+        Since X(ω) = ∫x(t)e^{-jωt}dt, setting ω = 0 removes the exponential and gives
+        <span class="mini">X(0) = ∫x(t)dt = ${fmt(AREA,4)}</span>.
+      </div>
+    `);
+
+    steps.push(`
+      <div class="step">
+        <strong>2. Do not confuse amplitude spectrum with energy spectrum.</strong><br>
+        The blue panel shows <strong>|X(ω)|</strong>. The green panel shows <strong>|X(ω)|²</strong>.
+        Squaring changes the relative weighting of different frequency components, so these two plots should not be read as the same quantity with a different axis label.
+      </div>
+    `);
+
+    steps.push(`
+      <div class="step">
+        <strong>3. Parseval converts the green area into total energy.</strong><br>
+        Total energy is not just “the area under the green curve.” It is
+        <span class="mini">W = (1/2π)∫|X(ω)|²dω = ${fmt(Wf,4)}</span>.
+        Forgetting the <strong>1/(2π)</strong> factor gives the wrong answer.
+      </div>
+    `);
+
+    if (bwInfo.value === null){
+      steps.push(`
+        <div class="step">
+          <strong>4. Bandwidth language has limits.</strong><br>
+          This preset deliberately shows a case where the common smooth half-power picture is awkward.
+          A brick-wall spectrum has an abrupt edge, so saying “the 3-dB point” without care can be misleading.
+        </div>
+      `);
+    } else if (bwInfo.type === 'bandpass'){
+      steps.push(`
+        <div class="step">
+          <strong>4. Measure 3-dB bandwidth around one lobe.</strong><br>
+          For a band-pass signal the energy is concentrated around ±ω₀, not near DC.
+          So the relevant 3-dB bandwidth is the full width between the two half-power crossings around a single lobe:
+          <span class="mini">BW₃dB = ${fmt(bwInfo.value,4)} rad/s</span>.
+        </div>
+      `);
+    } else {
+      steps.push(`
+        <div class="step">
+          <strong>4. Use the correct 3-dB rule.</strong><br>
+          The 3-dB point is where the energy density has fallen by one-half:
+          <span class="mini">|X(ω₃dB)|² = |X(0)|²/2</span>.
+          On the amplitude plot that same point appears at
+          <span class="mini">|X(ω₃dB)| = |X(0)|/√2</span>, not at half-height.
+        </div>
+      `);
+    }
+
+    preset.explanation(p).forEach((txt, idx) => {
+      steps.push(`
+        <div class="step">
+          <strong>${idx+5}. Current preset insight.</strong><br>
+          ${txt}
+        </div>
+      `);
+    });
+
+    explanationBox.innerHTML = steps.join('');
+  }
+
+  window.addEventListener('resize', render);
+
+  buildPresetButtons();
+  updateSliderConfig();
+  setMode('energy');
+  render();
+})();
+</script>
+</body>
+</html>

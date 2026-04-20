@@ -18,9 +18,7 @@
       --warn-border: #fdba74;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -31,7 +29,7 @@
     }
 
     .wrap {
-      max-width: 950px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 32px 20px 56px;
     }
@@ -39,13 +37,14 @@
     h1 {
       color: var(--uiuc-blue);
       margin-bottom: 0.25rem;
-      font-size: 2rem;
+      font-size: 2.1rem;
     }
 
     .subtitle {
       color: var(--muted);
       margin-top: 0;
       margin-bottom: 1.25rem;
+      font-size: 1.05rem;
     }
 
     .notice {
@@ -54,20 +53,22 @@
       border-left: 6px solid var(--uiuc-orange);
       border-radius: 10px;
       padding: 14px 16px;
-      margin-bottom: 28px;
+      margin-bottom: 30px;
     }
 
     .section-title {
       color: var(--uiuc-blue);
       margin-top: 2rem;
       margin-bottom: 0.75rem;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 0.3rem;
     }
 
     .grid {
       display: grid;
-      gap: 12px;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+      gap: 14px;
     }
 
     .card {
@@ -78,19 +79,19 @@
       padding: 14px 16px;
       text-decoration: none;
       color: inherit;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
       transition: transform 0.08s ease, box-shadow 0.08s ease;
     }
 
     .card:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
     }
 
     .card-title {
       font-weight: 700;
       color: var(--uiuc-blue);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
 
     .card-desc {
@@ -99,7 +100,7 @@
     }
 
     .footer-note {
-      margin-top: 28px;
+      margin-top: 32px;
       color: var(--muted);
       font-size: 0.92rem;
     }
@@ -115,14 +116,15 @@
 <body>
   <div class="wrap">
     <h1>ECE 210 Interactive Visuals</h1>
-    <p class="subtitle">Supplementary demos for intuition and self-study.</p>
+    <p class="subtitle">Supplementary demos for intuition, exploration, and self-study.</p>
 
     <div class="notice">
-      <strong>Important:</strong> These visualizations are experimental and may contain mistakes or rough edges.
-      Please use them as optional intuition-building aids, not as an authoritative source for definitions, notation, or grading expectations.
+      <strong>Important:</strong> These visualizations are experimental supplementary materials.
+      They may contain mistakes or simplifications. Use them as intuition-building aids, not
+      as an authoritative source for definitions, notation, or grading expectations.
     </div>
 
-    <h2 class="section-title">Available demos</h2>
+    <h2 class="section-title">Complex numbers and phasors</h2>
     <div class="grid">
       <a class="card" href="00_angle_conversion.html">
         <div class="card-title">The Angle Challenge</div>
@@ -130,58 +132,95 @@
       </a>
 
       <a class="card" href="01_complex_numbers.html">
-        <div class="card-title">Complex Numbers</div>
-        <div class="card-desc">Explore magnitude, phase, and geometric interpretation in the complex plane.</div>
+        <div class="card-title">Complex Numbers and Phasors</div>
+        <div class="card-desc">Explore magnitude, phase, rectangular form, polar form, and Euler’s identity.</div>
       </a>
+    </div>
 
+    <h2 class="section-title">LTI systems, responses, and properties</h2>
+    <div class="grid">
       <a class="card" href="02_zir_zsr_superposition_example.html">
         <div class="card-title">ZIR, ZSR, and Superposition</div>
-        <div class="card-desc">Interactive example illustrating zero-input response, zero-state response, and their sum.</div>
-      </a>
-
-      <a class="card" href="03_harmonics_superposition.html">
-        <div class="card-title">Harmonics and Superposition</div>
-        <div class="card-desc">Build intuition for combining sinusoidal components.</div>
-      </a>
-
-      <a class="card" href="04_fourier_series_visualization.html">
-        <div class="card-title">Fourier Series Visualization</div>
-        <div class="card-desc">Visualize how Fourier series components combine to represent periodic signals.</div>
-      </a>
-
-      <a class="card" href="05_another_fourier_series_visualization.html">
-        <div class="card-title">Another Fourier Series Visualization</div>
-        <div class="card-desc">A second interactive view of Fourier series and signal reconstruction.</div>
-      </a>
-
-      <a class="card" href="06_from_fourier_series_to_fourier_transform.html">
-        <div class="card-title">From Fourier Series to Fourier Transform</div>
-        <div class="card-desc">Develop intuition for the transition from discrete spectral lines to a continuous spectrum.</div>
-      </a>
-
-      <a class="card" href="07_interactive_convolution.html">
-        <div class="card-title">Interactive Convolution</div>
-        <div class="card-desc">Visualize how sliding, multiplying, and integrating produce convolution.</div>
-      </a>
-
-      <a class="card" href="08_another_interactive_convolution.html">
-        <div class="card-title">Another Interactive Convolution</div>
-        <div class="card-desc">A second convolution demo with a slightly different presentation.</div>
-      </a>
-
-      <a class="card" href="09_dirac_impulse_sifting.html">
-        <div class="card-title">Dirac Impulse and Sifting Property</div>
-        <div class="card-desc">Develop intuition for impulses, sampling, and the sifting property.</div>
+        <div class="card-desc">Build intuition for zero-input response, zero-state response, and how they combine.</div>
       </a>
 
       <a class="card" href="10_impulse_response_step_response.html">
         <div class="card-title">Impulse Response and Step Response</div>
-        <div class="card-desc">Explore the relationship between impulse response, step response, and system behavior.</div>
+        <div class="card-desc">Compare step response, derivatives, and the true impulse response.</div>
       </a>
 
+      <a class="card" href="12_causality_bibo_linearity_time-invariance-explorer.html">
+        <div class="card-title">System Properties Explorer</div>
+        <div class="card-desc">Test causality, BIBO stability, linearity, and time invariance on example systems.</div>
+      </a>
+    </div>
+
+    <h2 class="section-title">Convolution and impulses</h2>
+    <div class="grid">
+      <a class="card" href="07_interactive_convolution.html">
+        <div class="card-title">Interactive Convolution</div>
+        <div class="card-desc">Visualize continuous-time convolution through flipping, shifting, multiplying, and integrating.</div>
+      </a>
+
+      <a class="card" href="08_another_interactive_convolution.html">
+        <div class="card-title">Continuous Convolution Visualization</div>
+        <div class="card-desc">A second convolution demo with a different presentation and perspective.</div>
+      </a>
+
+      <a class="card" href="09_dirac_impulse_sifting.html">
+        <div class="card-title">Dirac Impulse and Sifting Property</div>
+        <div class="card-desc">Develop intuition for impulses, weighted impulses, and the sifting property.</div>
+      </a>
+
+      <a class="card" href="13_interactive_impulse_and_convolution.html">
+        <div class="card-title">Impulses and Convolution Sandbox</div>
+        <div class="card-desc">Experiment with impulse-based constructions and their effect on convolution.</div>
+      </a>
+    </div>
+
+    <h2 class="section-title">Fourier series and Fourier transform</h2>
+    <div class="grid">
+      <a class="card" href="03_harmonics_superposition.html">
+        <div class="card-title">Harmonics and Superposition</div>
+        <div class="card-desc">See how sinusoidal harmonics combine to form richer signals.</div>
+      </a>
+
+      <a class="card" href="04_fourier_series_visualization.html">
+        <div class="card-title">Fourier Series Visualization</div>
+        <div class="card-desc">Explore Fourier series coefficients and signal reconstruction.</div>
+      </a>
+
+      <a class="card" href="05_another_fourier_series_visualization.html">
+        <div class="card-title">Fourier Series Multi-Form Visualization</div>
+        <div class="card-desc">Compare multiple forms and views of Fourier series representations.</div>
+      </a>
+
+      <a class="card" href="06_from_fourier_series_to_fourier_transform.html">
+        <div class="card-title">From Fourier Series to Fourier Transform</div>
+        <div class="card-desc">Build intuition for the limiting transition from periodic spectra to continuous spectra.</div>
+      </a>
+
+      <a class="card" href="15_fourier_quantities_energy_bandwidth_explorer.html">
+        <div class="card-title">Fourier Quantities Explorer</div>
+        <div class="card-desc">Interact with energy, spectra, and bandwidth-related quantities in the Fourier domain.</div>
+      </a>
+    </div>
+
+    <h2 class="section-title">Sampling, modulation, and aliasing</h2>
+    <div class="grid">
       <a class="card" href="11_sampling_reconstruction_aliasing.html">
         <div class="card-title">Sampling, Reconstruction, and Aliasing</div>
-        <div class="card-desc">See how sampling rate affects reconstruction and aliasing behavior.</div>
+        <div class="card-desc">See how sampling rate affects spectral replication, aliasing, and reconstruction.</div>
+      </a>
+
+      <a class="card" href="14_modulation_frequency-shifting-and-low-pass_filtering.html">
+        <div class="card-title">Modulation, Frequency Shifting, and Low-Pass Filtering</div>
+        <div class="card-desc">Explore mixing, spectral shifting, and low-pass filtering in a modulation pipeline.</div>
+      </a>
+
+      <a class="card" href="16_continuous-time_sampling_spectral_replication_aliasing_reconstruction.html">
+        <div class="card-title">Continuous-Time Sampling, Spectral Replication, Aliasing, and Reconstruction</div>
+        <div class="card-desc">A more detailed sampling demo showing replicas, aliasing, and recovery conditions.</div>
       </a>
     </div>
 

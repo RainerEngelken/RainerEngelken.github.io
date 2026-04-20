@@ -1,0 +1,1312 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ECE 210 Modulation, Frequency Shifting, and Low-Pass Filtering</title>
+<style>
+  :root{
+    --bg:#f5f7fb;
+    --card:#ffffff;
+    --ink:#162033;
+    --muted:#5d6b84;
+    --line:#d7deea;
+    --accent:#2457d6;
+    --accent2:#b64a17;
+    --accent3:#177a63;
+    --accent4:#8b3fd1;
+    --soft:#eef3ff;
+    --shadow:0 10px 28px rgba(17,24,39,.08);
+    --radius:18px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background:linear-gradient(180deg,#f7f9fc 0%, #eef3f9 100%);
+    color:var(--ink);
+  }
+  .page{
+    max-width:1500px;
+    margin:0 auto;
+    padding:24px;
+  }
+  .hero{
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:18px;
+    margin-bottom:20px;
+  }
+  .hero-card, .controls, .panel, .notes, .challenge, .legend-card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+  }
+  .hero-card{
+    padding:22px 24px;
+  }
+  .hero h1{
+    margin:0 0 10px 0;
+    font-size:clamp(26px, 3vw, 38px);
+    line-height:1.08;
+    letter-spacing:-0.02em;
+  }
+  .hero p{
+    margin:0;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.55;
+  }
+  .badge-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:14px;
+  }
+  .badge{
+    background:var(--soft);
+    color:var(--accent);
+    border:1px solid #cfdcff;
+    padding:7px 10px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.01em;
+  }
+  .controls{
+    padding:18px;
+  }
+  .controls h2{
+    margin:0 0 12px 0;
+    font-size:20px;
+  }
+  .subtle{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.45;
+  }
+  .control-grid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(220px,1fr));
+    gap:14px;
+    margin-top:16px;
+  }
+  .control{
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:#fbfcff;
+  }
+  .control label{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    font-weight:700;
+    font-size:14px;
+    margin-bottom:8px;
+  }
+  .value{
+    color:var(--accent);
+    font-variant-numeric:tabular-nums;
+  }
+  input[type="range"]{
+    width:100%;
+    accent-color:var(--accent);
+  }
+  select, button{
+    font:inherit;
+  }
+  select{
+    width:100%;
+    padding:10px 12px;
+    border-radius:12px;
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+  }
+  .inline-options{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:8px;
+  }
+  .toggle{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    font-size:14px;
+    color:var(--ink);
+    margin:8px 0 0 0;
+  }
+  .preset-wrap{
+    margin-top:16px;
+  }
+  .preset-wrap h3{
+    margin:0 0 8px 0;
+    font-size:15px;
+  }
+  .preset-grid{
+    display:grid;
+    grid-template-columns: repeat(5, minmax(150px,1fr));
+    gap:10px;
+  }
+  .preset-btn, .action-btn, .chip, .tiny-btn{
+    border:1px solid var(--line);
+    background:#fff;
+    color:var(--ink);
+    border-radius:12px;
+    padding:10px 12px;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
+  }
+  .preset-btn:hover, .action-btn:hover, .chip:hover, .tiny-btn:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 16px rgba(31,41,55,.08);
+    border-color:#bfd0ff;
+  }
+  .preset-btn strong{
+    display:block;
+    font-size:13px;
+  }
+  .preset-btn span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:2px;
+  }
+  .main-grid{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(360px, 1fr));
+    gap:16px;
+    margin-top:18px;
+  }
+  .panel{
+    padding:16px;
+    min-height:320px;
+    position:relative;
+  }
+  .panel h3{
+    margin:0 0 4px 0;
+    font-size:18px;
+  }
+  .panel .caption{
+    margin:0 0 12px 0;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.45;
+  }
+  canvas{
+    width:100%;
+    height:220px;
+    display:block;
+    border-radius:12px;
+    background:linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+    border:1px solid #e7edf7;
+  }
+  .double-canvas{
+    display:grid;
+    grid-template-rows:auto auto;
+    gap:10px;
+  }
+  .reveal-cover{
+    position:absolute;
+    inset:56px 16px 16px 16px;
+    border-radius:14px;
+    background:rgba(245,248,255,.88);
+    border:1px dashed #b8c7e8;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    padding:20px;
+    gap:10px;
+  }
+  .reveal-cover.hidden{
+    display:none;
+  }
+  .equation{
+    margin-top:16px;
+    padding:16px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    background:#fafcff;
+    display:none;
+  }
+  .equation.show{
+    display:block;
+  }
+  .equation code{
+    display:block;
+    white-space:pre-wrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size:14px;
+    line-height:1.55;
+    color:#13203a;
+  }
+  .equation .highlight{
+    color:var(--accent2);
+    font-weight:700;
+  }
+  .lower-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+    margin-top:16px;
+    align-items:start;
+  }
+  .challenge{
+    padding:18px;
+  }
+  .challenge h3{
+    margin:0 0 8px 0;
+    font-size:18px;
+  }
+  .challenge .question{
+    font-size:15px;
+    line-height:1.55;
+    margin-bottom:12px;
+  }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin:12px 0;
+  }
+  .chip.selected{
+    border-color:var(--accent);
+    background:#eef4ff;
+    color:var(--accent);
+    font-weight:700;
+  }
+  .action-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:12px;
+  }
+  .action-btn.primary{
+    background:var(--accent);
+    color:#fff;
+    border-color:var(--accent);
+  }
+  .feedback{
+    margin-top:14px;
+    min-height:44px;
+    padding:12px 14px;
+    border-radius:12px;
+    background:#f6f9ff;
+    border:1px solid #d9e4ff;
+    font-size:14px;
+    line-height:1.5;
+  }
+  .good{
+    background:#f1fbf7;
+    border-color:#c8eedf;
+    color:#146c55;
+  }
+  .bad{
+    background:#fff7f4;
+    border-color:#ffd6c8;
+    color:#984123;
+  }
+  .legend-card{
+    padding:18px;
+  }
+  .legend-card h3{
+    margin:0 0 10px 0;
+    font-size:18px;
+  }
+  .mini-legend{
+    display:grid;
+    grid-template-columns: repeat(2, minmax(200px,1fr));
+    gap:10px 18px;
+    margin-top:10px;
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-size:14px;
+    color:#31415d;
+  }
+  .swatch{
+    width:16px;
+    height:16px;
+    border-radius:6px;
+    border:1px solid rgba(0,0,0,.08);
+    flex:0 0 auto;
+  }
+  details.notes{
+    margin-top:18px;
+    overflow:hidden;
+  }
+  details.notes summary{
+    cursor:pointer;
+    list-style:none;
+    padding:18px 20px;
+    font-weight:800;
+    font-size:18px;
+    background:#fbfcff;
+  }
+  details.notes summary::-webkit-details-marker{display:none}
+  .notes-body{
+    padding:0 20px 20px 20px;
+  }
+  .notes-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:18px;
+  }
+  .note-block{
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:16px;
+    background:#fff;
+  }
+  .note-block h4{
+    margin:0 0 10px 0;
+    font-size:16px;
+  }
+  .note-block ul{
+    margin:0;
+    padding-left:18px;
+    color:#31415d;
+    line-height:1.55;
+    font-size:14px;
+  }
+  .footer{
+    margin-top:18px;
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.55;
+    padding:0 2px 20px 2px;
+  }
+  .tiny{
+    font-size:12px;
+    color:var(--muted);
+  }
+  .summary-box{
+    margin-top:14px;
+    padding:14px;
+    border-radius:14px;
+    background:#f8fbff;
+    border:1px solid #dce8fb;
+    font-size:14px;
+    line-height:1.58;
+  }
+  .formula-pill{
+    display:inline-block;
+    margin:4px 8px 4px 0;
+    padding:8px 10px;
+    border-radius:999px;
+    background:#f1f5ff;
+    border:1px solid #d5e0ff;
+    font-size:12px;
+    color:#29498f;
+    font-weight:700;
+  }
+  @media (max-width: 1100px){
+    .hero{grid-template-columns:1fr}
+    .main-grid,.lower-grid,.notes-grid{grid-template-columns:1fr}
+    .preset-grid{grid-template-columns:repeat(2, minmax(150px,1fr))}
+    .control-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <section class="hero">
+    <div class="hero-card">
+      <h1>Modulation, Frequency Shifting, and Low-Pass Filtering</h1>
+      <p>
+        This applet is built to train communication-systems intuition. Students can move back and forth between
+        time-domain multiplication and frequency-domain spectral copying, then test what a low-pass filter actually keeps.
+        The notation follows the standard Chapter 8 modulation story:
+        multiplying by <strong>cos(ω<sub>c</sub>t)</strong> creates two shifted copies with a factor of <strong>1/2</strong>,
+        while <strong>cos²(ω<sub>c</sub>t)</strong> creates a <strong>DC term</strong> plus a <strong>double-frequency term</strong>.
+      </p>
+      <div class="badge-row">
+        <span class="badge">ECE 210 intuition builder</span>
+        <span class="badge">Shifted replicas</span>
+        <span class="badge">LPF survival test</span>
+        <span class="badge">Prediction before reveal</span>
+      </div>
+      <div class="summary-box" id="scenarioSummary"></div>
+    </div>
+    <div class="controls">
+      <h2>Controls</h2>
+      <div class="subtle">
+        Change the mixer, input spectrum, and LPF cutoff. Any change hides the final answer again so students must predict first.
+      </div>
+
+      <div class="control-grid">
+        <div class="control">
+          <label for="inputType">Input spectrum shape <span class="value" id="inputTypeLabel">One lobe</span></label>
+          <select id="inputType">
+            <option value="one">One lobe around baseband</option>
+            <option value="two">Two separated bands</option>
+          </select>
+          <div class="tiny">Use this to switch between a lowpass-like baseband spectrum and a bandpass-like two-band input.</div>
+        </div>
+
+        <div class="control">
+          <label for="mixerType">Mixer preset <span class="value" id="mixerTypeLabel">Cosine</span></label>
+          <select id="mixerType">
+            <option value="cos">Cosine mixer: cos(ωc t)</option>
+            <option value="cos2">Squared cosine mixer: cos²(ωc t)</option>
+          </select>
+          <div class="tiny">The squared-cosine mode is there on purpose. Students often miss the DC term.</div>
+        </div>
+
+        <div class="control">
+          <label for="wcSlider">Modulation frequency ωc <span class="value" id="wcVal">3.20</span></label>
+          <input id="wcSlider" type="range" min="0.4" max="5.5" step="0.05" value="3.2">
+          <div class="tiny">Increasing ωc pushes copies farther away from the origin. In cos² mode the shifted copies move to ±2ωc.</div>
+        </div>
+
+        <div class="control">
+          <label for="cutoffSlider">LPF cutoff ωL <span class="value" id="cutoffVal">1.60</span></label>
+          <input id="cutoffSlider" type="range" min="0.2" max="6.0" step="0.05" value="1.6">
+          <div class="tiny">The ideal LPF passes |ω| ≤ ωL and rejects frequencies outside that band.</div>
+        </div>
+      </div>
+
+      <div class="inline-options">
+        <label class="toggle"><input id="showDerivation" type="checkbox"> Show derivation using cosine identities</label>
+        <label class="toggle"><input id="copiesOnly" type="checkbox"> Show only spectral copies</label>
+      </div>
+
+      <div class="preset-wrap">
+        <h3>Presets</h3>
+        <div class="preset-grid">
+          <button class="preset-btn" data-preset="lowcos"><strong>Low-frequency cosine mixer</strong><span>One lobe, small shift, narrow LPF</span></button>
+          <button class="preset-btn" data-preset="highcos"><strong>High-frequency cosine mixer</strong><span>One lobe, larger shift, narrow LPF</span></button>
+          <button class="preset-btn" data-preset="cos2"><strong>Squared cosine mixer</strong><span>See DC + double-frequency copies</span></button>
+          <button class="preset-btn" data-preset="one"><strong>Input with one lobe</strong><span>Baseband spectrum emphasis</span></button>
+          <button class="preset-btn" data-preset="two"><strong>Input with two separated bands</strong><span>Bandpass-style input emphasis</span></button>
+          <button class="preset-btn" data-preset="demod"><strong>Coherent-demod intuition</strong><span>Copies fold toward baseband</span></button>
+        </div>
+      </div>
+
+      <div id="derivationBox" class="equation"></div>
+    </div>
+  </section>
+
+  <section class="main-grid">
+    <div class="panel">
+      <h3>1. Input signal in time domain</h3>
+      <p class="caption">The time waveform is reconstructed from the chosen input spectrum. It is not arbitrary decoration; it reflects the current spectral shape.</p>
+      <canvas id="inputTimeCanvas"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3>2. Mixer signal in time domain</h3>
+      <p class="caption">This is the multiplying signal. Watch how the identity behind the mixer controls the spectral replicas created in frequency.</p>
+      <canvas id="mixerCanvas"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3>3. Spectrum before mixing</h3>
+      <p class="caption">This is <strong>F(ω)</strong>. Keep track of its width and where its energy sits. That determines what happens after shifting.</p>
+      <canvas id="beforeCanvas"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3>4. Spectrum after mixing</h3>
+      <p class="caption">The mixed spectrum is built from shifted copies of <strong>F(ω)</strong>. The colored overlays make the amplitude factors explicit.</p>
+      <canvas id="afterCanvas"></canvas>
+    </div>
+
+    <div class="panel">
+      <h3>5. Low-pass filter response</h3>
+      <p class="caption">The LPF passes only the shaded center band. The actual question is: which shifted replicas overlap that passband?</p>
+      <canvas id="filterCanvas"></canvas>
+    </div>
+
+    <div class="panel" id="finalPanel">
+      <h3>6. Final output spectrum and output signal</h3>
+      <p class="caption">This remains hidden until the student makes a prediction. That forces a real before-and-after comparison.</p>
+      <div class="double-canvas">
+        <canvas id="outputSpectrumCanvas"></canvas>
+        <canvas id="outputSignalCanvas"></canvas>
+      </div>
+      <div id="revealCover" class="reveal-cover">
+        <div style="font-weight:800;font-size:18px;">Predict first</div>
+        <div class="subtle" style="max-width:420px;">
+          Decide which replicas make it through the LPF, then click <strong>Reveal output</strong> in the challenge box below.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lower-grid">
+    <div class="challenge">
+      <h3>Prediction challenge: which replicas survive?</h3>
+      <div class="question" id="questionText"></div>
+      <div class="chip-row" id="chipRow"></div>
+      <div class="action-row">
+        <button class="action-btn primary" id="revealBtn">Reveal output</button>
+        <button class="action-btn" id="checkBtn">Check my prediction</button>
+        <button class="action-btn" id="clearBtn">Clear selection</button>
+      </div>
+      <div class="feedback" id="feedbackBox">
+        Select the spectral regions you think contribute to the final output after ideal low-pass filtering.
+      </div>
+    </div>
+
+    <div class="legend-card">
+      <h3>What this applet is trying to teach</h3>
+      <div class="formula-pill">f(t)cos(ωct) ↔ 1/2 F(ω-ωc) + 1/2 F(ω+ωc)</div>
+      <div class="formula-pill">cos²(ωct) = 1/2 + 1/2 cos(2ωct)</div>
+      <div class="formula-pill">Y(ω) = H(ω) X(ω)</div>
+
+      <div class="mini-legend">
+        <div class="legend-item"><span class="swatch" style="background:#2457d6"></span> Input spectrum F(ω)</div>
+        <div class="legend-item"><span class="swatch" style="background:#b64a17"></span> Right-shifted copy</div>
+        <div class="legend-item"><span class="swatch" style="background:#177a63"></span> Left-shifted copy</div>
+        <div class="legend-item"><span class="swatch" style="background:#8b3fd1"></span> Baseband/DC copy</div>
+      </div>
+
+      <div class="summary-box" id="conceptBox"></div>
+    </div>
+  </section>
+
+  <details class="notes" open>
+    <summary>Instructor notes and misconceptions list</summary>
+    <div class="notes-body">
+      <div class="notes-grid">
+        <div class="note-block">
+          <h4>Instructor notes</h4>
+          <ul>
+            <li>Start with the input spectrum and ask students to identify its bandwidth before any mixing. Make them say what counts as “near zero” and what does not.</li>
+            <li>Then move to the mixer panel and ask which identity applies: either cosine splitting into two exponentials, or squared cosine splitting into a DC term plus a double-frequency cosine.</li>
+            <li>Use the “show only spectral copies” box when students conflate the original spectrum with the shifted replicas. It isolates the mechanism.</li>
+            <li>Do not reveal the final output immediately. Have students choose the replicas that overlap the LPF passband first.</li>
+            <li>The preset called <strong>Coherent-demod intuition</strong> is good for connecting Chapter 8 modulation to the idea of mixing again and low-pass filtering to recover baseband.</li>
+            <li>For a quick board derivation, write the cosine case first, then contrast it with cos². That contrast is where many weak intuitions break.</li>
+          </ul>
+        </div>
+
+        <div class="note-block">
+          <h4>Common misconceptions to attack directly</h4>
+          <ul>
+            <li><strong>“Multiplying by cosine just moves the spectrum once.”</strong> No. It creates two mirrored shifted copies, each scaled by 1/2.</li>
+            <li><strong>“The original baseband always stays.”</strong> Not in ordinary cosine mixing. The baseband copy disappears unless the shift creates overlap back near zero or the mixer itself includes a DC term.</li>
+            <li><strong>“cos² is just a stronger cosine.”</strong> No. It is a different spectral operation because cos²(ωct)=1/2+1/2cos(2ωct).</li>
+            <li><strong>“The LPF keeps the biggest lobe.”</strong> Wrong criterion. The LPF keeps whatever lies inside its passband, not whatever looks visually tallest elsewhere.</li>
+            <li><strong>“Mirrored copies are optional artistic symmetry.”</strong> No. Real signals force conjugate symmetry, and cosine mixing creates left and right replicas together.</li>
+            <li><strong>“The factor of 1/2 is bookkeeping only.”</strong> No. It changes actual spectral amplitude and matters after repeated mixing or filtering.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <div class="footer">
+    Designed as a polished communication-systems intuition builder rather than an exam spoiler.
+    Frequencies are shown in normalized ω-units so the geometry of shifting and filtering stays visually clear.
+  </div>
+</div>
+
+<script>
+(() => {
+  const state = {
+    inputType: 'one',
+    mixerType: 'cos',
+    wc: 3.2,
+    cutoff: 1.6,
+    showDerivation: false,
+    copiesOnly: false,
+    revealed: false,
+    selectedLabels: new Set()
+  };
+
+  const DOM = {
+    inputType: document.getElementById('inputType'),
+    mixerType: document.getElementById('mixerType'),
+    wcSlider: document.getElementById('wcSlider'),
+    cutoffSlider: document.getElementById('cutoffSlider'),
+    wcVal: document.getElementById('wcVal'),
+    cutoffVal: document.getElementById('cutoffVal'),
+    inputTypeLabel: document.getElementById('inputTypeLabel'),
+    mixerTypeLabel: document.getElementById('mixerTypeLabel'),
+    showDerivation: document.getElementById('showDerivation'),
+    copiesOnly: document.getElementById('copiesOnly'),
+    derivationBox: document.getElementById('derivationBox'),
+    questionText: document.getElementById('questionText'),
+    chipRow: document.getElementById('chipRow'),
+    revealBtn: document.getElementById('revealBtn'),
+    checkBtn: document.getElementById('checkBtn'),
+    clearBtn: document.getElementById('clearBtn'),
+    feedbackBox: document.getElementById('feedbackBox'),
+    revealCover: document.getElementById('revealCover'),
+    scenarioSummary: document.getElementById('scenarioSummary'),
+    conceptBox: document.getElementById('conceptBox')
+  };
+
+  const canvases = {
+    inputTime: document.getElementById('inputTimeCanvas'),
+    mixer: document.getElementById('mixerCanvas'),
+    before: document.getElementById('beforeCanvas'),
+    after: document.getElementById('afterCanvas'),
+    filter: document.getElementById('filterCanvas'),
+    outSpec: document.getElementById('outputSpectrumCanvas'),
+    outSig: document.getElementById('outputSignalCanvas')
+  };
+
+  const COLORS = {
+    blue: '#2457d6',
+    orange: '#b64a17',
+    green: '#177a63',
+    purple: '#8b3fd1',
+    grid: '#e8eef9',
+    axis: '#6f7d94',
+    fillBlue: 'rgba(36,87,214,0.12)',
+    fillOrange: 'rgba(182,74,23,0.12)',
+    fillGreen: 'rgba(23,122,99,0.12)',
+    fillPurple: 'rgba(139,63,209,0.12)',
+    passFill: 'rgba(36,87,214,0.12)',
+    passLine: '#2457d6'
+  };
+
+  const FREQ_MAX = 8.0;
+  const NFREQ = 801;
+  const NTIME = 500;
+  const TMIN = -10.0;
+  const TMAX = 10.0;
+
+  function linspace(a, b, n){
+    const arr = new Array(n);
+    const step = (b - a) / (n - 1);
+    for(let i=0;i<n;i++) arr[i] = a + i * step;
+    return arr;
+  }
+
+  const W = linspace(-FREQ_MAX, FREQ_MAX, NFREQ);
+  const T = linspace(TMIN, TMAX, NTIME);
+  const dW = W[1] - W[0];
+
+  function gaussian(x, mu, sigma){
+    const z = (x - mu) / sigma;
+    return Math.exp(-0.5 * z * z);
+  }
+
+  function inputSpectrumVal(w, inputType){
+    if(inputType === 'one'){
+      return gaussian(w, 0, 0.72);
+    }
+    const center = 2.15;
+    const sigma = 0.46;
+    return 0.92 * gaussian(w, center, sigma) + 0.92 * gaussian(w, -center, sigma);
+  }
+
+  function inputSpectrumArray(){
+    return W.map(w => inputSpectrumVal(w, state.inputType));
+  }
+
+  function componentList(){
+    if(state.mixerType === 'cos'){
+      return [
+        { key:'right', label:'Right 1/2 copy at +ωc', short:'Right copy', color:COLORS.orange, factor:0.5, shift:+state.wc },
+        { key:'left',  label:'Left 1/2 copy at -ωc',  short:'Left copy',  color:COLORS.green,  factor:0.5, shift:-state.wc }
+      ];
+    }
+    return [
+      { key:'dc',    label:'Baseband 1/2 copy',      short:'Baseband copy', color:COLORS.purple, factor:0.5,  shift:0 },
+      { key:'right', label:'Right 1/4 copy at +2ωc', short:'Right copy',    color:COLORS.orange, factor:0.25, shift:+2*state.wc },
+      { key:'left',  label:'Left 1/4 copy at -2ωc',  short:'Left copy',     color:COLORS.green,  factor:0.25, shift:-2*state.wc }
+    ];
+  }
+
+  function shiftedSpectrum(baseArray, shift, factor){
+    const out = new Array(W.length);
+    for(let i=0;i<W.length;i++){
+      out[i] = factor * inputSpectrumVal(W[i] - shift, state.inputType);
+    }
+    return out;
+  }
+
+  function addArrays(arrays){
+    const out = new Array(W.length).fill(0);
+    arrays.forEach(arr => {
+      for(let i=0;i<W.length;i++) out[i] += arr[i];
+    });
+    return out;
+  }
+
+  function multiplyArrays(a,b){
+    const out = new Array(a.length);
+    for(let i=0;i<a.length;i++) out[i] = a[i] * b[i];
+    return out;
+  }
+
+  function maxAbs(arr){
+    let m = 0;
+    for(const v of arr){
+      const av = Math.abs(v);
+      if(av > m) m = av;
+    }
+    return m || 1;
+  }
+
+  function reconstructSignalFromSpectrum(spec){
+    const y = new Array(T.length).fill(0);
+    for(let ti=0; ti<T.length; ti++){
+      let sum = 0;
+      const t = T[ti];
+      for(let i=0; i<W.length; i++){
+        sum += spec[i] * Math.cos(W[i] * t);
+      }
+      y[ti] = sum * dW / (2 * Math.PI);
+    }
+    return y;
+  }
+
+  function mixerSignalValue(t){
+    if(state.mixerType === 'cos') return Math.cos(state.wc * t);
+    return Math.cos(state.wc * t) ** 2;
+  }
+
+  function mixerSignalArray(){
+    return T.map(t => mixerSignalValue(t));
+  }
+
+  function idealLPFArray(){
+    return W.map(w => Math.abs(w) <= state.cutoff ? 1 : 0);
+  }
+
+  function computeModel(){
+    const inputSpec = inputSpectrumArray();
+    const components = componentList().map(c => {
+      const spec = shiftedSpectrum(inputSpec, c.shift, c.factor);
+      return { ...c, spec };
+    });
+    const mixedSpec = addArrays(components.map(c => c.spec));
+    const H = idealLPFArray();
+    const outputSpec = multiplyArrays(mixedSpec, H);
+
+    const inputSignalRaw = reconstructSignalFromSpectrum(inputSpec);
+    const outputSignalRaw = reconstructSignalFromSpectrum(outputSpec);
+    const inputScale = 1 / maxAbs(inputSignalRaw);
+    const inputSignal = inputSignalRaw.map(v => v * inputScale);
+    const outputSignal = outputSignalRaw.map(v => v * inputScale);
+
+    const survivalThreshold = 0.035;
+    const survivors = [];
+    components.forEach(c => {
+      let overlapMax = 0;
+      let overlapEnergy = 0;
+      for(let i=0;i<W.length;i++){
+        const v = c.spec[i] * H[i];
+        if(v > overlapMax) overlapMax = v;
+        overlapEnergy += v * v;
+      }
+      if(overlapMax > survivalThreshold || overlapEnergy > 0.03){
+        survivors.push(c.label);
+      }
+      c.overlapMax = overlapMax;
+      c.overlapEnergy = overlapEnergy;
+    });
+
+    return {
+      inputSpec,
+      components,
+      mixedSpec,
+      H,
+      outputSpec,
+      inputSignal,
+      outputSignal,
+      mixerSignal: mixerSignalArray(),
+      survivors
+    };
+  }
+
+  function fitCanvas(canvas){
+    const ratio = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    const width = Math.max(300, Math.floor(rect.width));
+    const height = Math.max(180, Math.floor(rect.height));
+    canvas.width = Math.floor(width * ratio);
+    canvas.height = Math.floor(height * ratio);
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return { ctx, width, height };
+  }
+
+  function drawAxes(ctx, width, height, xMin, xMax, yMin, yMax, opts={}){
+    const pad = { left:46, right:16, top:12, bottom:34 };
+    const plotW = width - pad.left - pad.right;
+    const plotH = height - pad.top - pad.bottom;
+
+    function px(x){ return pad.left + (x - xMin) / (xMax - xMin) * plotW; }
+    function py(y){ return pad.top + (yMax - y) / (yMax - yMin) * plotH; }
+
+    ctx.clearRect(0,0,width,height);
+
+    ctx.strokeStyle = COLORS.grid;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+
+    const xTicks = opts.xTicks || 8;
+    const yTicks = opts.yTicks || 4;
+
+    for(let i=0;i<=xTicks;i++){
+      const x = xMin + i*(xMax-xMin)/xTicks;
+      const X = px(x);
+      ctx.moveTo(X, pad.top);
+      ctx.lineTo(X, height - pad.bottom);
+    }
+    for(let i=0;i<=yTicks;i++){
+      const y = yMin + i*(yMax-yMin)/yTicks;
+      const Y = py(y);
+      ctx.moveTo(pad.left, Y);
+      ctx.lineTo(width - pad.right, Y);
+    }
+    ctx.stroke();
+
+    ctx.strokeStyle = COLORS.axis;
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(pad.left, py(0));
+    ctx.lineTo(width - pad.right, py(0));
+    ctx.moveTo(px(0), pad.top);
+    ctx.lineTo(px(0), height - pad.bottom);
+    ctx.stroke();
+
+    ctx.fillStyle = COLORS.axis;
+    ctx.font = '12px system-ui, sans-serif';
+
+    for(let i=0;i<=xTicks;i++){
+      const x = xMin + i*(xMax-xMin)/xTicks;
+      const X = px(x);
+      ctx.fillText(formatTick(x), X - 10, height - 12);
+    }
+    for(let i=0;i<=yTicks;i++){
+      const y = yMin + i*(yMax-yMin)/yTicks;
+      const Y = py(y);
+      ctx.fillText(formatTick(y), 8, Y + 4);
+    }
+
+    if(opts.xLabel){
+      ctx.fillStyle = '#33415c';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText(opts.xLabel, width - 32, height - 12);
+    }
+    if(opts.yLabel){
+      ctx.save();
+      ctx.translate(14, 22);
+      ctx.rotate(-Math.PI/2);
+      ctx.fillStyle = '#33415c';
+      ctx.font = '13px system-ui, sans-serif';
+      ctx.fillText(opts.yLabel, 0, 0);
+      ctx.restore();
+    }
+
+    return { px, py, pad, plotW, plotH };
+  }
+
+  function formatTick(v){
+    const a = Math.abs(v);
+    if(a < 0.001) return '0';
+    if(a >= 10) return v.toFixed(0);
+    if(a >= 1) return v.toFixed(1).replace(/\.0$/,'');
+    return v.toFixed(2).replace(/0+$/,'').replace(/\.$/,'');
+  }
+
+  function plotLine(ctx, xs, ys, px, py, color, lineWidth=2.3){
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.beginPath();
+    for(let i=0;i<xs.length;i++){
+      const X = px(xs[i]);
+      const Y = py(ys[i]);
+      if(i===0) ctx.moveTo(X,Y); else ctx.lineTo(X,Y);
+    }
+    ctx.stroke();
+  }
+
+  function fillCurve(ctx, xs, ys, px, py, color){
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.moveTo(px(xs[0]), py(0));
+    for(let i=0;i<xs.length;i++) ctx.lineTo(px(xs[i]), py(ys[i]));
+    ctx.lineTo(px(xs[xs.length-1]), py(0));
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawTimePanel(canvas, yArray, titleColor, yLabel, yRange){
+    const { ctx, width, height } = fitCanvas(canvas);
+    const axes = drawAxes(ctx, width, height, TMIN, TMAX, yRange[0], yRange[1], { xLabel:'t', yLabel });
+    fillCurve(ctx, T, yArray.map(v => Math.max(0,v)), axes.px, axes.py, 'rgba(36,87,214,0.05)');
+    plotLine(ctx, T, yArray, axes.px, axes.py, titleColor, 2.4);
+  }
+
+  function drawSpectrumPanel(canvas, curves, yMax, label){
+    const { ctx, width, height } = fitCanvas(canvas);
+    const axes = drawAxes(ctx, width, height, -FREQ_MAX, FREQ_MAX, 0, yMax, { xLabel:'ω', yLabel:label, xTicks:8, yTicks:4 });
+
+    curves.forEach(curve => {
+      if(curve.fill) fillCurve(ctx, W, curve.y, axes.px, axes.py, curve.fill);
+    });
+    curves.forEach(curve => {
+      plotLine(ctx, W, curve.y, axes.px, axes.py, curve.color, curve.lineWidth || 2.2);
+    });
+  }
+
+  function drawFilterPanel(canvas, H){
+    const { ctx, width, height } = fitCanvas(canvas);
+    const axes = drawAxes(ctx, width, height, -FREQ_MAX, FREQ_MAX, 0, 1.15, { xLabel:'ω', yLabel:'H(ω)', xTicks:8, yTicks:2 });
+
+    const y = H.map(v => v);
+    fillCurve(ctx, W, y, axes.px, axes.py, COLORS.passFill);
+    plotLine(ctx, W, y, axes.px, axes.py, COLORS.passLine, 2.4);
+
+    ctx.fillStyle = '#2457d6';
+    ctx.font = '12px system-ui, sans-serif';
+    const x1 = axes.px(-state.cutoff);
+    const x2 = axes.px(state.cutoff);
+    ctx.fillText('-ωL', x1 - 12, 20);
+    ctx.fillText('+ωL', x2 - 12, 20);
+  }
+
+  function placeholderFinal(canvas, text, subtext){
+    const { ctx, width, height } = fitCanvas(canvas);
+    ctx.clearRect(0,0,width,height);
+    ctx.fillStyle = '#fbfdff';
+    ctx.fillRect(0,0,width,height);
+    ctx.strokeStyle = '#dde6f6';
+    ctx.strokeRect(0.5,0.5,width-1,height-1);
+
+    ctx.fillStyle = '#425270';
+    ctx.font = '700 18px system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, width/2, height/2 - 10);
+    ctx.font = '13px system-ui, sans-serif';
+    ctx.fillStyle = '#6b7890';
+    ctx.fillText(subtext, width/2, height/2 + 18);
+    ctx.textAlign = 'start';
+  }
+
+  function updateDerivation(){
+    DOM.derivationBox.classList.toggle('show', state.showDerivation);
+    if(!state.showDerivation) return;
+    if(state.mixerType === 'cos'){
+      DOM.derivationBox.innerHTML = `
+        <code>
+cos(ω<sub>c</sub>t) = (e<sup>jω<sub>c</sub>t</sup> + e<sup>-jω<sub>c</sub>t</sup>)/2
+
+x(t) = f(t)cos(ω<sub>c</sub>t)
+     = <span class="highlight">1/2</span> f(t)e<sup>jω<sub>c</sub>t</sup> + <span class="highlight">1/2</span> f(t)e<sup>-jω<sub>c</sub>t</sup>
+
+X(ω) = <span class="highlight">1/2</span>F(ω-ω<sub>c</sub>) + <span class="highlight">1/2</span>F(ω+ω<sub>c</sub>)
+
+Interpretation:
+• cosine mixing creates two shifted replicas
+• each replica is scaled by 1/2
+• the LPF keeps only the parts of those replicas that overlap |ω| ≤ ωL
+        </code>
+      `;
+    } else {
+      DOM.derivationBox.innerHTML = `
+        <code>
+cos²(ω<sub>c</sub>t) = (1 + cos(2ω<sub>c</sub>t))/2
+
+x(t) = f(t)cos²(ω<sub>c</sub>t)
+     = <span class="highlight">1/2</span>f(t) + <span class="highlight">1/2</span>f(t)cos(2ω<sub>c</sub>t)
+
+X(ω) = <span class="highlight">1/2</span>F(ω)
+     + <span class="highlight">1/4</span>F(ω-2ω<sub>c</sub>)
+     + <span class="highlight">1/4</span>F(ω+2ω<sub>c</sub>)
+
+Interpretation:
+• cos² does not just “shift harder”
+• it leaves a DC/baseband copy of size 1/2
+• it also creates two copies at ±2ωc, each with factor 1/4
+        </code>
+      `;
+    }
+  }
+
+  function updateText(model){
+    DOM.wcVal.textContent = Number(state.wc).toFixed(2);
+    DOM.cutoffVal.textContent = Number(state.cutoff).toFixed(2);
+    DOM.inputTypeLabel.textContent = state.inputType === 'one' ? 'One lobe' : 'Two separated bands';
+    DOM.mixerTypeLabel.textContent = state.mixerType === 'cos' ? 'Cosine' : 'Squared cosine';
+
+    const typeText = state.inputType === 'one'
+      ? 'The input spectrum starts as one baseband lobe centered at ω = 0.'
+      : 'The input spectrum starts as two separated bands away from ω = 0.';
+
+    let mixerText = '';
+    if(state.mixerType === 'cos'){
+      mixerText = `Cosine mixing creates two shifted copies, each with factor 1/2, centered near ±${state.wc.toFixed(2)}.`;
+    } else {
+      mixerText = `Squared-cosine mixing creates a baseband 1/2 copy and two 1/4 copies centered near ±${(2*state.wc).toFixed(2)}.`;
+    }
+
+    const survivorText = model.survivors.length
+      ? `With the current LPF cutoff, the contributing region(s) are: ${model.survivors.join(', ')}.`
+      : 'With the current LPF cutoff, no appreciable spectral region survives.';
+
+    DOM.scenarioSummary.innerHTML = `
+      <strong>Current scenario.</strong> ${typeText} ${mixerText} The filter passes only |ω| ≤ ${state.cutoff.toFixed(2)}.
+      ${survivorText}
+    `;
+
+    const conceptLines = [];
+    if(state.mixerType === 'cos'){
+      conceptLines.push('Key idea: time-domain multiplication by cosine becomes spectral copying plus shifting.');
+      conceptLines.push('The 1/2 factors are real amplitude factors, not decorative symbols.');
+    } else {
+      conceptLines.push('Key idea: cos² contains a DC term, so some baseband survives even before the LPF acts.');
+      conceptLines.push('The shifted copies sit at ±2ωc, not ±ωc.');
+    }
+    if(state.inputType === 'two'){
+      conceptLines.push('Two separated input bands make it easier to see which pieces the LPF can and cannot recover.');
+    } else {
+      conceptLines.push('One-lobe input makes it easy to see spectral translation geometry.');
+    }
+    DOM.conceptBox.innerHTML = conceptLines.map(s => `<div>${s}</div>`).join('');
+  }
+
+  function buildChallenge(model){
+    DOM.chipRow.innerHTML = '';
+    DOM.questionText.innerHTML = `
+      Before seeing the result, pick the replica(s) that actually contribute to <strong>Y(ω) = H(ω)X(ω)</strong>.
+      Criterion: a replica counts as surviving if it has nontrivial overlap with the LPF passband.
+    `;
+
+    model.components.forEach(c => {
+      const chip = document.createElement('button');
+      chip.className = 'chip';
+      chip.textContent = c.label;
+      if(state.selectedLabels.has(c.label)) chip.classList.add('selected');
+      chip.addEventListener('click', () => {
+        if(state.selectedLabels.has(c.label)) state.selectedLabels.delete(c.label);
+        else state.selectedLabels.add(c.label);
+        chip.classList.toggle('selected');
+      });
+      DOM.chipRow.appendChild(chip);
+    });
+  }
+
+  function setFeedback(message, kind=''){
+    DOM.feedbackBox.className = 'feedback' + (kind ? ' ' + kind : '');
+    DOM.feedbackBox.innerHTML = message;
+  }
+
+  function checkPrediction(model){
+    const correct = new Set(model.survivors);
+    const chosen = new Set([...state.selectedLabels]);
+    const sameSize = correct.size === chosen.size;
+    let sameMembers = sameSize;
+    if(sameSize){
+      for(const item of correct){
+        if(!chosen.has(item)){ sameMembers = false; break; }
+      }
+    }
+    if(sameMembers){
+      setFeedback(
+        `Good. Your prediction matches the current LPF geometry. Surviving contribution(s): <strong>${model.survivors.join(', ') || 'none'}</strong>.`,
+        'good'
+      );
+    } else {
+      const correctText = model.survivors.length ? model.survivors.join(', ') : 'none';
+      setFeedback(
+        `Not quite. The correct surviving contribution(s) are <strong>${correctText}</strong>. Watch where the colored replicas overlap the passband |ω| ≤ ωL.`,
+        'bad'
+      );
+    }
+  }
+
+  function resetReveal(){
+    state.revealed = false;
+    DOM.revealCover.classList.remove('hidden');
+  }
+
+  function reveal(){
+    state.revealed = true;
+    DOM.revealCover.classList.add('hidden');
+    render();
+  }
+
+  function render(){
+    updateDerivation();
+    const model = computeModel();
+    updateText(model);
+    buildChallenge(model);
+
+    drawTimePanel(canvases.inputTime, model.inputSignal, COLORS.blue, 'f(t)', [-1.15, 1.15]);
+    drawTimePanel(canvases.mixer, model.mixerSignal, state.mixerType === 'cos' ? COLORS.orange : COLORS.purple, 'm(t)', state.mixerType === 'cos' ? [-1.15,1.15] : [-0.1,1.15]);
+
+    drawSpectrumPanel(canvases.before, [
+      { y:model.inputSpec, color:COLORS.blue, fill:COLORS.fillBlue }
+    ], 1.15, '|F(ω)|');
+
+    const afterCurves = [];
+    if(state.copiesOnly){
+      model.components.forEach(c => {
+        afterCurves.push({
+          y:c.spec,
+          color:c.color,
+          fill:c.color === COLORS.orange ? COLORS.fillOrange : c.color === COLORS.green ? COLORS.fillGreen : COLORS.fillPurple,
+          lineWidth:2.2
+        });
+      });
+    } else {
+      model.components.forEach(c => {
+        afterCurves.push({
+          y:c.spec,
+          color:c.color,
+          fill:null,
+          lineWidth:1.5
+        });
+      });
+      afterCurves.push({
+        y:model.mixedSpec,
+        color:'#1b1f2a',
+        fill:'rgba(27,31,42,0.08)',
+        lineWidth:2.7
+      });
+    }
+    drawSpectrumPanel(canvases.after, afterCurves, 1.15, '|X(ω)|');
+    drawFilterPanel(canvases.filter, model.H);
+
+    if(state.revealed){
+      const outCurves = model.components.map(c => ({
+        y: multiplyArrays(c.spec, model.H),
+        color: c.color,
+        fill: null,
+        lineWidth: 1.4
+      }));
+      outCurves.push({
+        y:model.outputSpec,
+        color:'#111827',
+        fill:'rgba(17,24,39,0.08)',
+        lineWidth:2.8
+      });
+      drawSpectrumPanel(canvases.outSpec, outCurves, 1.15, '|Y(ω)|');
+      drawTimePanel(canvases.outSig, model.outputSignal, COLORS.blue, 'y(t)', [-1.15,1.15]);
+    } else {
+      placeholderFinal(canvases.outSpec, 'Output spectrum hidden', 'Choose surviving replicas first');
+      placeholderFinal(canvases.outSig, 'Output signal hidden', 'Then compare prediction against result');
+    }
+  }
+
+  function applyPreset(name){
+    if(name === 'lowcos'){
+      state.inputType = 'one';
+      state.mixerType = 'cos';
+      state.wc = 1.25;
+      state.cutoff = 1.05;
+    } else if(name === 'highcos'){
+      state.inputType = 'one';
+      state.mixerType = 'cos';
+      state.wc = 3.9;
+      state.cutoff = 0.9;
+    } else if(name === 'cos2'){
+      state.inputType = 'one';
+      state.mixerType = 'cos2';
+      state.wc = 2.1;
+      state.cutoff = 1.15;
+    } else if(name === 'one'){
+      state.inputType = 'one';
+      state.mixerType = 'cos';
+      state.wc = 2.6;
+      state.cutoff = 1.4;
+    } else if(name === 'two'){
+      state.inputType = 'two';
+      state.mixerType = 'cos';
+      state.wc = 2.15;
+      state.cutoff = 1.35;
+    } else if(name === 'demod'){
+      state.inputType = 'two';
+      state.mixerType = 'cos';
+      state.wc = 2.15;
+      state.cutoff = 2.3;
+    }
+    syncControlsFromState();
+    state.selectedLabels.clear();
+    setFeedback('Preset loaded. Predict again before revealing the answer.');
+    resetReveal();
+    render();
+  }
+
+  function syncControlsFromState(){
+    DOM.inputType.value = state.inputType;
+    DOM.mixerType.value = state.mixerType;
+    DOM.wcSlider.value = state.wc;
+    DOM.cutoffSlider.value = state.cutoff;
+  }
+
+  function bind(){
+    DOM.inputType.addEventListener('change', () => {
+      state.inputType = DOM.inputType.value;
+      state.selectedLabels.clear();
+      resetReveal();
+      setFeedback('Input changed. Predict again.');
+      render();
+    });
+    DOM.mixerType.addEventListener('change', () => {
+      state.mixerType = DOM.mixerType.value;
+      state.selectedLabels.clear();
+      resetReveal();
+      setFeedback('Mixer changed. Predict again.');
+      render();
+    });
+    DOM.wcSlider.addEventListener('input', () => {
+      state.wc = parseFloat(DOM.wcSlider.value);
+      state.selectedLabels.clear();
+      resetReveal();
+      setFeedback('ωc changed. Predict again.');
+      render();
+    });
+    DOM.cutoffSlider.addEventListener('input', () => {
+      state.cutoff = parseFloat(DOM.cutoffSlider.value);
+      state.selectedLabels.clear();
+      resetReveal();
+      setFeedback('LPF cutoff changed. Predict again.');
+      render();
+    });
+    DOM.showDerivation.addEventListener('change', () => {
+      state.showDerivation = DOM.showDerivation.checked;
+      render();
+    });
+    DOM.copiesOnly.addEventListener('change', () => {
+      state.copiesOnly = DOM.copiesOnly.checked;
+      render();
+    });
+    DOM.revealBtn.addEventListener('click', () => {
+      reveal();
+      const model = computeModel();
+      const answer = model.survivors.length ? model.survivors.join(', ') : 'none';
+      setFeedback(`Revealed. The LPF output is built from: <strong>${answer}</strong>. Compare your mental picture against the actual spectrum and waveform.`);
+    });
+    DOM.checkBtn.addEventListener('click', () => {
+      checkPrediction(computeModel());
+    });
+    DOM.clearBtn.addEventListener('click', () => {
+      state.selectedLabels.clear();
+      setFeedback('Selection cleared.');
+      render();
+    });
+
+    document.querySelectorAll('[data-preset]').forEach(btn => {
+      btn.addEventListener('click', () => applyPreset(btn.dataset.preset));
+    });
+
+    window.addEventListener('resize', render);
+  }
+
+  bind();
+  syncControlsFromState();
+  render();
+})();
+</script>
+</body>
+</html>

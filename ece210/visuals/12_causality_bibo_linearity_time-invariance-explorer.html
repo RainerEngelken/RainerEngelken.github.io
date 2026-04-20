@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210: LTIC Systems & Properties</title>
+    
+    <!-- MathJax for rendering equations -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: { typeset: false } // We will typeset manually when content changes
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --uiuc-navy: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-light: #F4F6F9;
+            --white: #FFFFFF;
+            --text-dark: #333333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --gray: #6c757d;
+            --light-gray: #e9ecef;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--uiuc-navy);
+            color: var(--white);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        header h1 { margin: 0; font-size: 1.5rem; }
+        header p { margin: 0; font-size: 0.9rem; opacity: 0.8; }
+
+        #app-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Panels */
+        .panel {
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--light-gray);
+        }
+
+        #left-panel { flex: 0 0 300px; background: var(--white); }
+        #middle-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-light); }
+        #right-panel { flex: 0 0 380px; background: var(--white); }
+
+        /* Typography & Elements */
+        h2 { font-size: 1.2rem; margin-top: 0; color: var(--uiuc-navy); border-bottom: 2px solid var(--uiuc-orange); padding-bottom: 5px;}
+        
+        .preset-btn {
+            display: block; width: 100%; padding: 12px; margin-bottom: 8px;
+            background: var(--light-gray); border: none; border-radius: 4px;
+            text-align: left; font-size: 0.95rem; cursor: pointer;
+            transition: all 0.2s; font-weight: 500;
+        }
+        .preset-btn:hover { background: #d3d9df; }
+        .preset-btn.active { background: var(--uiuc-navy); color: var(--white); border-left: 5px solid var(--uiuc-orange); }
+
+        .misconception-box {
+            background: #fff3cd; border-left: 5px solid #ffc107; padding: 12px; margin-top: 20px;
+            font-size: 0.85rem; border-radius: 4px; line-height: 1.4;
+        }
+        .misconception-box strong { color: #856404; display: block; margin-bottom: 6px; }
+        .misconception-box ul { padding-left: 15px; margin: 0; }
+        .misconception-box li { margin-bottom: 6px; }
+
+        /* Middle Panel UI */
+        #visualizer-header {
+            display: flex; justify-content: space-between; align-items: center;
+            background: var(--white); padding: 15px 25px; border-radius: 8px; margin: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05); min-height: 70px;
+        }
+        #equation-display { font-size: 1.4rem; font-weight: bold; color: var(--uiuc-navy); }
+        
+        #canvas-container {
+            flex: 1; margin: 0 15px 15px 15px; background: var(--white);
+            border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        
+        #canvas-wrapper {
+            flex: 1; width: 100%; position: relative;
+        }
+        canvas {
+            position: absolute; top: 0; left: 0;
+            /* width/height managed dynamically in JS to prevent squishing */
+        }
+
+        .controls {
+            padding: 15px 25px; display: flex; align-items: center; gap: 15px;
+            background: var(--light-gray); border-top: 1px solid #dee2e6;
+        }
+        .controls label { font-weight: bold; white-space: nowrap; }
+        input[type="range"] { flex: 1; accent-color: var(--uiuc-orange); }
+
+        .toggle-btn {
+            background: var(--gray); color: white; border: none; padding: 8px 16px;
+            border-radius: 4px; cursor: pointer; transition: 0.2s; font-weight: bold;
+        }
+        .toggle-btn.active { background: var(--uiuc-orange); }
+
+        /* Right Panel UI */
+        .property-card {
+            border: 1px solid var(--light-gray); border-radius: 6px; padding: 15px; margin-bottom: 15px;
+            background: var(--bg-light);
+        }
+        .property-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 1.05rem; margin-bottom: 5px; }
+        
+        .predict-btns { margin-top: 12px; display: flex; gap: 10px; }
+        .predict-btn {
+            flex: 1; padding: 8px; border: 2px solid var(--uiuc-navy); border-radius: 4px;
+            background: white; cursor: pointer; color: var(--uiuc-navy); font-weight: bold;
+            transition: 0.2s;
+        }
+        .predict-btn:hover { background: var(--light-gray); }
+
+        .result { margin-top: 12px; padding: 10px; border-radius: 4px; font-size: 0.9rem; line-height: 1.4; display: none; }
+        .result.correct { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .result.incorrect { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        
+        .definition-text { color: var(--gray); font-size: 0.9rem; display: none; padding-bottom: 8px; border-bottom: 1px dashed #ccc; margin-bottom: 8px;}
+        .show-def .definition-text { display: block; }
+        
+        .verdict-icon { font-size: 1rem; padding: 3px 8px; border-radius: 4px; }
+        .verdict-icon.true { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .verdict-icon.false { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+
+        /* Modals & Overlays */
+        #instructor-notes {
+            display: none; position: fixed; top: 10%; left: 20%; right: 20%; bottom: 10%;
+            background: white; z-index: 100; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 8px; overflow-y: auto; line-height: 1.5;
+        }
+        #overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 50;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div>
+            <h1>System Properties Explorer</h1>
+            <p>ECE 210: Causality, Linearity, Time-Invariance, and BIBO Stability</p>
+        </div>
+        <button class="toggle-btn" onclick="toggleNotes()">Instructor Notes</button>
+    </header>
+
+    <div id="app-container">
+        <!-- Left Panel: Presets -->
+        <div id="left-panel" class="panel">
+            <h2>System Presets</h2>
+            <div id="preset-list"></div>
+
+            <div class="misconception-box">
+                <strong>💡 Common Misconceptions:</strong>
+                <ul>
+                    <li><strong>Bounded vs Decaying:</strong> A step function $u(t)$ is bounded, but doesn't decay. Integrating it yields a ramp (unbounded).</li>
+                    <li><strong>Shift vs Advance:</strong> $f(t-2)$ is a delay (causal). $f(t+2)$ looks back in time? No, it needs <em>future</em> inputs!</li>
+                    <li><strong>Algebraically Simple ≠ Stable:</strong> $y(t) = t \cdot f(t)$ is simple but unstable.</li>
+                    <li><strong>$f(t) + 2$ is NOT linear:</strong> Linear means $f(t)=0 \implies y(t)=0$.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Middle Panel: Visualization -->
+        <div id="middle-panel">
+            <div id="visualizer-header">
+                <div id="equation-display"></div>
+                <button class="toggle-btn" id="btn-test-signals" onclick="toggleTestSignals()">Show Test Signal u(t)</button>
+            </div>
+            
+            <div id="canvas-container">
+                <div id="canvas-wrapper">
+                    <canvas id="timeline-canvas"></canvas>
+                </div>
+                <div class="controls">
+                    <label>Current Time ($t_0$): <span id="t0-val">0.0</span></label>
+                    <input type="range" id="t0-slider" min="-4" max="4" step="0.1" value="0">
+                    <button class="toggle-btn" onclick="resetPredictions()" style="background: var(--gray);">Reset Applet</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Properties Checklist -->
+        <div id="right-panel" class="panel">
+            <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                <h2>Property Analysis</h2>
+                <label style="font-size: 0.85rem; cursor: pointer;">
+                    <input type="checkbox" id="def-toggle" onchange="toggleDefinitions()" checked> Formal Defs
+                </label>
+            </div>
+            <p style="font-size: 0.9rem; margin-bottom: 20px; color: var(--gray);">Predict the properties for the current system. (Click buttons to verify).</p>
+            
+            <div id="properties-list" class="show-def"></div>
+        </div>
+    </div>
+
+    <!-- Instructor Notes Modal -->
+    <div id="overlay" onclick="toggleNotes()"></div>
+    <div id="instructor-notes">
+        <h2 style="border-bottom: 2px solid var(--uiuc-orange);">Concept notes</h2>
+        <p>This applet serves as a conceptual simulator to help students diagnose system properties intuitively and formally.</p>
+        <ul>
+            <li><strong>Causality Visualization:</strong> When sliding $t_0$, any dependency mapping to $\tau > t_0$ crosses into the visually red "Future" region, explicitly showing causality violations.</li>
+            <li><strong>BIBO Stability Test:</strong> Toggling the test signal applies the unit step $u(t)$ (a strictly bounded signal). Students can visually observe if the output $y(t)$ grows unbounded (e.g., in the Accumulator or Time-Varying Gain presets).</li>
+            <li><strong>Time Invariance:</strong> Students can use the $t_0$ slider to shift the observation window. For Time-Varying Gain ($t \cdot f(t)$), sliding $t_0$ changes the amplitude of the mapped signal, visually demonstrating shift-variance.</li>
+            <li><strong>Linearity Misconception:</strong> The $f(t)+2$ preset proves that $y=mx+b$ logic fails for linear systems (requires zero-in, zero-out).</li>
+            <li><strong>Predictive Pedagogy:</strong> Forced choice ("Predict Yes/No") requires cognitive commitment before revealing the answer, improving retention over passive reading.</li>
+        </ul>
+        <button class="toggle-btn" onclick="toggleNotes()" style="margin-top:20px;">Close Notes</button>
+    </div>
+
+<script>
+    // System Data & Presets (Memoryless removed, LaTeX integrated)
+    const propertiesKeys =[
+        { id: 'causal', name: 'Causal' },
+        { id: 'linear', name: 'Linear' },
+        { id: 'ti', name: 'Time-Invariant (TI)' },
+        { id: 'bibo', name: 'BIBO Stable' }
+    ];
+
+    const presets =[
+        {
+            name: "1. Time Delay (Shift)",
+            latex: "$$y(t) = f(t - 2)$$",
+            deps: (t) => ({ type: 'point', val: t - 2 }),
+            props: { causal: true, linear: true, ti: true, bibo: true },
+            defs: {
+                causal: "$y(t)$ depends only on inputs $f(\\tau)$ where $\\tau \\le t$.",
+                linear: "$\\mathcal{H}\\{a f_1(t) + b f_2(t)\\} = a y_1(t) + b y_2(t)$",
+                ti: "$\\mathcal{H}\\{f(t - T)\\} = y(t - T)$",
+                bibo: "If $|f(t)| \\le B < \\infty$, then $|y(t)| \\le C < \\infty$"
+            },
+            exps: {
+                causal: "Output depends on $\\tau = t-2$, which is always in the past.",
+                linear: "Scaling and adding inputs perfectly scales and adds outputs.",
+                ti: "Shifting the input to $f(t-T)$ shifts the output exactly by $T$.",
+                bibo: "If $f(t)$ never exceeds bound $B$, then $f(t-2)$ also never exceeds $B$."
+            },
+            y_eval: (t, f) => f(t-2)
+        },
+        {
+            name: "2. Time Advance",
+            latex: "$$y(t) = f(t + 1)$$",
+            deps: (t) => ({ type: 'point', val: t + 1 }),
+            props: { causal: false, linear: true, ti: true, bibo: true },
+            defs: { causal: "$y(t)$ depends only on $\\tau \\le t$.", linear: "Superposition holds.", ti: "Shift commutes.", bibo: "Bounded in $\\implies$ Bounded out." },
+            exps: {
+                causal: "Depends on $\\tau = t+1$. It requires <strong>future</strong> knowledge of the input. Unrealizable!",
+                linear: "It is mathematically linear; superposition holds perfectly.",
+                ti: "Shifting the clock works normally. TI holds.",
+                bibo: "If $f(t)$ is bounded by $B$, $f(t+1)$ is just as bounded."
+            },
+            y_eval: (t, f) => f(t+1)
+        },
+        {
+            name: "3. Time-Varying Gain",
+            latex: "$$y(t) = t \\cdot f(t)$$",
+            deps: (t) => ({ type: 'point', val: t }),
+            props: { causal: true, linear: true, ti: false, bibo: false },
+            defs: { causal: "No future dependence.", linear: "Superposition holds.", ti: "$\\mathcal{H}\\{f(t-T)\\} = y(t-T)$", bibo: "Bounded in $\\implies$ Bounded out." },
+            exps: {
+                causal: "Only needs $f(t)$ at the current instant.",
+                linear: "Multiplication by '$t$' distributes over addition. Linear!",
+                ti: "If you delay $f(t)$ by $T$, output is $t \\cdot f(t-T)$. But delaying $y(t)$ gives $(t-T) \\cdot f(t-T)$. They do not match!",
+                bibo: "Try bounded $f(t) = 1$ for all $t$. Output is $y(t) = t$, which grows to $\\infty$!"
+            },
+            y_eval: (t, f) => t * f(t)
+        },
+        {
+            name: "4. Window Integration",
+            latex: "$$y(t) = \\int_{t-2}^{t} f(\\tau) d\\tau$$",
+            deps: (t) => ({ type: 'interval', start: t-2, end: t }),
+            props: { causal: true, linear: true, ti: true, bibo: true },
+            defs: { causal: "No future dependence.", linear: "Integrals are linear operators.", ti: "Shift invariant bounds.", bibo: "Integration over finite bounds." },
+            exps: {
+                causal: "Integration upper bound does not exceed current time $t$.",
+                linear: "Integration is a strictly linear mathematical operation.",
+                ti: "Integrating a shifted pulse over a fixed-width moving window yields a shifted result.",
+                bibo: "Integrating a bounded signal (Max $B$) over a width of $2$ yields a max output of $2B$. Stable."
+            },
+            y_eval: (t, f) => {
+                let sum = 0, dt = 0.05;
+                for(let tau = t-2; tau <= t; tau += dt) sum += f(tau)*dt;
+                return sum;
+            }
+        },
+        {
+            name: "5. Accumulator (All Past)",
+            latex: "$$y(t) = \\int_{-\\infty}^{t} f(\\tau) d\\tau$$",
+            deps: (t) => ({ type: 'interval', start: -10, end: t }), // -10 acts as -infty visually
+            props: { causal: true, linear: true, ti: true, bibo: false },
+            defs: { causal: "No future.", linear: "Superposition.", ti: "Shift invariant.", bibo: "Bounded in $\\implies$ Bounded out." },
+            exps: {
+                causal: "Upper limit is $t$. No future required.",
+                linear: "Integration is inherently linear.",
+                ti: "Time shift in input yields identical time shift in accumulated output.",
+                bibo: "<strong>DANGEROUS MISCONCEPTION:</strong> If $f(t)=u(t)$ (bounded by 1), $y(t)$ becomes a ramp $t \\cdot u(t)$ extending to infinity! Not BIBO Stable."
+            },
+            y_eval: (t, f) => {
+                let sum = 0, dt = 0.05;
+                for(let tau = -5; tau <= t; tau += dt) sum += f(tau)*dt;
+                return sum;
+            }
+        },
+        {
+            name: "6. Offset (Affine)",
+            latex: "$$y(t) = f(t) + 2$$",
+            deps: (t) => ({ type: 'point', val: t }),
+            props: { causal: true, linear: false, ti: true, bibo: true },
+            defs: { causal: "No future.", linear: "Zero-In gives Zero-Out.", ti: "Shift invariant.", bibo: "Bounded in $\\implies$ Bounded out." },
+            exps: {
+                causal: "Only depends on current time $t$.",
+                linear: "Fails Zero-in, Zero-out! If $f(t)=0$, $y(t)=2$. Also fails superposition: $\\mathcal{H}\\{2f(t)\\} = 2f(t)+2$, but $2\\mathcal{H}\\{f(t)\\} = 2f(t)+4$.",
+                ti: "Adding a constant is unaffected by time shifts.",
+                bibo: "If $|f(t)| \\le B$, then $|y(t)| \\le B + 2$. Still bounded."
+            },
+            y_eval: (t, f) => f(t) + 2
+        },
+        {
+            name: "7. Squarer",
+            latex: "$$y(t) = f^2(t)$$",
+            deps: (t) => ({ type: 'point', val: t }),
+            props: { causal: true, linear: false, ti: true, bibo: true },
+            defs: { causal: "No future.", linear: "Superposition.", ti: "Shift invariant.", bibo: "Bounded in $\\implies$ Bounded out." },
+            exps: {
+                causal: "Only uses current $t$.",
+                linear: "Fails scaling test: $\\mathcal{H}\\{2f(t)\\} = 4f^2(t)$, which is not equal to $2\\mathcal{H}\\{f(t)\\}$.",
+                ti: "Squaring operation does not explicitly depend on absolute time $t$.",
+                bibo: "If $|f(t)| \\le B$, then $|y(t)| \\le B^2$. Still bounded."
+            },
+            y_eval: (t, f) => Math.pow(f(t), 2)
+        }
+    ];
+
+    // State Variables
+    let currentPreset = presets[0];
+    let t0 = 0;
+    let showTestSignals = false;
+    let predictions = {}; // { causal: 'yes'/'no' }
+
+    // DOM Elements
+    const presetListEl = document.getElementById('preset-list');
+    const eqDisplayEl = document.getElementById('equation-display');
+    const t0Slider = document.getElementById('t0-slider');
+    const t0ValEl = document.getElementById('t0-val');
+    const canvas = document.getElementById('timeline-canvas');
+    const ctx = canvas.getContext('2d');
+    const propertiesListEl = document.getElementById('properties-list');
+
+    // Initialization
+    function init() {
+        presets.forEach((p, idx) => {
+            const btn = document.createElement('button');
+            btn.className = `preset-btn ${idx === 0 ? 'active' : ''}`;
+            btn.innerHTML = p.name;
+            btn.onclick = () => selectPreset(idx, btn);
+            presetListEl.appendChild(btn);
+        });
+
+        t0Slider.addEventListener('input', (e) => {
+            t0 = parseFloat(e.target.value);
+            t0ValEl.innerHTML = `$${t0.toFixed(1)}$`;
+            MathJax.typesetPromise([t0ValEl]);
+            drawCanvas();
+        });
+
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            drawCanvas();
+        });
+
+        loadPresetState();
+    }
+
+    function selectPreset(idx, btnEl) {
+        document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+        btnEl.classList.add('active');
+        currentPreset = presets[idx];
+        predictions = {}; // Reset predictions
+        t0 = 0;
+        t0Slider.value = 0;
+        t0ValEl.innerHTML = `$0.0$`;
+        loadPresetState();
+    }
+
+    function loadPresetState() {
+        eqDisplayEl.innerHTML = currentPreset.latex;
+        renderRightPanel();
+        resizeCanvas();
+        drawCanvas();
+        
+        // Trigger MathJax re-render safely
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.log(err.message));
+        }
+    }
+
+    function resetPredictions() {
+        predictions = {};
+        t0 = 0;
+        t0Slider.value = 0;
+        t0ValEl.innerHTML = `$0.0$`;
+        renderRightPanel();
+        drawCanvas();
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.log(err.message));
+        }
+    }
+
+    function renderRightPanel() {
+        propertiesListEl.innerHTML = '';
+        propertiesKeys.forEach(prop => {
+            const card = document.createElement('div');
+            card.className = 'property-card';
+            
+            const state = predictions[prop.id]; 
+            const actualVal = currentPreset.props[prop.id];
+            
+            // Icon represents the actual true/false property of the system (only shown after guess)
+            let iconHtml = '<span class="verdict-icon" style="color:var(--gray)">❔</span>';
+            if (state) {
+                iconHtml = actualVal 
+                    ? '<span class="verdict-icon true">✅ True</span>' 
+                    : '<span class="verdict-icon false">❌ False</span>';
+            }
+            
+            let html = `
+                <div class="property-header">
+                    <span>${prop.name}</span>
+                    ${iconHtml}
+                </div>
+                <div class="definition-text">${currentPreset.defs[prop.id]}</div>
+            `;
+
+            if (!state) {
+                html += `
+                    <div class="predict-btns">
+                        <button class="predict-btn" onclick="makePrediction('${prop.id}', 'yes')">Predict YES</button>
+                        <button class="predict-btn" onclick="makePrediction('${prop.id}', 'no')">Predict NO</button>
+                    </div>
+                `;
+            } else {
+                const isCorrect = (state === 'yes') === actualVal;
+                html += `
+                    <div class="result ${isCorrect ? 'correct' : 'incorrect'}" style="display:block;">
+                        <strong>Your guess: ${state.toUpperCase()}</strong> &mdash; 
+                        ${isCorrect ? 'Correct!' : 'Incorrect.'}<br><br>
+                        ${currentPreset.exps[prop.id]}
+                    </div>
+                `;
+            }
+
+            card.innerHTML = html;
+            propertiesListEl.appendChild(card);
+        });
+    }
+
+    function makePrediction(propId, guess) {
+        predictions[propId] = guess;
+        renderRightPanel();
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch((err) => console.log(err.message));
+        }
+    }
+
+    function toggleDefinitions() {
+        const checked = document.getElementById('def-toggle').checked;
+        if(checked) propertiesListEl.classList.add('show-def');
+        else propertiesListEl.classList.remove('show-def');
+    }
+
+    function toggleTestSignals() {
+        showTestSignals = !showTestSignals;
+        const btn = document.getElementById('btn-test-signals');
+        if(showTestSignals) {
+            btn.classList.add('active');
+            btn.innerHTML = "Hide Test Signal";
+        } else {
+            btn.classList.remove('active');
+            btn.innerHTML = "Show Test Signal u(t)";
+        }
+        drawCanvas();
+    }
+
+    function toggleNotes() {
+        const notes = document.getElementById('instructor-notes');
+        const overlay = document.getElementById('overlay');
+        if(notes.style.display === 'block') {
+            notes.style.display = 'none';
+            overlay.style.display = 'none';
+        } else {
+            notes.style.display = 'block';
+            overlay.style.display = 'block';
+        }
+    }
+
+    // -- CANVAS RENDERING --
+    function resizeCanvas() {
+        const wrapper = document.getElementById('canvas-wrapper');
+        const rect = wrapper.getBoundingClientRect();
+        
+        // Handle Device Pixel Ratio for sharp, non-squished rendering
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        
+        // Scale context so we can use standard CSS pixels in drawing math
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        
+        // Store logical size for drawing functions
+        canvas.logicalWidth = rect.width;
+        canvas.logicalHeight = rect.height;
+    }
+
+    function drawCanvas() {
+        const w = canvas.logicalWidth;
+        const h = canvas.logicalHeight;
+        
+        ctx.clearRect(0, 0, w, h);
+        
+        const topY = 100;
+        const botY = h - 80;
+        const tMin = -5;
+        const tMax = 5;
+
+        // X Mapping function (with padding)
+        const padX = 60;
+        const mapX = (t) => padX + ((t - tMin) / (tMax - tMin)) * (w - padX*2);
+
+        // 1. Draw "Future" hazard zone on top axis (tau > t0)
+        const xT0 = mapX(t0);
+        const xEnd = mapX(tMax);
+        
+        if(xT0 < xEnd) {
+            ctx.fillStyle = 'rgba(220, 53, 69, 0.05)';
+            ctx.fillRect(xT0, topY - 50, xEnd - xT0, 100);
+            ctx.fillStyle = 'rgba(220, 53, 69, 0.5)';
+            ctx.font = '13px "Segoe UI", sans-serif';
+            ctx.fillText("Future (relative to t₀)", xT0 + 10, topY - 30);
+        }
+
+        // 2. Draw Axes
+        drawAxis(topY, "Input f(τ)", true);
+        drawAxis(botY, "Output y(t)", false);
+
+        // 3. Current t0 marker on bottom axis
+        ctx.beginPath();
+        ctx.arc(xT0, botY, 6, 0, Math.PI*2);
+        ctx.fillStyle = 'var(--uiuc-navy)';
+        ctx.fill();
+        ctx.font = 'italic 14px serif';
+        ctx.fillText("t₀", xT0 - 6, botY + 30);
+
+        // 4. Draw Dependencies Mapping
+        const dep = currentPreset.deps(t0);
+        let requiresFuture = false;
+
+        if (dep.type === 'point') {
+            const xTop = mapX(dep.val);
+            if (dep.val > t0 + 0.001) requiresFuture = true; // small epsilon for float issues
+
+            // Highlight top point
+            ctx.beginPath();
+            ctx.arc(xTop, topY, 6, 0, Math.PI*2);
+            ctx.fillStyle = requiresFuture ? 'var(--danger)' : 'var(--uiuc-orange)';
+            ctx.fill();
+
+            // Arrow
+            drawArrow(xTop, topY + 12, xT0, botY - 12, requiresFuture ? 'var(--danger)' : 'var(--uiuc-orange)');
+
+        } else if (dep.type === 'interval') {
+            const visualStart = Math.max(tMin, dep.start);
+            const visualEnd = Math.min(tMax, dep.end);
+            const xTopStart = mapX(visualStart);
+            const xTopEnd = mapX(visualEnd);
+            
+            if (dep.end > t0 + 0.001) requiresFuture = true;
+
+            // Highlight region on top axis
+            ctx.fillStyle = requiresFuture ? 'rgba(220, 53, 69, 0.4)' : 'rgba(232, 74, 39, 0.4)';
+            ctx.fillRect(xTopStart, topY - 8, Math.max(xTopEnd - xTopStart, 2), 16);
+            
+            // Funnel mapping
+            ctx.beginPath();
+            ctx.moveTo(xTopStart, topY + 10);
+            ctx.lineTo(xTopEnd, topY + 10);
+            ctx.lineTo(xT0, botY - 10);
+            ctx.closePath();
+            ctx.fillStyle = requiresFuture ? 'rgba(220, 53, 69, 0.15)' : 'rgba(232, 74, 39, 0.15)';
+            ctx.fill();
+        }
+
+        // Causality warning text
+        if(requiresFuture) {
+            ctx.fillStyle = 'var(--danger)';
+            ctx.font = 'bold 15px "Segoe UI", sans-serif';
+            ctx.fillText("⚠️ Reaches into future: Non-Causal!", w/2 - 120, (topY+botY)/2);
+        }
+
+        // 5. Draw Test Signals if enabled
+        if (showTestSignals) {
+            // Signal: unit step u(t)
+            const u = (t) => t >= 0 ? 1 : 0;
+            drawSignal(topY, u, 'var(--uiuc-navy)', "f(τ) = u(τ)");
+            drawSignal(botY, (t) => currentPreset.y_eval(t, u), 'var(--success)', "y(t)", true);
+        }
+
+        function drawAxis(yPos, label, isTop) {
+            ctx.beginPath();
+            ctx.moveTo(padX - 20, yPos);
+            ctx.lineTo(w - padX + 20, yPos);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Ticks
+            ctx.fillStyle = '#444';
+            ctx.font = '13px "Segoe UI", sans-serif';
+            ctx.textAlign = 'center';
+            for(let t = tMin; t <= tMax; t++) {
+                let x = mapX(t);
+                ctx.beginPath(); ctx.moveTo(x, yPos - 6); ctx.lineTo(x, yPos + 6); ctx.stroke();
+                
+                // Avoid drawing number right over t0 marker on bottom axis
+                if(isTop || Math.abs(t - t0) > 0.3) {
+                    ctx.fillText(t, x, yPos + 22);
+                }
+            }
+            
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 15px "Segoe UI", sans-serif';
+            ctx.fillText(label, padX - 40, yPos - 20);
+        }
+
+        function drawArrow(x1, y1, x2, y2, color) {
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            const angle = Math.atan2(y2-y1, x2-x1);
+            ctx.beginPath();
+            ctx.moveTo(x2, y2);
+            ctx.lineTo(x2 - 12*Math.cos(angle-Math.PI/7), y2 - 12*Math.sin(angle-Math.PI/7));
+            ctx.lineTo(x2 - 12*Math.cos(angle+Math.PI/7), y2 - 12*Math.sin(angle+Math.PI/7));
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        function drawSignal(axisY, func, color, label, checkBounds=false) {
+            ctx.beginPath();
+            const scaleY = 35; // 1 unit = 35px
+            let isUnbounded = false;
+            
+            // Evaluate at higher resolution to capture sharp jumps properly
+            const steps = 1000;
+            for(let i = 0; i <= steps; i++) {
+                let t = tMin + (i/steps)*(tMax - tMin);
+                let val = func(t);
+                if (Math.abs(val) > 4) isUnbounded = true; 
+                
+                let drawVal = Math.max(Math.min(val, 3.5), -1.5); // Clip visual drawing
+                let px = mapX(t);
+                let py = axisY - drawVal * scaleY;
+
+                if(i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 3;
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+
+            ctx.fillStyle = color;
+            ctx.font = 'bold 15px "Segoe UI", sans-serif';
+            ctx.fillText(label, w - padX - 60, axisY - 45);
+
+            if(checkBounds && isUnbounded) {
+                ctx.fillStyle = 'var(--danger)';
+                ctx.fillText("⚠️ y(t) grows unbounded!", w - padX - 160, axisY - 70);
+            }
+        }
+    }
+
+    // Boot once MathJax logic applies
+    window.onload = () => {
+        init();
+    };
+</script>
+</body>
+</html>

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Convolution & Impulses - ECE 210</title>
+<style>
+    :root {
+        --primary: #1976d2;
+        --bg: #f4f6f8;
+        --card-bg: #ffffff;
+        --f-color: #2196F3;
+        --g-color: #F44336;
+        --out-color: #9C27B0;
+        --err-color: #FF9800;
+        --text: #333333;
+    }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: var(--bg); color: var(--text); overflow: hidden; }
+    .header { background: var(--primary); color: #fff; padding: 15px 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); z-index: 20; position: relative; display: flex; justify-content: space-between; align-items: center; }
+    .header h1 { margin: 0; font-size: 20px; }
+    .header p { margin: 0; font-size: 14px; opacity: 0.9; }
+    
+    .container { display: flex; flex-direction: row; height: calc(100vh - 60px); }
+    
+    .sidebar { width: 360px; background: var(--card-bg); border-right: 1px solid #ddd; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; z-index: 10; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+    .control-group { display: flex; flex-direction: column; gap: 8px; }
+    .control-group label { font-size: 14px; font-weight: 600; }
+    select, input[type="range"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 100%; box-sizing: border-box; }
+    
+    .playback-controls { display: flex; align-items: center; gap: 10px; }
+    .playback-controls input { flex: 1; }
+    button { background: var(--primary); color: white; border: none; padding: 8px 14px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    button:hover { background: #1565c0; }
+    
+    .info-box { background: #e3f2fd; border-left: 4px solid var(--primary); padding: 12px; font-size: 14px; line-height: 1.5; border-radius: 0 4px 4px 0; }
+    .equation { font-family: 'Courier New', Courier, monospace; font-size: 15px; text-align: center; color: var(--primary); font-weight: bold; margin: 5px 0; background: #fff; padding: 8px; border-radius: 4px; border: 1px dashed #ccc; }
+    
+    .instructor-notes { margin-top: auto; font-size: 13px; line-height: 1.4; color: #555; background: #fff3e0; padding: 15px; border: 1px solid #ffe0b2; border-radius: 6px; }
+    .instructor-notes h3 { margin: 0 0 8px 0; font-size: 14px; color: #e65100; }
+    
+    .legend { font-size: 13px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
+    .legend span { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 2px; }
+    
+    .main-area { flex: 1; padding: 20px; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 20px; overflow-y: auto; }
+    .canvas-card { background: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; padding: 15px; border: 1px solid #eee; }
+    .canvas-title { font-weight: 600; margin-bottom: 10px; color: #444; text-align: center; font-size: 15px; }
+    .canvas-wrapper { flex: 1; position: relative; min-height: 180px; }
+    canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: crosshair; }
+
+    /* Custom Checkbox / Radio styling */
+    .radio-group { display: flex; gap: 15px; font-size: 14px; font-weight: normal; }
+    .mistake-toggle { display: flex; align-items: center; gap: 8px; background: #fff8e1; padding: 10px; border-radius: 6px; border: 1px solid #ffecb3; font-weight: 600; color: #f57c00; cursor: pointer;}
+</style>
+</head>
+<body>
+
+<div class="header">
+    <h1>ECE 210 Sandbox: Impulses & Convolution</h1>
+    <p>Interactive Visualization of Signals and Systems</p>
+</div>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="control-group">
+            <label>Select Preset Example:</label>
+            <select id="presetSelect"></select>
+        </div>
+        
+        <div class="control-group">
+            <label>Operation Mode:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="mode" value="conv" id="modeConv"> Convolution (*)</label>
+                <label><input type="radio" name="mode" value="mult" id="modeMult"> Multiplication (·)</label>
+            </div>
+        </div>
+
+        <div class="control-group" id="wrapA">
+            <label>Delta Shift (a = <span id="valA">1.0</span>):</label>
+            <input type="range" id="sliderA" min="-4" max="4" step="0.5" value="1">
+        </div>
+
+        <div class="control-group" id="wrapT">
+            <label>Pulse Width (T = <span id="valT">2.0</span>):</label>
+            <input type="range" id="sliderT" min="0.5" max="5" step="0.5" value="2">
+        </div>
+
+        <div class="control-group">
+            <label>Time <i>t</i> (Scanning / Shifting):</label>
+            <div class="playback-controls">
+                <button id="playBtn" onclick="togglePlay()">Play</button>
+                <input type="range" id="sliderTime" min="-6" max="6" step="0.05" value="-6">
+            </div>
+        </div>
+
+        <label class="mistake-toggle">
+            <input type="checkbox" id="chkMistake"> Show Common Student Mistake
+        </label>
+
+        <div class="info-box" id="pedagogyText"></div>
+        <div class="equation" id="eqnEq"></div>
+
+        <div class="legend">
+            <div><span style="background:var(--f-color)"></span> Input <i>x(t)</i> or <i>x(τ)</i></div>
+            <div><span style="background:var(--g-color)"></span> System <i>h(t)</i> or <i>h(t-τ)</i></div>
+            <div><span style="background:var(--out-color)"></span> Correct Output <i>y(t)</i></div>
+            <div id="legMistake" style="display:none;"><span style="background:var(--err-color)"></span> Mistake Output</div>
+        </div>
+
+        <div class="instructor-notes">
+            <h3>Instructor / Pedagogy Notes</h3>
+            <ul style="margin:0; padding-left:15px;">
+                <li><strong>Multiply vs Convolve:</strong> Notice that multiplying by a shifted delta yields a point sample at $t=a$, whereas convolving completely shifts the target function to $t=a$.</li>
+                <li><strong>The Flip & Slide:</strong> Under convolution mode, watch the bottom-left panel. Observe $h(t-\tau)$ flip backward and slide through $x(\tau)$.</li>
+                <li><strong>Adding Widths:</strong> When convolving two pulses, their non-zero widths always sum. Toggle the "Mistake" checkbox to see the common error of taking the maximum width instead.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="main-area">
+        <div class="canvas-card">
+            <div class="canvas-title" id="titleF">Input Signal x(t)</div>
+            <div class="canvas-wrapper"><canvas id="cvsF"></canvas></div>
+        </div>
+        <div class="canvas-card">
+            <div class="canvas-title" id="titleG">Impulse Response h(t)</div>
+            <div class="canvas-wrapper"><canvas id="cvsG"></canvas></div>
+        </div>
+        <div class="canvas-card">
+            <div class="canvas-title" id="titleOverlap">Sliding Overlap</div>
+            <div class="canvas-wrapper"><canvas id="cvsOverlap"></canvas></div>
+        </div>
+        <div class="canvas-card">
+            <div class="canvas-title" id="titleOutput">Output y(t)</div>
+            <div class="canvas-wrapper"><canvas id="cvsOutput"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Signal generation and processing Engine
+const T_MIN = -6;
+const T_MAX = 6;
+const DT = 0.02;
+const N = Math.floor((T_MAX - T_MIN) / DT);
+
+function interpolate(arr, t) {
+    if (t < T_MIN || t >= T_MAX) return 0;
+    let idx = (t - T_MIN) / DT;
+    let i = Math.floor(idx);
+    let frac = idx - i;
+    if (i >= N - 1) return arr[N - 1];
+    return arr[i] * (1 - frac) + arr[i+1] * frac;
+}
+
+// Numerical Convolution engine
+function convolve(f, g) {
+    let fc_vals = new Float64Array(N);
+    for(let i=0; i<N; i++) fc_vals[i] = f.c(T_MIN + i*DT);
+
+    let y_c = new Float64Array(N);
+    for(let i=0; i<N; i++) {
+        let sum = 0;
+        let t = T_MIN + i*DT;
+        for(let j=0; j<N; j++) {
+            let tau = T_MIN + j*DT;
+            sum += fc_vals[j] * g.c(t - tau) * DT;
+        }
+        y_c[i] = sum;
+    }
+    
+    // Continuous * Discrete Delta
+    g.d.forEach(delta => {
+        for(let i=0; i<N; i++) y_c[i] += f.c((T_MIN + i*DT) - delta.pos) * delta.weight;
+    });
+    f.d.forEach(delta => {
+        for(let i=0; i<N; i++) y_c[i] += g.c((T_MIN + i*DT) - delta.pos) * delta.weight;
+    });
+    
+    let y_d =[];
+    f.d.forEach(df => {
+        g.d.forEach(dg => {
+            y_d.push({pos: df.pos + dg.pos, weight: df.weight * dg.weight});
+        });
+    });
+    
+    return {c: (t) => interpolate(y_c, t), d: y_d};
+}
+
+// Multiplication engine
+function multiply(f, g) {
+    let c = (t) => f.c(t) * g.c(t);
+    let d =[];
+    g.d.forEach(dg => {
+        let weight = f.c(dg.pos) * dg.weight; 
+        if(Math.abs(weight) > 1e-5) d.push({pos: dg.pos, weight: weight});
+    });
+    f.d.forEach(df => {
+        let weight = g.c(df.pos) * df.weight;
+        if(Math.abs(weight) > 1e-5) d.push({pos: df.pos, weight: weight});
+    });
+    return {c: c, d: d};
+}
+
+// System Presets
+const presets =[
+    {
+        name: "1. Multiplication: x(t) · δ(t-a)",
+        defaultMode: "mult",
+        f: () => ({ c: (t) => Math.cos(Math.PI*t)*Math.exp(-0.2*t*t), d: [] }),
+        g: (a, T) => ({ c: (t) => 0, d:[{pos: a, weight: 1}] }),
+        showA: true, showT: false,
+        desc: "Multiplying evaluates the continuous signal exactly at the delta's location. The result is a scaled delta.",
+        mistakeText: "Mistake Alert: Shifting the entire continuous function x(t-a).",
+        getMistake: (a, T, f, g) => ({ c: (t) => Math.cos(Math.PI*(t-a))*Math.exp(-0.2*(t-a)*(t-a)), d:[] }),
+        eqnText: (a, T, f) => `y(t) = x(t) &middot; &delta;(t - ${a.toFixed(1)}) = <br><b>${(f.c(a)).toFixed(2)} &delta;(t - ${a.toFixed(1)})</b>`
+    },
+    {
+        name: "2. Convolution: x(t) * δ(t-a)",
+        defaultMode: "conv",
+        f: () => ({ c: (t) => Math.cos(Math.PI*t)*Math.exp(-0.2*t*t), d:[] }),
+        g: (a, T) => ({ c: (t) => 0, d:[{pos: a, weight: 1}] }),
+        showA: true, showT: false,
+        desc: "Convolution with a shifted delta shifts the entire signal. Notice how the flipped delta scans across the function.",
+        mistakeText: "Mistake Alert: Just evaluating at a point (yielding a single delta instead of the shifted shape).",
+        getMistake: (a, T, f, g) => ({ c: (t) => 0, d:[{pos: a, weight: f.c(a)}] }),
+        eqnText: (a, T, f) => `y(t) = x(t) * &delta;(t - ${a.toFixed(1)}) = <br><b>x(t - ${a.toFixed(1)})</b>`
+    },
+    {
+        name: "3. Convolution: rect(t/2) * rect(t/T)",
+        defaultMode: "conv",
+        f: () => ({ c: (t) => (Math.abs(t) <= 1 ? 1 : 0), d:[] }),
+        g: (a, T) => ({ c: (t) => (Math.abs(t) <= T/2 ? 1 : 0), d:[] }),
+        showA: false, showT: true,
+        desc: "Convolution of two unequal rectangles yields a trapezoid. Total base width expands to the sum of the input widths.",
+        mistakeText: "Mistake Alert: Taking the max width instead of summing widths (creates a too-narrow trapezoid).",
+        getMistake: (a, T, f, g) => {
+            let maxW = Math.max(2, T); let minW = Math.min(2, T);
+            return { c: (t) => {
+                let absT = Math.abs(t);
+                if(absT <= (maxW - minW)/2) return minW;
+                if(absT <= maxW/2) return minW - 2*(absT - (maxW - minW)/2);
+                return 0;
+            }, d:[]};
+        },
+        eqnText: (a, T, f) => `y(t) = rect(t/2) * rect(t/${T.toFixed(1)})`
+    },
+    {
+        name: "4. Convolution: rect(t/2) * rect(t/2)",
+        defaultMode: "conv",
+        f: () => ({ c: (t) => (Math.abs(t) <= 1 ? 1 : 0), d:[] }),
+        g: (a, T) => ({ c: (t) => (Math.abs(t) <= 1 ? 1 : 0), d:[] }),
+        showA: false, showT: false,
+        desc: "When rectangles have the identical width, the flat top vanishes, resulting in a perfect triangle.",
+        mistakeText: "Mistake Alert: Forgetting that widths add, resulting in a triangle that is half as wide as it should be.",
+        getMistake: (a, T, f, g) => ({ c: (t) => (Math.abs(t) <= 1 ? 2 - 2*Math.abs(t) : 0), d:[] }),
+        eqnText: (a, T, f) => `y(t) = rect(t/2) * rect(t/2) = <br><b>2 tri(t/2)</b>`
+    },
+    {
+        name: "5. Delta + Signal: rect(t/2) * h(t)",
+        defaultMode: "conv",
+        f: () => ({ c: (t) => (Math.abs(t) <= 1 ? 1 : 0), d:[] }),
+        g: (a, T) => ({ c: (t) => (t >= 0 ? 0.8*Math.exp(-t) : 0), d:[{pos: a, weight: 1}] }),
+        showA: true, showT: false,
+        desc: "Linearity & Superposition: The system responds with a combination of a shifted rectangle (from the delta) and a charging/discharging curve.",
+        mistakeText: "Mistake Alert: Multiplying instead of convolving (yielding broken fragments of the signals).",
+        getMistake: (a, T, f, g) => multiply(f, g),
+        eqnText: (a, T, f) => `y(t) = x(t) *[ 0.8e^{-t}u(t) + &delta;(t - ${a.toFixed(1)}) ]`
+    },
+    {
+        name: "6. Weighted Delta Train (Echoes)",
+        defaultMode: "conv",
+        f: () => ({ c: (t) => Math.max(0, 1 - Math.abs(t/1.5)), d:[] }),
+        g: (a, T) => ({ c: (t) => 0, d:[{pos: 0, weight: 1}, {pos: a, weight: 0.6}, {pos: -a, weight: 0.6}] }),
+        showA: true, showT: false,
+        desc: "Linearity ensures that convolving with a sum of deltas creates multiple scaled, shifted copies of the input (multipath).",
+        mistakeText: "Mistake Alert: Pointwise multiplying the signal by the delta weights.",
+        getMistake: (a, T, f, g) => multiply(f, g),
+        eqnText: (a, T, f) => `y(t) = tri(t/1.5) *[ &delta;(t) + 0.6&delta;(t-${a.toFixed(1)}) + 0.6&delta;(t+${a.toFixed(1)}) ]`
+    }
+];
+
+// App State
+let state = {
+    preset: 0, mode: 'conv',
+    a: 1.0, T: 2.0, t: -6.0,
+    playing: false, showMistake: false
+};
+
+// Caching to prevent re-integration on pure time scrubs
+let cache = { a: null, T: null, preset: null, mode: null, out: null };
+
+function updateCache() { cache.out = null; }
+
+function drawCanvas(canvasId, signals, options) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+    
+    const t2x = (t) => (t - T_MIN) / (T_MAX - T_MIN) * W;
+    const y2p = (y) => H * 0.7 - y * (H * 0.25); 
+    
+    // Grid
+    ctx.strokeStyle = '#eaeaea';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    for(let i = Math.ceil(T_MIN); i <= Math.floor(T_MAX); i++) {
+        let x = t2x(i); ctx.moveTo(x, 0); ctx.lineTo(x, H);
+    }
+    ctx.stroke();
+
+    // Axes
+    ctx.strokeStyle = '#444';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(0, y2p(0)); ctx.lineTo(W, y2p(0));
+    ctx.moveTo(t2x(0), 0); ctx.lineTo(t2x(0), H);
+    ctx.stroke();
+    
+    ctx.fillStyle = '#888';
+    ctx.font = '10px sans-serif';
+    for(let i = Math.ceil(T_MIN); i <= Math.floor(T_MAX); i+=2) {
+        if(i !== 0) ctx.fillText(i, t2x(i) - 4, y2p(0) + 14);
+    }
+
+    ctx.save();
+    if (options.clipT !== undefined) {
+        ctx.beginPath();
+        ctx.rect(0, 0, t2x(options.clipT), H);
+        ctx.clip();
+    }
+
+    // Overlap Area Shading
+    if(options.fillOverlap && signals.length >= 2) {
+        ctx.fillStyle = 'rgba(156, 39, 176, 0.25)';
+        ctx.beginPath();
+        let started = false;
+        for(let i=0; i<N; i++) {
+            let t = T_MIN + i*DT;
+            let val = signals[0].obj.c(t) * signals[1].obj.c(t);
+            let x = t2x(t), y = y2p(val);
+            if(!started) { ctx.moveTo(x, y2p(0)); started = true; }
+            ctx.lineTo(x, y);
+        }
+        if(started) { ctx.lineTo(t2x(T_MAX), y2p(0)); ctx.fill(); }
+        
+        // Dots for Delta evaluation
+        signals[1].obj.d.forEach(delta => {
+            let val = signals[0].obj.c(delta.pos) * delta.weight;
+            if(Math.abs(val) > 1e-4) {
+                ctx.beginPath(); ctx.fillStyle = '#9C27B0';
+                ctx.arc(t2x(delta.pos), y2p(val), 6, 0, 2*Math.PI); ctx.fill();
+            }
+        });
+        signals[0].obj.d.forEach(delta => {
+            let val = signals[1].obj.c(delta.pos) * delta.weight;
+            if(Math.abs(val) > 1e-4) {
+                ctx.beginPath(); ctx.fillStyle = '#9C27B0';
+                ctx.arc(t2x(delta.pos), y2p(val), 6, 0, 2*Math.PI); ctx.fill();
+            }
+        });
+    }
+
+    // Output Area Fill
+    if(options.fillOutput && signals.length > 0 && !signals[0].dashed) {
+        ctx.fillStyle = 'rgba(156, 39, 176, 0.15)';
+        ctx.beginPath();
+        ctx.moveTo(t2x(T_MIN), y2p(0));
+        for(let i=0; i<N; i++) ctx.lineTo(t2x(T_MIN + i*DT), y2p(signals[0].obj.c(T_MIN + i*DT)));
+        ctx.lineTo(t2x(T_MAX), y2p(0));
+        ctx.fill();
+    }
+
+    // Draw Signals
+    signals.forEach(sig => {
+        ctx.strokeStyle = sig.color;
+        ctx.lineWidth = sig.lineWidth || 2.5;
+        if(sig.dashed) { ctx.setLineDash([6, 6]); ctx.lineWidth = 3; } 
+        else ctx.setLineDash([]);
+        
+        // Continuous
+        ctx.beginPath();
+        for(let i=0; i<N; i++) {
+            let t = T_MIN + i*DT;
+            let x = t2x(t), y = y2p(sig.obj.c(t));
+            if(i===0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        
+        // Deltas
+        ctx.setLineDash([]);
+        let xv = options.xVar || 't';
+        sig.obj.d.forEach(delta => {
+            let x = t2x(delta.pos), y0 = y2p(0), y1 = y2p(delta.weight);
+            ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke();
+            let dir = delta.weight > 0 ? 1 : -1;
+            ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x - 5, y1 + dir*6); ctx.lineTo(x + 5, y1 + dir*6); ctx.fill();
+            ctx.fillStyle = sig.color; ctx.font = 'bold 13px sans-serif';
+            ctx.fillText(`${delta.weight === 1 ? '' : delta.weight.toFixed(1)}δ`, x + 7, y1 + dir*8);
+        });
+    });
+
+    ctx.restore(); // Clear clipping for markers
+
+    // Vertical scan marker
+    if(options.markerT !== undefined) {
+        let x = t2x(options.markerT);
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); ctx.setLineDash([]);
+    }
+    
+    if(options.markerOrigin !== undefined) {
+        let x = t2x(options.markerOrigin);
+        ctx.strokeStyle = '#4CAF50'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#4CAF50'; ctx.font = 'bold 12px sans-serif';
+        ctx.fillText("τ = t", x + 6, 20);
+    }
+}
+
+function update() {
+    let p = presets[state.preset];
+    let f = p.f();
+    let g = p.g(state.a, state.T);
+    
+    // Caching logic
+    if(cache.a !== state.a || cache.T !== state.T || cache.preset !== state.preset || cache.mode !== state.mode || !cache.out) {
+        cache.out = state.mode === 'conv' ? convolve(f, g) : multiply(f, g);
+        cache.a = state.a; cache.T = state.T; cache.preset = state.preset; cache.mode = state.mode;
+        
+        let eqn = p.eqnText(state.a, state.T, f);
+        if(state.mode !== p.defaultMode) {
+            eqn = state.mode === 'conv' ? "User Override: Forced Convolution" : "User Override: Forced Multiplication";
+        }
+        document.getElementById('eqnEq').innerHTML = eqn;
+    }
+    
+    let out = cache.out;
+    let mistake = p.getMistake(state.a, state.T, f, g);
+    
+    // Title Updates
+    document.getElementById('titleF').innerHTML = `Input Signal <i>x(t)</i>`;
+    document.getElementById('titleG').innerHTML = state.mode === 'conv' ? `Impulse Response <i>h(t)</i>` : `Multiplier <i>h(t)</i>`;
+    
+    // Draw Inputs
+    drawCanvas('cvsF',[{obj: f, color: 'var(--f-color)'}], {});
+    drawCanvas('cvsG',[{obj: g, color: 'var(--g-color)'}], {});
+    
+    // Draw Sliding Overlap
+    if(state.mode === 'conv') {
+        document.getElementById('titleOverlap').innerHTML = `Sliding Overlap: <i>x(τ)</i> and <i>h(${state.t.toFixed(1)} - τ)</i>`;
+        let g_shifted = { c: (tau) => g.c(state.t - tau), d: g.d.map(delta => ({pos: state.t - delta.pos, weight: delta.weight})) };
+        drawCanvas('cvsOverlap',[{obj: f, color: 'var(--f-color)'}, {obj: g_shifted, color: 'var(--g-color)'}], { fillOverlap: true, markerOrigin: state.t, xVar: 'τ' });
+    } else {
+        document.getElementById('titleOverlap').innerHTML = `Evaluation at <i>t = ${state.t.toFixed(1)}</i>`;
+        drawCanvas('cvsOverlap',[{obj: f, color: 'var(--f-color)'}, {obj: g, color: 'var(--g-color)'}], { fillOverlap: true, markerT: state.t, xVar: 't' });
+    }
+    
+    // Draw Output
+    let outSignals = [{obj: out, color: 'var(--out-color)'}];
+    if(state.showMistake) {
+        outSignals.push({obj: mistake, color: 'var(--err-color)', dashed: true});
+        document.getElementById('legMistake').style.display = 'block';
+    } else {
+        document.getElementById('legMistake').style.display = 'none';
+    }
+    
+    drawCanvas('cvsOutput', outSignals, { clipT: state.t, markerT: state.t, fillOutput: true });
+    
+    // Update Info Box
+    let isDefault = (p.defaultMode === state.mode);
+    let descHtml = isDefault ? p.desc : (state.mode === 'conv' ? "Convolution forces the impulse response to flip and slide across the input." : "Multiplication evaluates the signals at matching timestamps pointwise.");
+    let mistakeHtml = isDefault && state.showMistake ? `<div style="color:#d32f2f; margin-top:8px;"><b>${p.mistakeText}</b></div>` : "";
+    document.getElementById('pedagogyText').innerHTML = `<b>Concept:</b> ${descHtml} ${mistakeHtml}`;
+}
+
+// Interactions and Anim Loop
+function togglePlay() {
+    state.playing = !state.playing;
+    if(state.playing) {
+        if(state.t >= T_MAX) state.t = T_MIN;
+        requestAnimationFrame(animLoop);
+        document.getElementById('playBtn').innerText = 'Pause';
+    } else {
+        document.getElementById('playBtn').innerText = 'Play';
+    }
+}
+
+function animLoop() {
+    if(!state.playing) return;
+    state.t += 0.05;
+    if(state.t > T_MAX) { state.t = T_MAX; state.playing = false; document.getElementById('playBtn').innerText = 'Play'; }
+    document.getElementById('sliderTime').value = state.t;
+    update();
+    if(state.playing) requestAnimationFrame(animLoop);
+}
+
+function resizeCanvases() {
+    document.querySelectorAll('.canvas-wrapper').forEach(w => {
+        const cvs = w.querySelector('canvas');
+        cvs.width = w.clientWidth; cvs.height = w.clientHeight;
+    });
+    update();
+}
+
+function loadPresetUI() {
+    let p = presets[state.preset];
+    document.getElementById('wrapA').style.display = p.showA ? 'block' : 'none';
+    document.getElementById('wrapT').style.display = p.showT ? 'block' : 'none';
+    
+    state.mode = p.defaultMode;
+    document.getElementById(state.mode === 'conv' ? 'modeConv' : 'modeMult').checked = true;
+    
+    state.t = T_MIN;
+    document.getElementById('sliderTime').value = state.t;
+    state.playing = false; document.getElementById('playBtn').innerText = 'Play';
+    
+    updateCache();
+    resizeCanvases();
+}
+
+// Initialization
+window.onload = () => {
+    let sel = document.getElementById('presetSelect');
+    presets.forEach((p, i) => { let opt = document.createElement('option'); opt.value = i; opt.innerText = p.name; sel.appendChild(opt); });
+    
+    document.getElementById('sliderA').addEventListener('input', (e) => { state.a = parseFloat(e.target.value); document.getElementById('valA').innerText = state.a.toFixed(1); update(); });
+    document.getElementById('sliderT').addEventListener('input', (e) => { state.T = parseFloat(e.target.value); document.getElementById('valT').innerText = state.T.toFixed(1); update(); });
+    document.getElementById('sliderTime').addEventListener('input', (e) => { state.t = parseFloat(e.target.value); update(); });
+    document.getElementById('presetSelect').addEventListener('change', (e) => { state.preset = parseInt(e.target.value); loadPresetUI(); });
+    document.getElementById('chkMistake').addEventListener('change', (e) => { state.showMistake = e.target.checked; update(); });
+    
+    document.getElementById('modeConv').addEventListener('change', (e) => { if(e.target.checked){ state.mode = 'conv'; updateCache(); update(); }});
+    document.getElementById('modeMult').addEventListener('change', (e) => { if(e.target.checked){ state.mode = 'mult'; updateCache(); update(); }});
+
+    window.addEventListener('resize', resizeCanvases);
+    loadPresetUI();
+};
+</script>
+
+</body>
+</html>
