@@ -149,7 +149,7 @@
         <div class="card-desc">Visualize how Fourier series components combine to represent periodic signals.</div>
       </a>
 
-      <a class="card" href="05_another_fourier_series_visualization.html">
+      <a class="card" href="05_another_fourier_veries_visualization.html">
         <div class="card-title">Another Fourier Series Visualization</div>
         <div class="card-desc">A second interactive view of Fourier series and signal reconstruction.</div>
       </a>
