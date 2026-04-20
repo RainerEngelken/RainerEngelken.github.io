@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(19).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210: Harmonics &amp; Superposition</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --panel-bg: #ffffff;
+            --text-main: #2b2d42;
+            --border-color: #dee2e6;
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            max-width: 900px;
+        }
+
+        .header h1 {
+            color: var(--uiuc-blue);
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.5;
+        }
+
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            max-width: 1000px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .canvas-container {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 15px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        canvas {
+            background-color: #222; /* Dark background makes colors pop */
+            border-radius: 4px;
+            cursor: crosshair;
+        }
+
+        .controls {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 20px;
+            min-width: 300px;
+            flex-shrink: 0;
+        }
+
+        .controls h2 {
+            margin-top: 0;
+            font-size: 1.2em;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            color: var(--uiuc-blue);
+        }
+
+        .slider-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            background-color: #f1f3f5;
+            transition: background-color 0.2s;
+        }
+
+        .slider-group:hover {
+            background-color: #e9ecef;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        input[type=range] {
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .toggles {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid var(--border-color);
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1em;
+            cursor: pointer;
+            color: var(--uiuc-orange);
+        }
+
+        .toggle-label input {
+            margin-right: 10px;
+            transform: scale(1.5);
+        }
+
+        .math-box {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+            margin-top: 15px;
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Fourier Series: String Harmonics &amp; Superposition</h1>
+        <p>In ECE 210, you learn that periodic signals can be expressed as a sum of harmonics ($n\omega_0$). Adjust the amplitudes of the fundamental frequency and its integer-multiple harmonics below to see how they superimpose to create complex standing waves on a string.</p>
+    </div>
+
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="waveCanvas" width="600" height="400"></canvas>
+            <div class="math-box" id="equationDisplay">
+                f(x,t) = Σ F_n · sin(n·π·x/L) · cos(n·ω_0·t)
+            </div>
+        </div>
+
+        <div class="controls">
+            <h2>Harmonic Amplitudes ($F_n$)</h2>
+            <div id="sliders">
+                <!-- Sliders generated via JS -->
+            <div class="slider-group">
+                <div class="slider-header" style="color: #FF5733">
+                    <span>Fundamental (ω₀)</span>
+                    <span id="val-0">1.00</span>
+                </div>
+                <input type="range" id="slider-0" min="-100" max="100" value="100">
+            </div><div class="slider-group">
+                <div class="slider-header" style="color: #33FF57">
+                    <span>2nd Harmonic (2ω₀)</span>
+                    <span id="val-1">0.00</span>
+                </div>
+                <input type="range" id="slider-1" min="-100" max="100" value="0">
+            </div><div class="slider-group">
+                <div class="slider-header" style="color: #3357FF">
+                    <span>3rd Harmonic (3ω₀)</span>
+                    <span id="val-2">0.00</span>
+                </div>
+                <input type="range" id="slider-2" min="-100" max="100" value="0">
+            </div><div class="slider-group">
+                <div class="slider-header" style="color: #F033FF">
+                    <span>4th Harmonic (4ω₀)</span>
+                    <span id="val-3">0.00</span>
+                </div>
+                <input type="range" id="slider-3" min="-100" max="100" value="0">
+            </div><div class="slider-group">
+                <div class="slider-header" style="color: #33FFF0">
+                    <span>5th Harmonic (5ω₀)</span>
+                    <span id="val-4">0.00</span>
+                </div>
+                <input type="range" id="slider-4" min="-100" max="100" value="0">
+            </div></div>
+
+            <div class="toggles">
+                <label class="toggle-label">
+                    <input type="checkbox" id="showSum" checked="">
+                    Show Resulting Sum (Superposition)
+                </label>
+                <br>
+                <label class="toggle-label" style="color: #555; font-size: 0.9em;">
+                    <input type="checkbox" id="showComponents" checked="">
+                    Show Individual Components
+                </label>
+            </div>
+            
+            <button onclick="resetSliders()" style="margin-top: 20px; width: 100%; padding: 10px; background: var(--uiuc-blue); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">Reset to Fundamental</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        const centerY = height / 2;
+
+        let time = 0;
+        const timeStep = 0.03;
+
+        // Colors for components: Fundamental, 2nd, 3rd, 4th, 5th
+        const colors =['#00d2ff', '#3a7bd5', '#00c6ff', '#f12711', '#f5af19'];
+        
+        // Harmonics data structure
+        const harmonics =[
+            { n: 1, amplitude: 100, color: '#FF5733', name: "Fundamental (ω₀)" },
+            { n: 2, amplitude: 0,   color: '#33FF57', name: "2nd Harmonic (2ω₀)" },
+            { n: 3, amplitude: 0,   color: '#3357FF', name: "3rd Harmonic (3ω₀)" },
+            { n: 4, amplitude: 0,   color: '#F033FF', name: "4th Harmonic (4ω₀)" },
+            { n: 5, amplitude: 0,   color: '#33FFF0', name: "5th Harmonic (5ω₀)" }
+        ];
+
+        // Generate UI Sliders dynamically
+        const slidersContainer = document.getElementById('sliders');
+        harmonics.forEach((h, index) => {
+            const group = document.createElement('div');
+            group.className = 'slider-group';
+            group.innerHTML = `
+                <div class="slider-header" style="color: ${h.color}">
+                    <span>${h.name}</span>
+                    <span id="val-${index}">${(h.amplitude / 100).toFixed(2)}</span>
+                </div>
+                <input type="range" id="slider-${index}" min="-100" max="100" value="${h.amplitude}">
+            `;
+            slidersContainer.appendChild(group);
+
+            // Add event listener
+            document.getElementById(`slider-${index}`).addEventListener('input', function(e) {
+                harmonics[index].amplitude = parseInt(e.target.value);
+                document.getElementById(`val-${index}`).innerText = (harmonics[index].amplitude / 100).toFixed(2);
+            });
+        });
+
+        function resetSliders() {
+            harmonics.forEach((h, index) => {
+                h.amplitude = index === 0 ? 100 : 0;
+                document.getElementById(`slider-${index}`).value = h.amplitude;
+                document.getElementById(`val-${index}`).innerText = (h.amplitude / 100).toFixed(2);
+            });
+        }
+
+        function drawWave() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw center axis
+            ctx.beginPath();
+            ctx.moveTo(0, centerY);
+            ctx.lineTo(width, centerY);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            const showSum = document.getElementById('showSum').checked;
+            const showComponents = document.getElementById('showComponents').checked;
+
+            let sumPoints = new Array(width).fill(0);
+
+            // Calculate and draw individual harmonics
+            harmonics.forEach(h => {
+                if (h.amplitude === 0) return; // Skip if zero
+
+                ctx.beginPath();
+                ctx.strokeStyle = h.color + (showComponents ? 'AA' : '00'); // Add transparency if showing sum
+                ctx.lineWidth = 2;
+
+                for (let x = 0; x < width; x++) {
+                    // Standing wave equation: y = A * sin(n*pi*x/L) * cos(n*omega*t)
+                    const normalizedX = x / width; 
+                    const spatialPart = Math.sin(h.n * Math.PI * normalizedX);
+                    const temporalPart = Math.cos(h.n * time);
+                    const yOffset = h.amplitude * spatialPart * temporalPart;
+                    
+                    sumPoints[x] += yOffset; // Add to superposition sum
+
+                    if (showComponents) {
+                        if (x === 0) ctx.moveTo(x, centerY - yOffset);
+                        else ctx.lineTo(x, centerY - yOffset);
+                    }
+                }
+                if (showComponents) ctx.stroke();
+            });
+
+            // Draw resulting superposition (Sum)
+            if (showSum) {
+                ctx.beginPath();
+                ctx.strokeStyle = '#ffffff'; // White for the sum
+                ctx.lineWidth = 4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                for (let x = 0; x < width; x++) {
+                    if (x === 0) ctx.moveTo(x, centerY - sumPoints[x]);
+                    else ctx.lineTo(x, centerY - sumPoints[x]);
+                }
+                ctx.stroke();
+                
+                // Add glowing effect
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = 'white';
+                ctx.stroke();
+                ctx.shadowBlur = 0; // reset
+            }
+
+            // Draw tied ends of the string (Nodes)
+            ctx.fillStyle = '#E84A27';
+            ctx.beginPath(); ctx.arc(0, centerY, 6, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(width, centerY, 6, 0, Math.PI*2); ctx.fill();
+
+            time += timeStep;
+            requestAnimationFrame(drawWave);
+        }
+
+        // Start animation loop
+        drawWave();
+    </script>
+
+</body></html>

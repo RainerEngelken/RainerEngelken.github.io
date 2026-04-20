@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(21).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fourier Series Visualization - ECE 210</title>
+    
+    <!-- Plotly for plotting, MathJax for rendering equations -->
+    <script src="./another_Fourier_Series_Visualization_ECE_210_files/plotly-2.24.1.min.js"></script><style id="plotly.js-style-global"></style>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async="" src="./another_Fourier_Series_Visualization_ECE_210_files/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            /* UIUC Official Colors */
+            --illini-orange: #E84A27;
+            --illini-blue: #13294B;
+            --light-bg: #F8F9FA;
+            --border-color: #DEE2E6;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #333;
+        }
+
+        header {
+            background-color: var(--illini-blue);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 5px solid var(--illini-orange);
+        }
+
+        header h1 { margin: 0; font-size: 28px; }
+        header h2 { margin: 5px 0 0 0; font-size: 16px; font-weight: 400; color: #D2E0E9; }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .controls-card {
+            background-color: var(--light-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        label { font-weight: bold; color: var(--illini-blue); }
+        
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .slider-container { display: flex; align-items: center; gap: 15px; }
+        
+        input[type=range] {
+            width: 250px;
+            accent-color: var(--illini-orange);
+            cursor: pointer;
+        }
+
+        .n-badge {
+            background-color: var(--illini-orange);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 16px;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .info-panel {
+            background-color: #e9f2fb;
+            border-left: 5px solid var(--illini-blue);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* Equation Grid System */
+        .equations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .eq-box {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-top: 4px solid var(--illini-blue);
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            text-align: center;
+            overflow-x: auto;
+        }
+
+        .eq-box h4 {
+            margin: 0 0 10px 0;
+            color: var(--illini-blue);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .plots-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .plot-container {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 1024px) {
+            .plots-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+<style type="text/css">.CtxtMenu_InfoClose {  top:.2em; right:.2em;}
+.CtxtMenu_InfoContent {  overflow:auto; text-align:left; font-size:80%;  padding:.4em .6em; border:1px inset; margin:1em 0px;  max-height:20em; max-width:30em; background-color:#EEEEEE;  white-space:normal;}
+.CtxtMenu_Info.CtxtMenu_MousePost {outline:none;}
+.CtxtMenu_Info {  position:fixed; left:50%; width:auto; text-align:center;  border:3px outset; padding:1em 2em; background-color:#DDDDDD;  color:black;  cursor:default; font-family:message-box; font-size:120%;  font-style:normal; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 15px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius:15px;               /* Safari and Chrome */  -moz-border-radius:15px;                  /* Firefox */  -khtml-border-radius:15px;                /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */  filter:progid:DXImageTransform.Microsoft.dropshadow(OffX=2, OffY=2, Color="gray", Positive="true"); /* IE */}
+</style><style type="text/css">.CtxtMenu_MenuClose {  position:absolute;  cursor:pointer;  display:inline-block;  border:2px solid #AAA;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  font-family: "Courier New", Courier;  font-size:24px;  color:#F0F0F0}
+.CtxtMenu_MenuClose span {  display:block; background-color:#AAA; border:1.5px solid;  border-radius:18px;  -webkit-border-radius: 18px;             /* Safari and Chrome */  -moz-border-radius: 18px;                /* Firefox */  -khtml-border-radius: 18px;              /* Konqueror */  line-height:0;  padding:8px 0 6px     /* may need to be browser-specific */}
+.CtxtMenu_MenuClose:hover {  color:white!important;  border:2px solid #CCC!important}
+.CtxtMenu_MenuClose:hover span {  background-color:#CCC!important}
+.CtxtMenu_MenuClose:hover:focus {  outline:none}
+</style><style type="text/css">.CtxtMenu_Menu {  position:absolute;  background-color:white;  color:black;  width:auto; padding:5px 0px;  border:1px solid #CCCCCC; margin:0; cursor:default;  font: menu; text-align:left; text-indent:0; text-transform:none;  line-height:normal; letter-spacing:normal; word-spacing:normal;  word-wrap:normal; white-space:nowrap; float:none; z-index:201;  border-radius: 5px;                     /* Opera 10.5 and IE9 */  -webkit-border-radius: 5px;             /* Safari and Chrome */  -moz-border-radius: 5px;                /* Firefox */  -khtml-border-radius: 5px;              /* Konqueror */  box-shadow:0px 10px 20px #808080;         /* Opera 10.5 and IE9 */  -webkit-box-shadow:0px 10px 20px #808080; /* Safari 3 & Chrome */  -moz-box-shadow:0px 10px 20px #808080;    /* Forefox 3.5 */  -khtml-box-shadow:0px 10px 20px #808080;  /* Konqueror */}
+.CtxtMenu_MenuItem {  padding: 1px 2em;  background:transparent;}
+.CtxtMenu_MenuArrow {  position:absolute; right:.5em; padding-top:.25em; color:#666666;  font-family: null; font-size: .75em}
+.CtxtMenu_MenuActive .CtxtMenu_MenuArrow {color:white}
+.CtxtMenu_MenuArrow.CtxtMenu_RTL {left:.5em; right:auto}
+.CtxtMenu_MenuCheck {  position:absolute; left:.7em;  font-family: null}
+.CtxtMenu_MenuCheck.CtxtMenu_RTL { right:.7em; left:auto }
+.CtxtMenu_MenuRadioCheck {  position:absolute; left: .7em;}
+.CtxtMenu_MenuRadioCheck.CtxtMenu_RTL {  right: .7em; left:auto}
+.CtxtMenu_MenuInputBox {  padding-left: 1em; right:.5em; color:#666666;  font-family: null;}
+.CtxtMenu_MenuInputBox.CtxtMenu_RTL {  left: .1em;}
+.CtxtMenu_MenuComboBox {  left:.1em; padding-bottom:.5em;}
+.CtxtMenu_MenuSlider {  left: .1em;}
+.CtxtMenu_SliderValue {  position:absolute; right:.1em; padding-top:.25em; color:#333333;  font-size: .75em}
+.CtxtMenu_SliderBar {  outline: none; background: #d3d3d3}
+.CtxtMenu_MenuLabel {  padding: 1px 2em 3px 1.33em;  font-style:italic}
+.CtxtMenu_MenuRule {  border-top: 1px solid #DDDDDD;  margin: 4px 3px;}
+.CtxtMenu_MenuDisabled {  color:GrayText}
+.CtxtMenu_MenuActive {  background-color: #606872;  color: white;}
+.CtxtMenu_MenuDisabled:focus {  background-color: #E8E8E8}
+.CtxtMenu_MenuLabel:focus {  background-color: #E8E8E8}
+.CtxtMenu_ContextMenu:focus {  outline:none}
+.CtxtMenu_ContextMenu .CtxtMenu_MenuItem:focus {  outline:none}
+.CtxtMenu_SelectionMenu {  position:relative; float:left;  border-bottom: none; -webkit-box-shadow:none; -webkit-border-radius:0px; }
+.CtxtMenu_SelectionItem {  padding-right: 1em;}
+.CtxtMenu_Selection {  right: 40%; width:50%; }
+.CtxtMenu_SelectionBox {  padding: 0em; max-height:20em; max-width: none;  background-color:#FFFFFF;}
+.CtxtMenu_SelectionDivider {  clear: both; border-top: 2px solid #000000;}
+.CtxtMenu_Menu .CtxtMenu_MenuClose {  top:-10px; left:-10px}
+</style><style id="MJX-CHTML-styles">
+mjx-container[jax="CHTML"] {
+  line-height: 0;
+}
+
+mjx-container [space="1"] {
+  margin-left: .111em;
+}
+
+mjx-container [space="2"] {
+  margin-left: .167em;
+}
+
+mjx-container [space="3"] {
+  margin-left: .222em;
+}
+
+mjx-container [space="4"] {
+  margin-left: .278em;
+}
+
+mjx-container [space="5"] {
+  margin-left: .333em;
+}
+
+mjx-container [rspace="1"] {
+  margin-right: .111em;
+}
+
+mjx-container [rspace="2"] {
+  margin-right: .167em;
+}
+
+mjx-container [rspace="3"] {
+  margin-right: .222em;
+}
+
+mjx-container [rspace="4"] {
+  margin-right: .278em;
+}
+
+mjx-container [rspace="5"] {
+  margin-right: .333em;
+}
+
+mjx-container [size="s"] {
+  font-size: 70.7%;
+}
+
+mjx-container [size="ss"] {
+  font-size: 50%;
+}
+
+mjx-container [size="Tn"] {
+  font-size: 60%;
+}
+
+mjx-container [size="sm"] {
+  font-size: 85%;
+}
+
+mjx-container [size="lg"] {
+  font-size: 120%;
+}
+
+mjx-container [size="Lg"] {
+  font-size: 144%;
+}
+
+mjx-container [size="LG"] {
+  font-size: 173%;
+}
+
+mjx-container [size="hg"] {
+  font-size: 207%;
+}
+
+mjx-container [size="HG"] {
+  font-size: 249%;
+}
+
+mjx-container [width="full"] {
+  width: 100%;
+}
+
+mjx-box {
+  display: inline-block;
+}
+
+mjx-block {
+  display: block;
+}
+
+mjx-itable {
+  display: inline-table;
+}
+
+mjx-row {
+  display: table-row;
+}
+
+mjx-row > * {
+  display: table-cell;
+}
+
+mjx-mtext {
+  display: inline-block;
+}
+
+mjx-mstyle {
+  display: inline-block;
+}
+
+mjx-merror {
+  display: inline-block;
+  color: red;
+  background-color: yellow;
+}
+
+mjx-mphantom {
+  visibility: hidden;
+}
+
+_::-webkit-full-page-media, _:future, :root mjx-container {
+  will-change: opacity;
+}
+
+mjx-assistive-mml {
+  position: absolute !important;
+  top: 0px;
+  left: 0px;
+  clip: rect(1px, 1px, 1px, 1px);
+  padding: 1px 0px 0px 0px !important;
+  border: 0px !important;
+  display: block !important;
+  width: auto !important;
+  overflow: hidden !important;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+mjx-assistive-mml[display="block"] {
+  width: 100% !important;
+}
+
+mjx-c::before {
+  display: block;
+  width: 0;
+}
+
+.MJX-TEX {
+  font-family: MJXZERO, MJXTEX;
+}
+
+.TEX-B {
+  font-family: MJXZERO, MJXTEX-B;
+}
+
+.TEX-I {
+  font-family: MJXZERO, MJXTEX-I;
+}
+
+.TEX-MI {
+  font-family: MJXZERO, MJXTEX-MI;
+}
+
+.TEX-BI {
+  font-family: MJXZERO, MJXTEX-BI;
+}
+
+.TEX-S1 {
+  font-family: MJXZERO, MJXTEX-S1;
+}
+
+.TEX-S2 {
+  font-family: MJXZERO, MJXTEX-S2;
+}
+
+.TEX-S3 {
+  font-family: MJXZERO, MJXTEX-S3;
+}
+
+.TEX-S4 {
+  font-family: MJXZERO, MJXTEX-S4;
+}
+
+.TEX-A {
+  font-family: MJXZERO, MJXTEX-A;
+}
+
+.TEX-C {
+  font-family: MJXZERO, MJXTEX-C;
+}
+
+.TEX-CB {
+  font-family: MJXZERO, MJXTEX-CB;
+}
+
+.TEX-FR {
+  font-family: MJXZERO, MJXTEX-FR;
+}
+
+.TEX-FRB {
+  font-family: MJXZERO, MJXTEX-FRB;
+}
+
+.TEX-SS {
+  font-family: MJXZERO, MJXTEX-SS;
+}
+
+.TEX-SSB {
+  font-family: MJXZERO, MJXTEX-SSB;
+}
+
+.TEX-SSI {
+  font-family: MJXZERO, MJXTEX-SSI;
+}
+
+.TEX-SC {
+  font-family: MJXZERO, MJXTEX-SC;
+}
+
+.TEX-T {
+  font-family: MJXZERO, MJXTEX-T;
+}
+
+.TEX-V {
+  font-family: MJXZERO, MJXTEX-V;
+}
+
+.TEX-VB {
+  font-family: MJXZERO, MJXTEX-VB;
+}
+
+mjx-stretchy-v mjx-c, mjx-stretchy-h mjx-c {
+  font-family: MJXZERO, MJXTEX-S1, MJXTEX-S4, MJXTEX, MJXTEX-A ! important;
+}
+
+@font-face /* 0 */ {
+  font-family: MJXZERO;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Zero.woff") format("woff");
+}
+
+@font-face /* 1 */ {
+  font-family: MJXTEX;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Regular.woff") format("woff");
+}
+
+@font-face /* 2 */ {
+  font-family: MJXTEX-B;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Bold.woff") format("woff");
+}
+
+@font-face /* 3 */ {
+  font-family: MJXTEX-I;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-Italic.woff") format("woff");
+}
+
+@font-face /* 4 */ {
+  font-family: MJXTEX-MI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Main-Italic.woff") format("woff");
+}
+
+@font-face /* 5 */ {
+  font-family: MJXTEX-BI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Math-BoldItalic.woff") format("woff");
+}
+
+@font-face /* 6 */ {
+  font-family: MJXTEX-S1;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size1-Regular.woff") format("woff");
+}
+
+@font-face /* 7 */ {
+  font-family: MJXTEX-S2;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size2-Regular.woff") format("woff");
+}
+
+@font-face /* 8 */ {
+  font-family: MJXTEX-S3;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size3-Regular.woff") format("woff");
+}
+
+@font-face /* 9 */ {
+  font-family: MJXTEX-S4;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Size4-Regular.woff") format("woff");
+}
+
+@font-face /* 10 */ {
+  font-family: MJXTEX-A;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_AMS-Regular.woff") format("woff");
+}
+
+@font-face /* 11 */ {
+  font-family: MJXTEX-C;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Regular.woff") format("woff");
+}
+
+@font-face /* 12 */ {
+  font-family: MJXTEX-CB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Calligraphic-Bold.woff") format("woff");
+}
+
+@font-face /* 13 */ {
+  font-family: MJXTEX-FR;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Regular.woff") format("woff");
+}
+
+@font-face /* 14 */ {
+  font-family: MJXTEX-FRB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Fraktur-Bold.woff") format("woff");
+}
+
+@font-face /* 15 */ {
+  font-family: MJXTEX-SS;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Regular.woff") format("woff");
+}
+
+@font-face /* 16 */ {
+  font-family: MJXTEX-SSB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Bold.woff") format("woff");
+}
+
+@font-face /* 17 */ {
+  font-family: MJXTEX-SSI;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_SansSerif-Italic.woff") format("woff");
+}
+
+@font-face /* 18 */ {
+  font-family: MJXTEX-SC;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Script-Regular.woff") format("woff");
+}
+
+@font-face /* 19 */ {
+  font-family: MJXTEX-T;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Typewriter-Regular.woff") format("woff");
+}
+
+@font-face /* 20 */ {
+  font-family: MJXTEX-V;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Regular.woff") format("woff");
+}
+
+@font-face /* 21 */ {
+  font-family: MJXTEX-VB;
+  src: url("https://cdn.jsdelivr.net/npm/mathjax@3/es5/output/chtml/fonts/woff-v2/MathJax_Vector-Bold.woff") format("woff");
+}
+</style></head>
+<body>
+
+<header>
+    <h1>Fourier Series Multi-Form Visualization</h1>
+    <h2>ECE 210: Analog Signal Processing — University of Illinois Urbana-Champaign</h2>
+</header>
+
+<div class="container">
+    
+    <!-- Controls -->
+    <div class="controls-card">
+        <div class="control-group">
+            <label for="signalType">Select Signal Function, x(t):</label>
+            <select id="signalType">
+                <option value="square">Square Wave</option>
+                <option value="sawtooth">Sawtooth Wave</option>
+                <option value="triangle">Triangle Wave</option>
+                <option value="sine">Pure Sine Wave</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="nSlider">Maximum Harmonic Number, N:</label>
+            <div class="slider-container">
+                <input type="range" id="nSlider" min="1" max="30" value="5" step="1">
+                <div class="n-badge" id="nDisplay">N = 5</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pedagogical Explanation & Equations -->
+    <div class="info-panel" id="infoPanel">
+            <div class="desc-text"><strong>Square Wave:</strong> Odd and half-wave symmetric (only odd harmonics $k=1,3,5...$). Features the <strong>Gibbs phenomenon</strong> (overshoot at discontinuities). Coefficients decay as $1/k$. Note how a negative index $k$ in the exponential sum naturally implements the complex conjugate $c_{-k} = c_k^*$.</div>
+            <div class="equations-grid">
+                <div class="eq-box">
+                    <h4>Trigonometric Form</h4>
+                    <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="0" style="font-size: 119.5%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-munderover space="4"><mjx-over style="padding-bottom: 0.2em; padding-left: 0.529em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-over><mjx-box><mjx-munder><mjx-row><mjx-base style="padding-left: 0.121em;"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c2211 TEX-S2"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtable justify="left" style="min-width: 2.383em;"><mjx-table><mjx-itable><mjx-mtr><mjx-mtd style="padding-bottom: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-mtd></mjx-mtr><mjx-mtr><mjx-mtd style="padding-top: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mtext class="mjx-n"><mjx-c class="mjx-cA0"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-mtd></mjx-mtr></mjx-itable></mjx-table></mjx-mtable></mjx-texatom></mjx-under></mjx-row></mjx-munder></mjx-box></mjx-munderover><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c34"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mi class="mjx-n"><mjx-c class="mjx-c73"></mjx-c><mjx-c class="mjx-c69"></mjx-c><mjx-c class="mjx-c6E"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>x</mi><mi>N</mi></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo data-mjx-texclass="OP">∑</mo><mrow data-mjx-texclass="ORD"><mtable data-mjx-smallmatrix="true" columnspacing="0em" rowspacing="0.1em"><mtr><mtd><mi>k</mi><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd><mi>k</mi><mtext>&nbsp;odd</mtext></mtd></mtr></mtable></mrow><mrow data-mjx-texclass="ORD"><mi>N</mi></mrow></munderover><mfrac><mn>4</mn><mrow><mi>π</mi><mi>k</mi></mrow></mfrac><mi>sin</mi><mo data-mjx-texclass="NONE">⁡</mo><mo stretchy="false">(</mo><mi>k</mi><mi>t</mi><mo stretchy="false">)</mo></math></mjx-assistive-mml></mjx-container>
+                </div>
+                <div class="eq-box">
+                    <h4>Compact Form</h4>
+                    <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="1" style="font-size: 119.5%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-munderover space="4"><mjx-over style="padding-bottom: 0.2em; padding-left: 0.529em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-over><mjx-box><mjx-munder><mjx-row><mjx-base style="padding-left: 0.121em;"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c2211 TEX-S2"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtable justify="left" style="min-width: 2.383em;"><mjx-table><mjx-itable><mjx-mtr><mjx-mtd style="padding-bottom: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mn class="mjx-n"><mjx-c class="mjx-c31"></mjx-c></mjx-mn></mjx-mtd></mjx-mtr><mjx-mtr><mjx-mtd style="padding-top: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mtext class="mjx-n"><mjx-c class="mjx-cA0"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-mtd></mjx-mtr></mjx-itable></mjx-table></mjx-mtable></mjx-texatom></mjx-under></mjx-row></mjx-munder></mjx-box></mjx-munderover><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c34"></mjx-c></mjx-mn></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mi class="mjx-n"><mjx-c class="mjx-c63"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c73"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c2061"></mjx-c></mjx-mo><mjx-mrow space="2"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c28 TEX-S2"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n" space="3"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mfrac space="3"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-mo class="mjx-lop"><mjx-c class="mjx-c29 TEX-S2"></mjx-c></mjx-mo></mjx-mrow></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>x</mi><mi>N</mi></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo data-mjx-texclass="OP">∑</mo><mrow data-mjx-texclass="ORD"><mtable data-mjx-smallmatrix="true" columnspacing="0em" rowspacing="0.1em"><mtr><mtd><mi>k</mi><mo>=</mo><mn>1</mn></mtd></mtr><mtr><mtd><mi>k</mi><mtext>&nbsp;odd</mtext></mtd></mtr></mtable></mrow><mrow data-mjx-texclass="ORD"><mi>N</mi></mrow></munderover><mfrac><mn>4</mn><mrow><mi>π</mi><mi>k</mi></mrow></mfrac><mi>cos</mi><mo data-mjx-texclass="NONE">⁡</mo><mrow data-mjx-texclass="INNER"><mo data-mjx-texclass="OPEN">(</mo><mi>k</mi><mi>t</mi><mo>−</mo><mfrac><mi>π</mi><mn>2</mn></mfrac><mo data-mjx-texclass="CLOSE">)</mo></mrow></math></mjx-assistive-mml></mjx-container>
+                </div>
+                <div class="eq-box">
+                    <h4>Exponential Form</h4>
+                    <mjx-container class="MathJax CtxtMenu_Attached_0" jax="CHTML" display="true" tabindex="0" ctxtmenu_counter="2" style="font-size: 119.5%; position: relative;"><mjx-math display="true" class="MJX-TEX" aria-hidden="true" style="margin-left: 0px; margin-right: 0px;"><mjx-msub><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D465 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: -0.15em;"><mjx-mi class="mjx-i" size="s"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-script></mjx-msub><mjx-mo class="mjx-n"><mjx-c class="mjx-c28"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c29"></mjx-c></mjx-mo><mjx-mo class="mjx-n" space="4"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-munderover space="4"><mjx-over style="padding-bottom: 0.2em; padding-left: 0.734em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-over><mjx-box><mjx-munder><mjx-row><mjx-base style="padding-left: 0.326em;"><mjx-mo class="mjx-lop"><mjx-c class="mjx-c2211 TEX-S2"></mjx-c></mjx-mo></mjx-base></mjx-row><mjx-row><mjx-under style="padding-top: 0.167em;"><mjx-texatom size="s" texclass="ORD"><mjx-mtable justify="left" style="min-width: 2.965em;"><mjx-table><mjx-itable><mjx-mtr><mjx-mtd style="padding-bottom: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mo class="mjx-n"><mjx-c class="mjx-c3D"></mjx-c></mjx-mo><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D441 TEX-I"></mjx-c></mjx-mi></mjx-mtd></mjx-mtr><mjx-mtr><mjx-mtd style="padding-top: 0.05em;"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mtext class="mjx-n"><mjx-c class="mjx-cA0"></mjx-c><mjx-c class="mjx-c6F"></mjx-c><mjx-c class="mjx-c64"></mjx-c><mjx-c class="mjx-c64"></mjx-c></mjx-mtext></mjx-mtd></mjx-mtr></mjx-itable></mjx-table></mjx-mtable></mjx-texatom></mjx-under></mjx-row></mjx-munder></mjx-box></mjx-munderover><mjx-mfrac space="2"><mjx-frac type="d"><mjx-num><mjx-nstrut type="d"></mjx-nstrut><mjx-mrow><mjx-mo class="mjx-n"><mjx-c class="mjx-c2212"></mjx-c></mjx-mo><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi><mjx-mn class="mjx-n"><mjx-c class="mjx-c32"></mjx-c></mjx-mn></mjx-mrow></mjx-num><mjx-dbox><mjx-dtable><mjx-line type="d"></mjx-line><mjx-row><mjx-den><mjx-dstrut type="d"></mjx-dstrut><mjx-mrow><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D70B TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi></mjx-mrow></mjx-den></mjx-row></mjx-dtable></mjx-dbox></mjx-frac></mjx-mfrac><mjx-msup><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D452 TEX-I"></mjx-c></mjx-mi><mjx-script style="vertical-align: 0.413em;"><mjx-texatom size="s" texclass="ORD"><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D457 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D458 TEX-I"></mjx-c></mjx-mi><mjx-mi class="mjx-i"><mjx-c class="mjx-c1D461 TEX-I"></mjx-c></mjx-mi></mjx-texatom></mjx-script></mjx-msup></mjx-math><mjx-assistive-mml unselectable="on" display="block"><math xmlns="http://www.w3.org/1998/Math/MathML" display="block"><msub><mi>x</mi><mi>N</mi></msub><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><munderover><mo data-mjx-texclass="OP">∑</mo><mrow data-mjx-texclass="ORD"><mtable data-mjx-smallmatrix="true" columnspacing="0em" rowspacing="0.1em"><mtr><mtd><mi>k</mi><mo>=</mo><mo>−</mo><mi>N</mi></mtd></mtr><mtr><mtd><mi>k</mi><mtext>&nbsp;odd</mtext></mtd></mtr></mtable></mrow><mrow data-mjx-texclass="ORD"><mi>N</mi></mrow></munderover><mfrac><mrow><mo>−</mo><mi>j</mi><mn>2</mn></mrow><mrow><mi>π</mi><mi>k</mi></mrow></mfrac><msup><mi>e</mi><mrow data-mjx-texclass="ORD"><mi>j</mi><mi>k</mi><mi>t</mi></mrow></msup></math></mjx-assistive-mml></mjx-container>
+                </div>
+            </div>
+        </div>
+
+    <!-- Plots -->
+    <div class="plots-grid">
+        <div class="plot-container">
+            <div id="timeDomainPlot" class="js-plotly-plot"><div class="plot-container plotly"><div class="user-select-none svg-container" style="position: relative; width: 100%; height: 450px;"><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450" style="background: white;"><defs id="defs-21fad5"><g class="clips"><clippath id="clip21fad5xyplot" class="plotclip"><rect width="598" height="350"></rect></clippath><clippath class="axesclip" id="clip21fad5x"><rect x="50" y="0" width="598" height="450"></rect></clippath><clippath class="axesclip" id="clip21fad5y"><rect x="0" y="50" width="668" height="350"></rect></clippath><clippath class="axesclip" id="clip21fad5xy"><rect x="50" y="50" width="598" height="350"></rect></clippath></g><g class="gradients"></g><g class="patterns"></g></defs><g class="bglayer"></g><g class="draglayer cursor-crosshair"><g class="xy"><rect class="nsewdrag drag" data-subplot="xy" x="50" y="50" width="598" height="350" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nwdrag drag cursor-nw-resize" data-subplot="xy" x="30" y="30" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nedrag drag cursor-ne-resize" data-subplot="xy" x="648" y="30" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="swdrag drag cursor-sw-resize" data-subplot="xy" x="30" y="400" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="sedrag drag cursor-se-resize" data-subplot="xy" x="648" y="400" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="ewdrag drag cursor-ew-resize" data-subplot="xy" x="109.80000000000001" y="400.5" width="478.40000000000003" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="wdrag drag cursor-w-resize" data-subplot="xy" x="50" y="400.5" width="59.800000000000004" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="edrag drag cursor-e-resize" data-subplot="xy" x="588.2" y="400.5" width="59.800000000000004" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nsdrag drag cursor-ns-resize" data-subplot="xy" x="29.5" y="85" width="20" height="280" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="sdrag drag cursor-s-resize" data-subplot="xy" x="29.5" y="365" width="20" height="35" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="ndrag drag cursor-n-resize" data-subplot="xy" x="29.5" y="50" width="20" height="35" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect></g></g><g class="layer-below"><g class="imagelayer"></g><g class="shapelayer"></g></g><g class="cartesianlayer"><g class="subplot xy"><g class="layer-subplot"><g class="shapelayer"></g><g class="imagelayer"></g></g><g class="minor-gridlayer"><g class="x"></g><g class="y"></g></g><g class="gridlayer"><g class="x"><path class="xgrid crisp" transform="translate(199.5,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(498.5,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path></g><g class="y"><path class="ygrid crisp" transform="translate(0,370.83)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,322.22)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,273.61)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,176.39)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,127.78)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,79.17)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path></g></g><g class="zerolinelayer"><path class="xzl zl crisp" transform="translate(349,0)" d="M0,50v350" style="stroke: rgb(68, 68, 68); stroke-opacity: 1; stroke-width: 1px;"></path><path class="yzl zl crisp" transform="translate(0,225)" d="M50,0h598" style="stroke: rgb(68, 68, 68); stroke-opacity: 1; stroke-width: 1px;"></path></g><path class="xlines-below"></path><path class="ylines-below"></path><g class="overlines-below"></g><g class="xaxislayer-below"></g><g class="yaxislayer-below"></g><g class="overaxes-below"></g><g class="plot" transform="translate(50,50)" clip-path="url(#clip21fad5xyplot)"><g class="scatterlayer mlayer"><g class="trace scatter tracef075ee" style="stroke-miterlimit: 2; opacity: 1;"><g class="fills"></g><g class="errorbars"></g><g class="lines"><path class="js-line" d="M0,77.78L148.9,77.78L149.5,272.22L298.4,272.22L299,175L300.2,77.78L300.79,77.78L448.5,77.78L449.1,272.22L598,272.22" style="vector-effect: non-scaling-stroke; fill: none; stroke: rgb(19, 41, 75); stroke-opacity: 1; stroke-dasharray: 3px, 3px; stroke-width: 2px; opacity: 1;"></path></g><g class="points"></g><g class="text"></g></g><g class="trace scatter trace8f960f" style="stroke-miterlimit: 2; opacity: 1;"><g class="fills"></g><g class="errorbars"></g><g class="lines"><path class="js-line" d="M0,175L9.57,105.97L10.17,102.39L14.95,78.61L15.55,76.29L19.14,65.6L19.73,64.35L22.72,60.29L23.32,59.9L25.71,59.57L26.31,59.77L28.7,61.58L29.3,62.25L33.49,68.63L34.09,69.71L43.06,84.89L43.65,85.61L47.24,88.59L47.84,88.86L50.83,89.14L51.43,89L54.42,87.37L55.02,86.87L59.8,81.52L60.4,80.74L68.77,70.52L69.37,70.01L72.96,67.98L73.55,67.83L76.54,67.98L77.14,68.18L80.73,70.52L81.33,71.08L86.11,76.73L86.71,77.53L94.48,86.87L95.08,87.37L98.67,89.14L99.27,89.22L102.26,88.59L102.86,88.26L105.85,85.61L106.44,84.89L110.63,78.49L111.23,77.43L120.2,62.25L120.8,61.58L123.79,59.57L124.38,59.47L126.78,60.29L127.37,60.82L129.77,64.35L130.36,65.6L133.35,74.12L133.95,76.29L137.54,92.42L138.14,95.61L142.92,125.54L143.52,129.74L160.86,254.39L161.46,257.58L165.65,275.88L166.24,277.89L169.83,286.75L170.43,287.7L172.82,290.1L173.42,290.37L175.81,290.23L176.41,289.92L179.4,287L180,286.19L184.78,278.09L185.38,276.98L192.56,265.11L193.15,264.39L196.74,261.41L197.34,261.14L200.33,260.86L200.93,261L203.92,262.63L204.52,263.13L209.3,268.48L209.9,269.26L218.27,279.48L218.87,279.99L222.46,282.02L223.05,282.17L226.04,282.02L226.64,281.82L230.23,279.48L230.83,278.92L235.61,273.27L236.21,272.47L243.98,263.13L244.58,262.63L248.17,260.86L248.77,260.78L251.76,261.41L252.36,261.74L255.35,264.39L255.94,265.11L260.13,271.51L260.73,272.57L269.7,287.75L270.3,288.42L273.29,290.43L273.88,290.53L276.28,289.71L276.87,289.18L279.27,285.65L279.86,284.4L282.85,275.88L283.45,273.71L287.04,257.58L287.64,254.39L292.42,224.46L293.02,220.26L310.36,95.61L310.96,92.42L315.15,74.12L315.74,72.11L319.33,63.25L319.93,62.3L322.32,59.9L322.92,59.63L325.31,59.77L325.91,60.08L328.9,63L329.5,63.81L334.28,71.91L334.88,73.02L342.06,84.89L342.65,85.61L346.24,88.59L346.84,88.86L349.83,89.14L350.43,89L353.42,87.37L354.02,86.87L358.8,81.52L359.4,80.74L367.77,70.52L368.37,70.01L371.96,67.98L372.55,67.83L375.54,67.98L376.14,68.18L379.73,70.52L380.33,71.08L385.11,76.73L385.71,77.53L393.48,86.87L394.08,87.37L397.67,89.14L398.27,89.22L401.26,88.59L401.86,88.26L404.85,85.61L405.44,84.89L409.63,78.49L410.23,77.43L419.2,62.25L419.8,61.58L422.79,59.57L423.38,59.47L425.78,60.29L426.37,60.82L428.77,64.35L429.36,65.6L432.35,74.12L432.95,76.29L436.54,92.42L437.14,95.61L441.92,125.54L442.52,129.74L459.86,254.39L460.46,257.58L464.65,275.88L465.24,277.89L468.83,286.75L469.43,287.7L471.82,290.1L472.42,290.37L474.81,290.23L475.41,289.92L478.4,287L479,286.19L483.78,278.09L484.38,276.98L491.56,265.11L492.15,264.39L495.74,261.41L496.34,261.14L499.33,260.86L499.93,261L502.92,262.63L503.52,263.13L508.3,268.48L508.9,269.26L517.27,279.48L517.87,279.99L521.46,282.02L522.05,282.17L525.04,282.02L525.64,281.82L529.23,279.48L529.83,278.92L534.61,273.27L535.21,272.47L542.98,263.13L543.58,262.63L547.17,260.86L547.77,260.78L550.76,261.41L551.36,261.74L554.35,264.39L554.94,265.11L559.13,271.51L559.73,272.57L568.7,287.75L569.3,288.42L572.29,290.43L572.88,290.53L575.28,289.71L575.87,289.18L578.27,285.65L578.86,284.4L581.85,275.88L582.45,273.71L586.04,257.58L586.64,254.39L591.42,224.46L592.02,220.26L598,175" style="vector-effect: non-scaling-stroke; fill: none; stroke: rgb(232, 74, 39); stroke-opacity: 1; stroke-width: 3px; opacity: 1;"></path></g><g class="points"></g><g class="text"></g></g></g></g><g class="overplot"></g><path class="xlines-above crisp" d="M0,0" style="fill: none;"></path><path class="ylines-above crisp" d="M0,0" style="fill: none;"></path><g class="overlines-above"></g><g class="xaxislayer-above"><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="-2π" data-math="N" transform="translate(50,0)" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;">-2π</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="-π" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(199.5,0)">-π</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="0" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(349,0)">0</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="π" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(498.5,0)">π</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="2π" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(648,0)">2π</text></g></g><g class="yaxislayer-above"><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="−1.5" data-math="N" transform="translate(0,370.83)" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;">−1.5</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="−1" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,322.22)">−1</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="−0.5" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,273.61)">−0.5</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,225)">0</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.5" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,176.39)">0.5</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="1" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,127.78)">1</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="1.5" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,79.17)">1.5</text></g></g><g class="overaxes-above"></g></g></g><g class="polarlayer"></g><g class="smithlayer"></g><g class="ternarylayer"></g><g class="geolayer"></g><g class="funnelarealayer"></g><g class="pielayer"></g><g class="iciclelayer"></g><g class="treemaplayer"></g><g class="sunburstlayer"></g><g class="glimages"></g></svg><div class="gl-container"></div><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450"><defs id="topdefs-21fad5"><g class="clips"></g><clippath id="legend21fad5"><rect width="254" height="29" x="0" y="0"></rect></clippath></defs><g class="indicatorlayer"></g><g class="layer-above"><g class="imagelayer"></g><g class="shapelayer"></g></g><g class="selectionlayer"></g><g class="infolayer"><g class="g-gtitle"><text class="gtitle" x="334" y="25" text-anchor="middle" dy="0em" data-unformatted="Time Domain: Signal vs. Fourier Sum" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 17px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Time Domain: Signal vs. Fourier Sum</text></g><g class="legend" pointer-events="all" transform="translate(222,14.999999999999972)"><rect class="bg" shape-rendering="crispEdges" style="stroke: rgb(68, 68, 68); stroke-opacity: 1; fill: rgb(255, 255, 255); fill-opacity: 1; stroke-width: 0px;" width="254" height="29" x="0" y="0"></rect><g class="scrollbox" transform="" clip-path="url(#legend21fad5)"><g class="groups"><g class="traces" transform="translate(0,14.5)" style="opacity: 1;"><text class="legendtext" text-anchor="start" x="40" y="4.680000000000001" data-unformatted="True Signal" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre;">True Signal</text><g class="layers" style="opacity: 1;"><g class="legendfill"></g><g class="legendlines"><path class="js-line" d="M5,0h30" style="fill: none; stroke: rgb(19, 41, 75); stroke-opacity: 1; stroke-dasharray: 3px, 3px; stroke-width: 2px;"></path></g><g class="legendsymbols"><g class="legendpoints"></g></g></g><rect class="legendtoggle" pointer-events="all" x="0" y="-9.5" width="103.9375" height="19" style="cursor: pointer; fill: rgb(0, 0, 0); fill-opacity: 0;"></rect></g><g class="traces" transform="translate(106.4375,14.5)" style="opacity: 1;"><text class="legendtext" text-anchor="start" x="40" y="4.680000000000001" data-unformatted="Fourier Sum (N=5)" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre;">Fourier Sum (N=5)</text><g class="layers" style="opacity: 1;"><g class="legendfill"></g><g class="legendlines"><path class="js-line" d="M5,0h30" style="fill: none; stroke: rgb(232, 74, 39); stroke-opacity: 1; stroke-width: 3px;"></path></g><g class="legendsymbols"><g class="legendpoints"></g></g></g><rect class="legendtoggle" pointer-events="all" x="0" y="-9.5" width="144.5390625" height="19" style="cursor: pointer; fill: rgb(0, 0, 0); fill-opacity: 0;"></rect></g></g></g><rect class="scrollbar" rx="20" ry="3" width="0" height="0" style="fill: rgb(128, 139, 164); fill-opacity: 1;" x="0" y="0"></rect></g><g class="g-xtitle" transform="translate(0,-6)"><text class="xtitle" x="349" y="452" text-anchor="middle" data-unformatted="Time (t)" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 14px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Time (t)</text></g><g class="g-ytitle" transform="translate(3,0)"><text class="ytitle" transform="rotate(-90,12,225)" x="12" y="225" text-anchor="middle" data-unformatted="Amplitude x(t)" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 14px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Amplitude x(t)</text></g></g><g class="menulayer"></g><g class="zoomlayer"></g></svg><div class="modebar-container" style="position: absolute; top: 0px; right: 0px; width: 100%;"></div><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450"><g class="hoverlayer"></g></svg></div></div></div>
+        </div>
+        <div class="plot-container">
+            <div id="freqDomainPlot" class="js-plotly-plot"><div class="plot-container plotly"><div class="user-select-none svg-container" style="position: relative; width: 100%; height: 450px;"><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450" style="background: white;"><defs id="defs-b3c8a8"><g class="clips"><clippath id="clipb3c8a8xyplot" class="plotclip"><rect width="598" height="350"></rect></clippath><clippath class="axesclip" id="clipb3c8a8x"><rect x="50" y="0" width="598" height="450"></rect></clippath><clippath class="axesclip" id="clipb3c8a8y"><rect x="0" y="50" width="668" height="350"></rect></clippath><clippath class="axesclip" id="clipb3c8a8xy"><rect x="50" y="50" width="598" height="350"></rect></clippath></g><g class="gradients"></g><g class="patterns"></g></defs><g class="bglayer"></g><g class="draglayer cursor-crosshair"><g class="xy"><rect class="nsewdrag drag" data-subplot="xy" x="50" y="50" width="598" height="350" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nwdrag drag cursor-nw-resize" data-subplot="xy" x="30" y="30" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nedrag drag cursor-ne-resize" data-subplot="xy" x="648" y="30" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="swdrag drag cursor-sw-resize" data-subplot="xy" x="30" y="400" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="sedrag drag cursor-se-resize" data-subplot="xy" x="648" y="400" width="20" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="ewdrag drag cursor-ew-resize" data-subplot="xy" x="109.80000000000001" y="400.5" width="478.40000000000003" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="wdrag drag cursor-w-resize" data-subplot="xy" x="50" y="400.5" width="59.800000000000004" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="edrag drag cursor-e-resize" data-subplot="xy" x="588.2" y="400.5" width="59.800000000000004" height="20" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="nsdrag drag cursor-ns-resize" data-subplot="xy" x="29.5" y="85" width="20" height="280" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="sdrag drag cursor-s-resize" data-subplot="xy" x="29.5" y="365" width="20" height="35" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect><rect class="ndrag drag cursor-n-resize" data-subplot="xy" x="29.5" y="50" width="20" height="35" style="fill: transparent; stroke-width: 0; pointer-events: all;"></rect></g></g><g class="layer-below"><g class="imagelayer"></g><g class="shapelayer"></g></g><g class="cartesianlayer"><g class="subplot xy"><g class="layer-subplot"><g class="shapelayer"></g><g class="imagelayer"></g></g><g class="minor-gridlayer"><g class="x"></g><g class="y"></g></g><g class="gridlayer"><g class="x"><path class="xgrid crisp" transform="translate(54.9,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(152.93,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(250.97,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(349,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(447.03,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(545.0699999999999,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="xgrid crisp" transform="translate(643.1,0)" d="M0,50v350" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path></g><g class="y"><path class="ygrid crisp" transform="translate(0,353.33)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,306.67)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,260)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,213.33)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,166.67000000000002)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,120)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path><path class="ygrid crisp" transform="translate(0,73.33)" d="M50,0h598" style="stroke: rgb(238, 238, 238); stroke-opacity: 1; stroke-width: 1px;"></path></g></g><g class="zerolinelayer"><path class="yzl zl crisp" transform="translate(0,400)" d="M50,0h598" style="stroke: rgb(68, 68, 68); stroke-opacity: 1; stroke-width: 1px;"></path></g><path class="xlines-below"></path><path class="ylines-below"></path><g class="overlines-below"></g><g class="xaxislayer-below"></g><g class="yaxislayer-below"></g><g class="overaxes-below"></g><g class="plot" transform="translate(50,50)" clip-path="url(#clipb3c8a8xyplot)"><g class="barlayer mlayer"><g class="trace bars" style="opacity: 1;"><g class="points"><g class="point"><path d="M2.45,350V350H7.35V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M12.25,350V339.76H17.16V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M22.06,350V350H26.96V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M31.86,350V339H36.76V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M41.66,350V350H46.57V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M51.47,350V338.12H56.37V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M61.27,350V350H66.17V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M71.07,350V337.08H75.98V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M80.88,350V350H85.78V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M90.68,350V335.85H95.58V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M100.48,350V350H105.39V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M110.29,350V334.36H115.19V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M120.09,350V350H124.99V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M129.89,350V332.52H134.8V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M139.7,350V350H144.6V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M149.5,350V330.19H154.4V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M159.3,350V350H164.2V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M169.11,350V327.15H174.01V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M178.91,350V350H183.81V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M188.71,350V322.99H193.61V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M198.52,350V350H203.42V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M208.32,350V316.99H213.22V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M218.12,350V350H223.02V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M227.93,350V307.56H232.83V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M237.73,350V350H242.63V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M247.53,350V290.58H252.43V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M257.34,350V350H262.24V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M267.14,350V250.97H272.04V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M276.94,350V350H281.84V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M286.75,350V52.91H291.65V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M296.55,350V350H301.45V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M306.35,350V52.91H311.25V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M316.16,350V350H321.06V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M325.96,350V250.97H330.86V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M335.76,350V350H340.66V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M345.57,350V290.58H350.47V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(232, 74, 39); fill-opacity: 1;"></path></g><g class="point"><path d="M355.37,350V350H360.27V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M365.17,350V307.56H370.07V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M374.98,350V350H379.88V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M384.78,350V316.99H389.68V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M394.58,350V350H399.48V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M404.39,350V322.99H409.29V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M414.19,350V350H419.09V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M423.99,350V327.15H428.89V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M433.8,350V350H438.7V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M443.6,350V330.19H448.5V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M453.4,350V350H458.3V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M463.2,350V332.52H468.11V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M473.01,350V350H477.91V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M482.81,350V334.36H487.71V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M492.61,350V350H497.52V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M502.42,350V335.85H507.32V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M512.22,350V350H517.12V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M522.02,350V337.08H526.93V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M531.83,350V350H536.73V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M541.63,350V338.12H546.53V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M551.43,350V350H556.34V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M561.24,350V339H566.14V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M571.04,350V350H575.94V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M580.84,350V339.76H585.75V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g><g class="point"><path d="M590.65,350V350H595.55V350Z" style="vector-effect: non-scaling-stroke; opacity: 1; stroke-width: 0px; fill: rgb(211, 211, 211); fill-opacity: 1;"></path></g></g></g></g></g><g class="overplot"></g><path class="xlines-above crisp" d="M0,0" style="fill: none;"></path><path class="ylines-above crisp" d="M0,0" style="fill: none;"></path><g class="overlines-above"></g><g class="xaxislayer-above"><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="−30" data-math="N" transform="translate(54.9,0)" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;">−30</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="−20" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(152.93,0)">−20</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="−10" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(250.97,0)">−10</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="0" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(349,0)">0</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="10" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(447.03,0)">10</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="20" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(545.0699999999999,0)">20</text></g><g class="xtick"><text text-anchor="middle" x="0" y="413" data-unformatted="30" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(643.1,0)">30</text></g></g><g class="yaxislayer-above"><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0" data-math="N" transform="translate(0,400)" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;">0</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.1" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,353.33)">0.1</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.2" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,306.67)">0.2</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.3" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,260)">0.3</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.4" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,213.33)">0.4</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.5" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,166.67000000000002)">0.5</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.6" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,120)">0.6</text></g><g class="ytick"><text text-anchor="end" x="49" y="4.199999999999999" data-unformatted="0.7" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 12px; fill: rgb(68, 68, 68); fill-opacity: 1; white-space: pre; opacity: 1;" transform="translate(0,73.33)">0.7</text></g></g><g class="overaxes-above"></g></g></g><g class="polarlayer"></g><g class="smithlayer"></g><g class="ternarylayer"></g><g class="geolayer"></g><g class="funnelarealayer"></g><g class="pielayer"></g><g class="iciclelayer"></g><g class="treemaplayer"></g><g class="sunburstlayer"></g><g class="glimages"></g></svg><div class="gl-container"></div><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450"><defs id="topdefs-b3c8a8"><g class="clips"></g></defs><g class="indicatorlayer"></g><g class="layer-above"><g class="imagelayer"></g><g class="shapelayer"></g></g><g class="selectionlayer"></g><g class="infolayer"><g class="g-gtitle"><text class="gtitle" x="334" y="25" text-anchor="middle" dy="0em" data-unformatted="Frequency Domain: Two-Sided Spectrum |c_k|" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 17px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Frequency Domain: Two-Sided Spectrum |c_k|</text></g><g class="g-xtitle" transform="translate(0,-6)"><text class="xtitle" x="349" y="452" text-anchor="middle" data-unformatted="Harmonic Number (k)" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 14px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Harmonic Number (k)</text></g><g class="g-ytitle" transform="translate(3,0)"><text class="ytitle" transform="rotate(-90,12,225)" x="12" y="225" text-anchor="middle" data-unformatted="Magnitude |c_k|" data-math="N" style="font-family: &quot;Open Sans&quot;, verdana, arial, sans-serif; font-size: 14px; fill: rgb(68, 68, 68); opacity: 1; font-weight: normal; white-space: pre;">Magnitude |c_k|</text></g></g><g class="menulayer"></g><g class="zoomlayer"></g></svg><div class="modebar-container" style="position: absolute; top: 0px; right: 0px; width: 100%;"></div><svg class="main-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="668" height="450"><g class="hoverlayer"></g></svg></div></div></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- Configuration & Constants ---
+    const MAX_N = 30; // Max slider value for clean two-sided display
+    const NUM_POINTS = 1000;
+    const ILLINI_ORANGE = '#E84A27';
+    const ILLINI_BLUE = '#13294B';
+    const GREY = '#D3D3D3';
+
+    // Generate time vector t from -2*pi to 2*pi
+    let t =[];
+    for(let i=0; i<=NUM_POINTS; i++) {
+        t.push(-2 * Math.PI + (4 * Math.PI * i / NUM_POINTS));
+    }
+
+    // --- Signal Definitions & Fourier Coefficients ---
+    // Equations are formatted in LaTeX for MathJax rendering.
+    const signals = {
+        sine: {
+            evalFn: (tau) => Math.sin(tau),
+            getAk: (k) => 0,
+            getBk: (k) => k === 1 ? 1 : 0,
+            descText: `<strong>Pure Sine Wave:</strong> Contains only the fundamental frequency ($k=\\pm 1$). Notice the exponential spectrum splits the amplitude in half: $|c_1| = |c_{-1}| = 0.5$.`,
+            eqTrig: `\\[ x(t) = \\sin(t) \\]`,
+            eqComp: `\\[ x(t) = \\cos\\left(t - \\frac{\\pi}{2}\\right) \\]`,
+            eqExp: `\\[ x(t) = \\frac{-j}{2} e^{jt} + \\frac{j}{2} e^{-jt} \\]`
+        },
+        square: {
+            evalFn: (tau) => Math.sign(Math.sin(tau)),
+            getAk: (k) => 0,
+            getBk: (k) => (k % 2 !== 0) ? 4 / (k * Math.PI) : 0,
+            descText: `<strong>Square Wave:</strong> Odd and half-wave symmetric (only odd harmonics $k=1,3,5...$). Features the <strong>Gibbs phenomenon</strong> (overshoot at discontinuities). Coefficients decay as $1/k$. Note how a negative index $k$ in the exponential sum naturally implements the complex conjugate $c_{-k} = c_k^*$.`,
+            eqTrig: `\\[ x_N(t) = \\sum_{\\substack{k=1 \\\\ k \\text{ odd}}}^{N} \\frac{4}{\\pi k} \\sin(k t) \\]`,
+            eqComp: `\\[ x_N(t) = \\sum_{\\substack{k=1 \\\\ k \\text{ odd}}}^{N} \\frac{4}{\\pi k} \\cos\\left(k t - \\frac{\\pi}{2}\\right) \\]`,
+            eqExp: `\\[ x_N(t) = \\sum_{\\substack{k=-N \\\\ k \\text{ odd}}}^{N} \\frac{-j 2}{\\pi k} e^{j k t} \\]`
+        },
+        sawtooth: {
+            evalFn: (tau) => {
+                let wrapped = (tau + Math.PI) % (2 * Math.PI);
+                if (wrapped < 0) wrapped += 2 * Math.PI;
+                return (wrapped / Math.PI) - 1;
+            },
+            getAk: (k) => 0,
+            getBk: (k) => (2 / (k * Math.PI)) * Math.pow(-1, k + 1),
+            descText: `<strong>Sawtooth Wave:</strong> Odd symmetric, so $a_k = 0$, but lacking half-wave symmetry (contains both even and odd modes). The phase term $\\theta_k$ flips by $\\pi$ depending on whether $k$ is even or odd to maintain a positive amplitude $C_k$ in the compact form.`,
+            eqTrig: `\\[ x_N(t) = \\sum_{k=1}^{N} \\frac{2(-1)^{k+1}}{\\pi k} \\sin(k t) \\]`,
+            eqComp: `\\[ x_N(t) = \\sum_{k=1}^{N} \\frac{2}{\\pi k} \\cos\\left(k t + (-1)^k \\frac{\\pi}{2}\\right) \\]`,
+            eqExp: `\\[ x_N(t) = \\sum_{\\substack{k=-N \\\\ k \\neq 0}}^{N} \\frac{j(-1)^k}{\\pi k} e^{j k t} \\]`
+        },
+        triangle: {
+            evalFn: (tau) => {
+                let wrapped = tau % (2 * Math.PI);
+                if (wrapped < 0) wrapped += 2 * Math.PI;
+                if (wrapped < Math.PI / 2) return wrapped / (Math.PI / 2);
+                else if (wrapped < 3 * Math.PI / 2) return 2 - wrapped / (Math.PI / 2);
+                else return -4 + wrapped / (Math.PI / 2);
+            },
+            getAk: (k) => 0,
+            getBk: (k) => {
+                if (k % 2 === 0) return 0;
+                let sign = ((k - 1) / 2) % 2 === 0 ? 1 : -1;
+                return (8 / (Math.PI * Math.PI * k * k)) * sign;
+            },
+            descText: `<strong>Triangle Wave:</strong> Continuous waveform resulting in a rapid $1/k^2$ convergence without Gibbs phenomenon! Observe how quickly the higher frequency harmonics drop to zero.`,
+            eqTrig: `\\[ x_N(t) = \\sum_{\\substack{k=1 \\\\ k \\text{ odd}}}^{N} \\frac{8(-1)^{\\frac{k-1}{2}}}{\\pi^2 k^2} \\sin(k t) \\]`,
+            eqComp: `\\[ x_N(t) = \\sum_{\\substack{k=1 \\\\ k \\text{ odd}}}^{N} \\frac{8}{\\pi^2 k^2} \\cos\\left(k t - (-1)^{\\frac{k-1}{2}} \\frac{\\pi}{2}\\right) \\]`,
+            eqExp: `\\[ x_N(t) = \\sum_{\\substack{k=-N \\\\ k \\text{ odd}}}^{N} \\frac{-j 4 \\operatorname{sgn}(k)}{\\pi^2 k^2} (-1)^{\\frac{|k|-1}{2}} e^{j k t} \\]`
+        }
+    };
+
+    // --- State Variables ---
+    let currentType = 'square';
+    let currentN = 5;
+
+    // --- Core Logic ---
+    function computeApproximation(type, N) {
+        let sig = signals[type];
+        return t.map(ti => {
+            let sum = 0;
+            // Trigonometric summation form
+            for(let k = 1; k <= N; k++) {
+                sum += sig.getAk(k) * Math.cos(k * ti) + sig.getBk(k) * Math.sin(k * ti);
+            }
+            return sum;
+        });
+    }
+
+    function getFrequencyData(type, N) {
+        let sig = signals[type];
+        let k_vals = [];
+        let mags =[];
+        let colors =[];
+
+        // Two-Sided Spectrum! Iterate from -MAX_N to +MAX_N
+        for(let k = -MAX_N; k <= MAX_N; k++) {
+            k_vals.push(k);
+            if (k === 0) {
+                mags.push(Math.abs(sig.getAk(0))); // DC Component |c_0|
+                colors.push(0 <= N ? ILLINI_ORANGE : GREY);
+            } else {
+                let ak = sig.getAk(Math.abs(k));
+                let bk = sig.getBk(Math.abs(k));
+                
+                // Exponential Magnitude |c_k| = 0.5 * C_k = 0.5 * sqrt(a_k^2 + b_k^2)
+                let c_k_mag = 0.5 * Math.sqrt(ak*ak + bk*bk);
+                mags.push(c_k_mag);
+                
+                // Color active harmonics UIUC Orange, inactive Grey
+                colors.push(Math.abs(k) <= N ? ILLINI_ORANGE : GREY);
+            }
+        }
+        return { k_vals, mags, colors };
+    }
+
+    // --- Plotly Initialization ---
+    let timeLayout = {
+        title: 'Time Domain: Signal vs. Fourier Sum',
+        xaxis: { 
+            title: 'Time (t)', 
+            tickvals:[-2*Math.PI, -Math.PI, 0, Math.PI, 2*Math.PI], 
+            ticktext:['-2π', '-π', '0', 'π', '2π'],
+            gridcolor: '#eee'
+        },
+        yaxis: { 
+            title: 'Amplitude x(t)', 
+            range:[-1.8, 1.8],
+            gridcolor: '#eee'
+        },
+        margin: { t: 50, b: 50, l: 50, r: 20 },
+        legend: { orientation: 'h', y: 1.1, x: 0.5, xanchor: 'center' },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white'
+    };
+
+    let freqLayout = {
+        title: 'Frequency Domain: Two-Sided Spectrum |c_k|',
+        xaxis: { 
+            title: 'Harmonic Number (k)', 
+            range:[-MAX_N - 0.5, MAX_N + 0.5],
+            gridcolor: '#eee'
+        },
+        yaxis: { 
+            title: 'Magnitude |c_k|', 
+            range: [0, 0.75], // Max needed is ~0.63 (c_1 of square wave)
+            gridcolor: '#eee'
+        },
+        margin: { t: 50, b: 50, l: 50, r: 20 },
+        plot_bgcolor: 'white',
+        paper_bgcolor: 'white'
+    };
+
+    let config = { responsive: true, displayModeBar: false };
+
+    Plotly.newPlot('timeDomainPlot', [], timeLayout, config);
+    Plotly.newPlot('freqDomainPlot',[], freqLayout, config);
+
+    // --- Update Function ---
+    function updateVisualization() {
+        let sigObj = signals[currentType];
+        
+        // Compute Data
+        let trueSignal = t.map(sigObj.evalFn);
+        let approxSignal = computeApproximation(currentType, currentN);
+        let freqData = getFrequencyData(currentType, currentN);
+
+        // Update Time Plot
+        let traceTrue = {
+            x: t, y: trueSignal,
+            name: 'True Signal',
+            line: { color: ILLINI_BLUE, width: 2, dash: 'dot' },
+            type: 'scatter'
+        };
+
+        let traceApprox = {
+            x: t, y: approxSignal,
+            name: `Fourier Sum (N=${currentN})`,
+            line: { color: ILLINI_ORANGE, width: 3 },
+            type: 'scatter'
+        };
+
+        Plotly.react('timeDomainPlot',[traceTrue, traceApprox], timeLayout);
+
+        // Update Two-Sided Frequency Plot
+        let traceFreq = {
+            x: freqData.k_vals, y: freqData.mags,
+            type: 'bar', name: '|c_k|',
+            marker: { color: freqData.colors },
+            width: 0.5
+        };
+
+        Plotly.react('freqDomainPlot', [traceFreq], freqLayout);
+
+        // Update Pedagogical Text & Equation Grids
+        const panel = document.getElementById('infoPanel');
+        panel.innerHTML = `
+            <div class="desc-text">${sigObj.descText}</div>
+            <div class="equations-grid">
+                <div class="eq-box">
+                    <h4>Trigonometric Form</h4>
+                    ${sigObj.eqTrig}
+                </div>
+                <div class="eq-box">
+                    <h4>Compact Form</h4>
+                    ${sigObj.eqComp}
+                </div>
+                <div class="eq-box">
+                    <h4>Exponential Form</h4>
+                    ${sigObj.eqExp}
+                </div>
+            </div>
+        `;
+        
+        // Trigger MathJax re-render
+        if (window.MathJax) {
+            MathJax.typesetPromise([panel]).catch(err => console.error('MathJax error: ', err.message));
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('nSlider').addEventListener('input', function(e) {
+        currentN = parseInt(e.target.value);
+        document.getElementById('nDisplay').innerText = `N = ${currentN}`;
+        updateVisualization();
+    });
+
+    document.getElementById('signalType').addEventListener('change', function(e) {
+        currentType = e.target.value;
+        updateVisualization();
+    });
+
+    // Run once on load
+    window.onload = () => { updateVisualization(); };
+
+</script><svg id="js-plotly-tester" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position: absolute; left: -10000px; top: -10000px; width: 9000px; height: 9000px; z-index: 1;"><path class="js-reference-point" d="M0,0H1V1H0Z" style="stroke-width: 0; fill: black;"></path></svg>
+
+</body></html>

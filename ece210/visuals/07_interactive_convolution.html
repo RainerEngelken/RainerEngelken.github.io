@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(24).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210: Interactive Convolution</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-light: #f4f6f8;
+            --text-dark: #333333;
+            --grid-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            color: var(--uiuc-blue);
+            margin: 0 0 10px 0;
+            font-size: 2.2rem;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            margin: 0;
+            color: #555;
+        }
+
+        .formula {
+            background: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--uiuc-blue);
+            margin: 15px 0;
+            display: inline-block;
+            border-left: 4px solid var(--uiuc-orange);
+        }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        select, button {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--uiuc-orange);
+            color: white;
+            border: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #c93b1c;
+        }
+
+        input[type="range"] {
+            width: 250px;
+            cursor: pointer;
+            accent-color: var(--uiuc-orange);
+        }
+
+        .plot-container {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .plot-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        canvas {
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        .legend {
+            font-size: 0.95rem;
+            display: flex;
+            gap: 15px;
+        }
+        .legend span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .color-box {
+            width: 12px;
+            height: 12px;
+            display: inline-block;
+            border-radius: 2px;
+        }
+
+        #t-value-display {
+            font-weight: bold;
+            color: var(--uiuc-orange);
+            min-width: 40px;
+            display: inline-block;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ECE 210: Continuous-Time Convolution</h1>
+        <p>Interactive visualization of <strong>y(t) = f(t) * h(t)</strong></p>
+        <div class="formula">
+            y(t) = ∫ f(τ) h(t - τ) dτ
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="controls">
+            <div class="control-group">
+                <label for="signal-select"><strong>Signal Pair:</strong></label>
+                <select id="signal-select">
+                    <option value="rect_exp">Example 4: Rect(t/2) * exp(-t)u(t)</option>
+                    <option value="rect_rect">Example 5: Rect(t/2) * Rect(t/2)</option>
+                    <option value="step_exp">Example 2: u(t) * exp(-t)u(t)</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <button id="play-btn">▶ Play</button>
+                <label for="t-slider">Time <strong>t = </strong> <span id="t-value-display">-3.00</span></label>
+                <input type="range" id="t-slider" min="-3" max="5" step="0.05" value="-3">
+            </div>
+        </div>
+
+        <!-- Top Plot: f(tau) and h(t-tau) -->
+        <div class="plot-container">
+            <div class="plot-title">
+                <span>1. Signals in τ-domain (Flip and Shift)</span>
+                <div class="legend">
+                    <span><div class="color-box" style="background: #13294B;"></div> f(τ)</span>
+                    <span><div class="color-box" style="background: #E84A27;"></div> h(t - τ)</span>
+                </div>
+            </div>
+            <canvas id="canvasTop" width="900" height="200"></canvas>
+        </div>
+
+        <!-- Middle Plot: Pointwise Multiplication -->
+        <div class="plot-container">
+            <div class="plot-title">
+                <span>2. Pointwise Multiplication: f(τ) · h(t - τ)</span>
+                <div class="legend">
+                    <span><div class="color-box" style="background: #800080;"></div> Area to Integrate</span>
+                </div>
+            </div>
+            <canvas id="canvasMid" width="900" height="200"></canvas>
+        </div>
+
+        <!-- Bottom Plot: Resulting Convolution y(t) -->
+        <div class="plot-container">
+            <div class="plot-title">
+                <span>3. Resulting Convolution: y(t)</span>
+                <div class="legend">
+                    <span><div class="color-box" style="background: #008000;"></div> y(t)</span>
+                </div>
+            </div>
+            <canvas id="canvasBot" width="900" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. Signal Definitions ---
+        const signals = {
+            rect_exp: {
+                f: (t) => (t >= -1 && t <= 1) ? 1 : 0,
+                h: (t) => (t >= 0) ? Math.exp(-t) : 0,
+                domain: [-4, 6],
+                yRangeTop: [-0.2, 1.5],
+                yRangeBot: [-0.2, 2.0]
+            },
+            rect_rect: {
+                f: (t) => (t >= -1 && t <= 1) ? 1 : 0,
+                h: (t) => (t >= -1 && t <= 1) ? 1 : 0,
+                domain: [-4, 6],
+                yRangeTop: [-0.2, 1.5],
+                yRangeBot: [-0.2, 2.5]
+            },
+            step_exp: {
+                f: (t) => (t >= 0) ? 1 : 0,
+                h: (t) => (t >= 0) ? Math.exp(-t) : 0,
+                domain: [-2, 6],
+                yRangeTop: [-0.2, 1.5],
+                yRangeBot: [-0.2, 1.5]
+            }
+        };
+
+        // --- 2. Setup Canvas and State ---
+        let currentPair = 'rect_exp';
+        let currentT = -3;
+        let isPlaying = false;
+        let animationId;
+        
+        const canvTop = document.getElementById('canvasTop');
+        const canvMid = document.getElementById('canvasMid');
+        const canvBot = document.getElementById('canvasBot');
+        
+        const ctxTop = canvTop.getContext('2d');
+        const ctxMid = canvMid.getContext('2d');
+        const ctxBot = canvBot.getContext('2d');
+
+        // Precalculated integration array for the bottom plot
+        let yData = []; 
+        const NUM_POINTS = 800; // Resolution
+
+        function resizeCanvases() {
+            const width = canvTop.parentElement.clientWidth;
+            const height = 200;
+            [canvTop, canvMid, canvBot].forEach(c => {
+                c.width = width;
+                c.height = height;
+            });
+            precalculateY();
+            draw();
+        }
+
+        // --- 3. Core Math & Precalculation ---
+        function precalculateY() {
+            yData = [];
+            const sig = signals[currentPair];
+            const [xMin, xMax] = sig.domain;
+            const dx = (xMax - xMin) / NUM_POINTS;
+            
+            for (let i = 0; i <= NUM_POINTS; i++) {
+                let t = xMin + i * dx;
+                let integral = 0;
+                // Numerical integration over tau
+                let tauMin = xMin - 2; 
+                let tauMax = xMax + 2;
+                let dTau = (tauMax - tauMin) / 1000;
+                for (let tau = tauMin; tau <= tauMax; tau += dTau) {
+                    integral += sig.f(tau) * sig.h(t - tau) * dTau;
+                }
+                yData.push({ t: t, y: integral });
+            }
+        }
+
+        // Mapping Math coordinates to Canvas pixels
+        function mapX(x, xMin, xMax, width) {
+            return ((x - xMin) / (xMax - xMin)) * width;
+        }
+        function mapY(y, yMin, yMax, height) {
+            return height - ((y - yMin) / (yMax - yMin)) * height;
+        }
+
+        // --- 4. Drawing Logic ---
+        function drawAxes(ctx, width, height, xMin, xMax, yMin, yMax, isTDomain = false) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#999';
+            ctx.lineWidth = 1;
+            
+            // X-axis
+            let yZero = mapY(0, yMin, yMax, height);
+            ctx.moveTo(0, yZero);
+            ctx.lineTo(width, yZero);
+            
+            // Y-axis
+            let xZero = mapX(0, xMin, xMax, width);
+            ctx.moveTo(xZero, 0);
+            ctx.lineTo(xZero, height);
+            ctx.stroke();
+
+            // Labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.fillText(isTDomain ? "t" : "τ", width - 15, yZero - 5);
+            ctx.fillText("0", xZero + 5, yZero + 15);
+        }
+
+        function drawSignal(ctx, f, isShifted, t_shift, color, width, height, xMin, xMax, yMin, yMax, fill = false) {
+            ctx.beginPath();
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            if(fill) {
+                ctx.fillStyle = color.replace(')', ', 0.3)').replace('rgb', 'rgba'); // Make transparent
+            }
+
+            const dx = (xMax - xMin) / NUM_POINTS;
+            let started = false;
+
+            for (let i = 0; i <= NUM_POINTS; i++) {
+                let tau = xMin + i * dx;
+                let val = isShifted ? f(t_shift - tau) : f(tau);
+                let px = mapX(tau, xMin, xMax, width);
+                let py = mapY(val, yMin, yMax, height);
+
+                if (!started) {
+                    ctx.moveTo(px, py);
+                    started = true;
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+
+            if(fill) {
+                let yZero = mapY(0, yMin, yMax, height);
+                ctx.lineTo(width, yZero);
+                ctx.lineTo(0, yZero);
+                ctx.fill();
+            } else {
+                ctx.stroke();
+            }
+        }
+
+        function draw() {
+            const sig = signals[currentPair];
+            const [xMin, xMax] = sig.domain;
+            const width = canvTop.width;
+            const height = canvTop.height;
+
+            // Clear canvases
+            ctxTop.clearRect(0, 0, width, height);
+            ctxMid.clearRect(0, 0, width, height);
+            ctxBot.clearRect(0, 0, width, height);
+
+            // Draw Axes
+            drawAxes(ctxTop, width, height, xMin, xMax, sig.yRangeTop[0], sig.yRangeTop[1], false);
+            drawAxes(ctxMid, width, height, xMin, xMax, sig.yRangeTop[0], sig.yRangeTop[1], false);
+            drawAxes(ctxBot, width, height, xMin, xMax, sig.yRangeBot[0], sig.yRangeBot[1], true);
+
+            // 1. Top Canvas: f(tau) and h(t-tau)
+            drawSignal(ctxTop, sig.f, false, 0, '#13294B', width, height, xMin, xMax, sig.yRangeTop[0], sig.yRangeTop[1]); // UIUC Blue
+            drawSignal(ctxTop, sig.h, true, currentT, '#E84A27', width, height, xMin, xMax, sig.yRangeTop[0], sig.yRangeTop[1]); // UIUC Orange
+
+            // 2. Middle Canvas: Pointwise product
+            const productFunc = (tau) => sig.f(tau) * sig.h(currentT - tau);
+            drawSignal(ctxMid, productFunc, false, 0, 'rgb(128, 0, 128)', width, height, xMin, xMax, sig.yRangeTop[0], sig.yRangeTop[1], true);
+
+            // 3. Bottom Canvas: y(t) integral
+            ctxBot.beginPath();
+            ctxBot.strokeStyle = '#ccc'; // Faint background of full curve
+            ctxBot.lineWidth = 2;
+            let started = false;
+            for(let pt of yData) {
+                let px = mapX(pt.t, xMin, xMax, width);
+                let py = mapY(pt.y, sig.yRangeBot[0], sig.yRangeBot[1], height);
+                if (!started) { ctxBot.moveTo(px, py); started = true; }
+                else { ctxBot.lineTo(px, py); }
+            }
+            ctxBot.stroke();
+
+            // Draw active y(t) up to currentT
+            ctxBot.beginPath();
+            ctxBot.strokeStyle = '#008000'; // Green line for active convolution
+            ctxBot.lineWidth = 3;
+            started = false;
+            let currentY = 0;
+            for(let pt of yData) {
+                if (pt.t > currentT) break;
+                currentY = pt.y;
+                let px = mapX(pt.t, xMin, xMax, width);
+                let py = mapY(pt.y, sig.yRangeBot[0], sig.yRangeBot[1], height);
+                if (!started) { ctxBot.moveTo(px, py); started = true; }
+                else { ctxBot.lineTo(px, py); }
+            }
+            ctxBot.stroke();
+
+            // Draw Current t marker (Vertical Alignment Line across all 3 plots!)
+            let pxT = mapX(currentT, xMin, xMax, width);
+            
+            // Draw guiding vertical dashed line
+            [ctxTop, ctxMid, ctxBot].forEach((ctx, idx) => {
+                ctx.beginPath();
+                ctx.setLineDash([5, 5]);
+                ctx.strokeStyle = 'rgba(232, 74, 39, 0.5)'; // Orange dash
+                ctx.moveTo(pxT, 0);
+                ctx.lineTo(pxT, height);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            });
+
+            // Draw dot on the convolution curve
+            let pyT = mapY(currentY, sig.yRangeBot[0], sig.yRangeBot[1], height);
+            ctxBot.beginPath();
+            ctxBot.fillStyle = '#008000';
+            ctxBot.arc(pxT, pyT, 6, 0, 2 * Math.PI);
+            ctxBot.fill();
+        }
+
+        // --- 5. UI & Interactivity ---
+        const tSlider = document.getElementById('t-slider');
+        const tDisplay = document.getElementById('t-value-display');
+        const playBtn = document.getElementById('play-btn');
+        const sigSelect = document.getElementById('signal-select');
+
+        function updateT(val) {
+            currentT = parseFloat(val);
+            tDisplay.innerText = currentT.toFixed(2);
+            tSlider.value = currentT;
+            draw();
+        }
+
+        tSlider.addEventListener('input', (e) => updateT(e.target.value));
+
+        sigSelect.addEventListener('change', (e) => {
+            currentPair = e.target.value;
+            const bounds = signals[currentPair].domain;
+            tSlider.min = bounds[0] + 1;
+            tSlider.max = bounds[1] - 1;
+            updateT(tSlider.min);
+            precalculateY();
+            draw();
+        });
+
+        function autoPlay() {
+            if (!isPlaying) return;
+            currentT += 0.02;
+            if (currentT > parseFloat(tSlider.max)) {
+                currentT = parseFloat(tSlider.min);
+            }
+            updateT(currentT);
+            animationId = requestAnimationFrame(autoPlay);
+        }
+
+        playBtn.addEventListener('click', () => {
+            isPlaying = !isPlaying;
+            if (isPlaying) {
+                playBtn.innerText = "⏸ Pause";
+                playBtn.style.backgroundColor = "#13294B"; // Change to Blue when playing
+                autoPlay();
+            } else {
+                playBtn.innerText = "▶ Play";
+                playBtn.style.backgroundColor = "var(--uiuc-orange)";
+                cancelAnimationFrame(animationId);
+            }
+        });
+
+        // Initialize
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases(); // triggers precalculateY and draw
+        updateT(-3);
+
+    </script>
+
+</body></html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(12).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <title>ECE 210: The Angle Challenge</title>
+    <style>
+        :root { --uiuc-orange: #FF5F05; --uiuc-blue: #13294B; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--uiuc-blue); display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { display: flex; gap: 20px; max-width: 1000px; flex-wrap: wrap; justify-content: center; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid var(--uiuc-orange); }
+        canvas { background: white; border-radius: 8px; cursor: crosshair; touch-action: none; border: 1px solid #ddd; }
+        
+        /* Piecewise Formula Styling */
+        .piecewise { font-family: 'Times New Roman', serif; font-size: 1.4rem; position: relative; padding-left: 30px; line-height: 2.2; }
+        .piecewise::before { content: '{'; position: absolute; left: 0; top: 0; font-size: 6rem; font-weight: 100; transform: translateY(-15%); }
+        .row { display: grid; grid-template-columns: 180px 150px; padding: 5px 15px; border-radius: 8px; transition: 0.3s; opacity: 0.3; }
+        .active { opacity: 1; background: #fff5ee; border: 1px solid var(--uiuc-orange); font-weight: bold; }
+        .math-italic { font-style: italic; }
+        
+        .label { font-size: 0.9rem; color: #666; margin-bottom: 5px; }
+        .stats { margin-top: 15px; font-family: monospace; font-size: 1.1rem; border-top: 1px solid #eee; padding-top: 10px;}
+    </style>
+</head>
+<body>
+
+<h1 style="margin-bottom: 5px;">Finding the Angle θ</h1>
+<p style="margin-top: 0; color: #555;">Rectangular <span style="color:var(--uiuc-orange)">→</span> Polar</p>
+
+<div class="container">
+    <div class="card">
+        <canvas id="plot" width="450" height="450"></canvas>
+        <div class="stats">
+            Position: (<span id="outX">1.00</span>, <span id="outY">1.00</span>)<br>
+            tan<sup>-1</sup>(y/x) result: <span id="rawAtan" style="color: #888;">45.0°</span>
+        </div>
+    </div>
+
+    <div class="card" style="min-width: 400px;">
+        <div class="label">Mathematical Case:</div>
+        <div class="piecewise">
+            <div id="row1" class="row active">
+                <div>tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
+                <div><span class="math-italic">x</span> &gt; 0</div>
+            </div>
+            <div id="row2" class="row">
+                <div>π + tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
+                <div><span class="math-italic">x</span> &lt; 0, <span class="math-italic">y</span> &gt; 0</div>
+            </div>
+            <div id="row3" class="row">
+                <div>-π + tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
+                <div><span class="math-italic">x</span> &lt; 0, <span class="math-italic">y</span> &lt; 0</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; padding: 15px; background: #eef2f7; border-radius: 8px; font-size: 0.95rem;">
+            <strong>Pedagogical Hint:</strong> The dashed line is what your calculator "thinks" the angle is. Notice how it's always in the right-hand plane!
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('plot');
+    const ctx = canvas.getContext('2d');
+    const w = canvas.width, h = canvas.height;
+    const scale = 180;
+    let p = { x: 1, y: 1 };
+
+    function draw() {
+        ctx.clearRect(0,0,w,h);
+        
+        // Axes
+        ctx.strokeStyle = '#ccc';
+        ctx.beginPath();
+        ctx.moveTo(0, h/2); ctx.lineTo(w, h/2);
+        ctx.moveTo(w/2, 0); ctx.lineTo(w/2, h);
+        ctx.stroke();
+
+        const cx = w/2, cy = h/2;
+        const tx = cx + p.x * scale, ty = cy - p.y * scale;
+
+        // Raw Atan calculation
+        const rawTheta = Math.atan2(p.y, p.x); // Note: JS atan2 handles quadrants, but we will simulate atan(y/x)
+        const mathAtan = Math.atan(p.y/p.x); 
+        
+        // Draw Ghost Vector (The raw tan-1 output)
+        const ghostX = cx + Math.cos(mathAtan) * scale * 0.8;
+        const ghostY = cy - Math.sin(mathAtan) * scale * 0.8;
+        ctx.setLineDash([5, 5]);
+        ctx.strokeStyle = '#aaa';
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ghostX, ghostY); ctx.stroke();
+        ctx.setLineDash([]);
+
+        // Real Vector
+        ctx.strokeStyle = '#13294B'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(tx, ty); ctx.stroke();
+
+        // Point
+        ctx.fillStyle = '#FF5F05';
+        ctx.beginPath(); ctx.arc(tx, ty, 8, 0, Math.PI*2); ctx.fill();
+
+        // UI Updates
+        document.getElementById('outX').innerText = p.x.toFixed(2);
+        document.getElementById('outY').innerText = p.y.toFixed(2);
+        document.getElementById('rawAtan').innerText = (mathAtan * 180 / Math.PI).toFixed(1) + "°";
+        
+        updateRows(p.x, p.y);
+    }
+
+    function updateRows(x, y) {
+        document.querySelectorAll('.row').forEach(r => r.classList.remove('active'));
+        if (x > 0) document.getElementById('row1').classList.add('active');
+        else if (x < 0 && y >= 0) document.getElementById('row2').classList.add('active');
+        else if (x < 0 && y < 0) document.getElementById('row3').classList.add('active');
+    }
+
+    canvas.addEventListener('mousemove', e => {
+        const rect = canvas.getBoundingClientRect();
+        p.x = (e.clientX - rect.left - w/2) / scale;
+        p.y = -(e.clientY - rect.top - h/2) / scale;
+        draw();
+    });
+
+    draw();
+</script>
+
+</body></html>

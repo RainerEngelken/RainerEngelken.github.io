@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(29).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210: Sampling, Reconstruction &amp; Aliasing</title>
+    <style>
+        :root {
+            --bg-color: #f8fafc;
+            --panel-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-light: #64748b;
+            --primary: #0284c7;      /* Original signal */
+            --samples: #0f172a;      /* Samples */
+            --recon: #d97706;        /* Reconstructed */
+            --alias: #dc2626;        /* Aliasing/Errors */
+            --lpf-fill: rgba(2, 132, 199, 0.15);
+            --grid-line: #e2e8f0;
+            --font-main: system-ui, -apple-system, sans-serif;
+            --font-math: "Times New Roman", Times, serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            margin: 0 0 5px 0;
+            font-size: 1.8rem;
+            color: var(--text-main);
+        }
+        
+        .subtitle {
+            margin: 0 0 15px 0;
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .controls {
+            background: var(--panel-bg);
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1150px;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .control-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        select, input[type="range"] {
+            padding: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .slider-val {
+            font-family: var(--font-math);
+            font-weight: bold;
+            color: var(--primary);
+            width: 50px;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 9999px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            display: inline-block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge.good { background-color: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+        .badge.bad { background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .panel h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .math {
+            font-family: var(--font-math);
+            font-style: italic;
+        }
+
+        canvas {
+            width: 100%;
+            height: 200px;
+            display: block;
+        }
+
+        .explanation {
+            max-width: 1200px;
+            margin-top: 20px;
+            background: var(--panel-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            line-height: 1.6;
+        }
+        
+        .explanation h3 { margin-top: 0; }
+
+        /* Custom Checkbox */
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: normal;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 800px) {
+            .grid-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>ECE 210: Sampling, Reconstruction &amp; Aliasing</h1>
+        <p class="subtitle">Explore how time-domain sampling mathematically replicates spectra, and how low-pass filtering reconstructs the signal.</p>
+    </div>
+
+    <div class="controls">
+        <div class="control-group">
+            <label for="signal-preset">Input Signal <span class="math">x(t)</span></label>
+            <select id="signal-preset">
+                <option value="cos_low">1 Hz Cosine (Power Signal)</option>
+                <option value="cos_high">6 Hz Cosine (Aliasing Demo)</option>
+                <option value="twotone">1 Hz + 3 Hz Cosines (Two-Tone)</option>
+                <option value="sinc">Sinc Pulse (Energy Signal, BW = 2 Hz)</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label>Sampling Frequency <span class="math">f<sub>s</sub></span></label>
+            <div class="control-row">
+                <input type="range" id="fs-slider" min="1" max="15" step="0.5" value="8">
+                <span class="slider-val" id="fs-val">8.0 Hz</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label>Visual Toggles</label>
+            <label class="toggle-label"><input type="checkbox" id="toggle-lpf" checked=""> Show LPF / Reconstruction</label>
+            <label class="toggle-label"><input type="checkbox" id="toggle-sincs"> Show Time-Domain Sincs</label>
+            <label class="toggle-label"><input type="checkbox" id="toggle-alias"> Show "Impersonator" Signal</label>
+        </div>
+
+        <div class="control-group" style="align-items: flex-end;">
+            <div id="nyquist-badge" class="badge good">Nyquist Satisfied</div>
+            <div style="font-size: 0.85rem; margin-top: 5px; color: var(--text-light);">
+                Required <span class="math">f<sub>s</sub> &gt; <span id="req-fs">2.0</span> Hz</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <!-- Time Domain Column -->
+        <div class="panel">
+            <h2>1. Original Analog Signal <span style="color:var(--primary)" class="math">x(t)</span></h2>
+            <canvas id="canvas-t1" width="560" height="200"></canvas>
+        </div>
+        
+        <!-- Frequency Domain Column -->
+        <div class="panel">
+            <h2>1. Original Spectrum <span style="color:var(--primary)" class="math">X(f)</span></h2>
+            <canvas id="canvas-f1" width="560" height="200"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>2. Ideal Samples <span style="color:var(--samples)" class="math">x(nT<sub>s</sub>)</span></h2>
+            <canvas id="canvas-t2" width="560" height="200"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>2. Replicated Spectrum <span style="color:var(--samples)" class="math">X<sub>s</sub>(f)</span></h2>
+            <canvas id="canvas-f2" width="560" height="200"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>3. Reconstructed Signal <span style="color:var(--recon)" class="math">x̂(t)</span></h2>
+            <canvas id="canvas-t3" width="560" height="200"></canvas>
+        </div>
+
+        <div class="panel">
+            <h2>3. Recovered Spectrum <span style="color:var(--recon)" class="math">X̂(f)</span></h2>
+            <canvas id="canvas-f3" width="560" height="200"></canvas>
+        </div>
+    </div>
+
+    <div class="explanation">
+        <h3>Instructor Notes &amp; Conceptual Guide</h3>
+        <p><strong>Energy vs. Power Signals:</strong> In the presets, the <em>Sinc Pulse</em> is an <strong>Energy Signal</strong> (finite energy, decays to 0). Its Fourier Transform is a continuous rectangular function. The <em>Cosines</em> are <strong>Power Signals</strong> (infinite energy, finite average power, never decay). Because they do not decay, the standard Fourier integral diverges. We mathematically represent them in the frequency domain using <strong>Dirac delta functions (impulses)</strong>, shown here as arrows.</p>
+        <p><strong>The Mechanism of Sampling:</strong> Sampling in the time domain is mathematically modeled as multiplying $x(t)$ by an impulse train. Multiplication in time corresponds to <em>convolution in frequency</em>. Convolving a spectrum with an impulse train creates infinitely many shifted copies (replicas) of the original spectrum spaced by $f_s$.</p>
+        <p><strong>Nyquist Criterion &amp; Aliasing:</strong> To recover the signal, we apply an ideal Low-Pass Filter (LPF) from $-f_s/2$ to $f_s/2$. If $f_s &gt; 2B$, the central replica is isolated, and the LPF perfectly extracts $X(f)$. If $f_s \le 2B$, the replicas overlap (<strong>Aliasing</strong>). <em>Try the 6 Hz Cosine preset with $f_s = 5$ Hz.</em> Turn on the "Show Impersonator Signal" toggle. You will see that the samples of a 6 Hz cosine perfectly match a 1 Hz cosine. Because the LPF only extracts frequencies up to $2.5$ Hz, it outputs the 1 Hz "impersonator" instead of the 6 Hz original.</p>
+        <p><strong>Time-Domain Reconstruction:</strong> Passing impulses through a brick-wall LPF in frequency corresponds to convolving the samples with a $\text{sinc}$ function in time. <em>Turn on "Show Time-Domain Sincs"</em> to see how the mathematical formula $\hat{x}(t) = \sum x(nT_s)\text{sinc}(f_s(t - nT_s))$ physically rebuilds the smooth analog waveform.</p>
+    </div>
+
+<script>
+/**
+ * ECE 210 Sampling and Aliasing Engine
+ * Vanilla JS implementation.
+ */
+
+// --- Presets Definition ---
+const PRESETS = {
+    'cos_low': { type: 'impulse', f_comps: [{f: 1, a: 1}], B: 1 },
+    'cos_high': { type: 'impulse', f_comps: [{f: 6, a: 1}], B: 6 },
+    'twotone': { type: 'impulse', f_comps: [{f: 1, a: 1}, {f: 3, a: 0.5}], B: 3 },
+    'sinc': { type: 'continuous', B: 2 } // sinc(2*pi*B*t) -> rect(f / 2B)
+};
+
+// --- Application State ---
+let state = {
+    preset: 'cos_low',
+    fs: 8.0,
+    showLPF: true,
+    showSincs: false,
+    showAlias: false,
+    tMin: -2, tMax: 2,
+    fMin: -10, fMax: 10
+};
+
+// --- DOM Elements ---
+const els = {
+    preset: document.getElementById('signal-preset'),
+    fsSlider: document.getElementById('fs-slider'),
+    fsVal: document.getElementById('fs-val'),
+    toggleLpf: document.getElementById('toggle-lpf'),
+    toggleSincs: document.getElementById('toggle-sincs'),
+    toggleAlias: document.getElementById('toggle-alias'),
+    badge: document.getElementById('nyquist-badge'),
+    reqFs: document.getElementById('req-fs'),
+    cT1: document.getElementById('canvas-t1'),
+    cF1: document.getElementById('canvas-f1'),
+    cT2: document.getElementById('canvas-t2'),
+    cF2: document.getElementById('canvas-f2'),
+    cT3: document.getElementById('canvas-t3'),
+    cF3: document.getElementById('canvas-f3')
+};
+
+// --- Math Utilities ---
+const sinc = (x) => (x === 0) ? 1 : Math.sin(Math.PI * x) / (Math.PI * x);
+
+// Get exact time-domain value for continuous signal
+function getXt(t, sig) {
+    if (sig.type === 'impulse') {
+        let val = 0;
+        sig.f_comps.forEach(c => val += c.a * Math.cos(2 * Math.PI * c.f * t));
+        return val;
+    } else if (sig.type === 'continuous') {
+        // We defined sinc preset as sinc(2*B*t) so it has bandwidth B
+        return Math.sin(2 * Math.PI * sig.B * t) / (2 * Math.PI * sig.B * t || 1);
+    }
+}
+
+// Get the apparent (aliased) frequency for a given f0 and fs
+function getAliasedFreq(f0, fs) {
+    let k = Math.round(f0 / fs);
+    return Math.abs(f0 - k * fs);
+}
+
+// --- Plotting Class ---
+class Plotter {
+    constructor(canvas, xMin, xMax, yMin, yMax, xLabel, yLabel) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext('2d');
+        this.xMin = xMin; this.xMax = xMax;
+        this.yMin = yMin; this.yMax = yMax;
+        this.xLabel = xLabel; this.yLabel = yLabel;
+        this.resize();
+    }
+
+    resize() {
+        const rect = this.canvas.getBoundingClientRect();
+        const dpr = window.devicePixelRatio || 1;
+        this.canvas.width = rect.width * dpr;
+        this.canvas.height = rect.height * dpr;
+        this.ctx.scale(dpr, dpr);
+        this.w = rect.width;
+        this.h = rect.height;
+    }
+
+    mapX(x) { return (x - this.xMin) / (this.xMax - this.xMin) * this.w; }
+    mapY(y) { return this.h - (y - this.yMin) / (this.yMax - this.yMin) * this.h; }
+
+    clear() {
+        this.ctx.clearRect(0, 0, this.w, this.h);
+        this.drawAxes();
+    }
+
+    drawAxes() {
+        this.ctx.strokeStyle = '#cbd5e1';
+        this.ctx.lineWidth = 1;
+        
+        // Grid lines (simplified)
+        this.ctx.beginPath();
+        for (let x = Math.ceil(this.xMin); x <= Math.floor(this.xMax); x++) {
+            let px = this.mapX(x);
+            this.ctx.moveTo(px, 0); this.ctx.lineTo(px, this.h);
+        }
+        for (let y = Math.ceil(this.yMin); y <= Math.floor(this.yMax); y++) {
+            let py = this.mapY(y);
+            this.ctx.moveTo(0, py); this.ctx.lineTo(this.w, py);
+        }
+        this.ctx.stroke();
+
+        // Main axes
+        this.ctx.strokeStyle = '#64748b';
+        this.ctx.lineWidth = 1.5;
+        this.ctx.beginPath();
+        let zeroY = this.mapY(0);
+        let zeroX = this.mapX(0);
+        
+        if(zeroY >= 0 && zeroY <= this.h) {
+            this.ctx.moveTo(0, zeroY); this.ctx.lineTo(this.w, zeroY);
+        }
+        if(zeroX >= 0 && zeroX <= this.w) {
+            this.ctx.moveTo(zeroX, 0); this.ctx.lineTo(zeroX, this.h);
+        }
+        this.ctx.stroke();
+
+        // Labels
+        this.ctx.fillStyle = '#64748b';
+        this.ctx.font = '12px system-ui';
+        this.ctx.fillText(this.xLabel, this.w - 30, zeroY - 5);
+    }
+
+    plotFunction(fn, color, lineDash = []) {
+        this.ctx.beginPath();
+        this.ctx.strokeStyle = color;
+        this.ctx.lineWidth = 2;
+        this.ctx.setLineDash(lineDash);
+        
+        let steps = 400;
+        let dx = (this.xMax - this.xMin) / steps;
+        
+        let first = true;
+        for (let i = 0; i <= steps; i++) {
+            let x = this.xMin + i * dx;
+            let y = fn(x);
+            if (first) { this.ctx.moveTo(this.mapX(x), this.mapY(y)); first = false; }
+            else { this.ctx.lineTo(this.mapX(x), this.mapY(y)); }
+        }
+        this.ctx.stroke();
+        this.ctx.setLineDash([]);
+    }
+
+    plotStem(x, y, color, r = 4) {
+        let px = this.mapX(x);
+        let py = this.mapY(y);
+        let py0 = this.mapY(0);
+        
+        this.ctx.strokeStyle = color;
+        this.ctx.fillStyle = color;
+        this.ctx.lineWidth = 1.5;
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(px, py0);
+        this.ctx.lineTo(px, py);
+        this.ctx.stroke();
+        
+        this.ctx.beginPath();
+        this.ctx.arc(px, py, r, 0, 2*Math.PI);
+        this.ctx.fill();
+    }
+
+    plotImpulse(x, amp, color) {
+        if(x < this.xMin || x > this.xMax) return;
+        let px = this.mapX(x);
+        let py = this.mapY(amp);
+        let py0 = this.mapY(0);
+        
+        this.ctx.strokeStyle = color;
+        this.ctx.fillStyle = color;
+        this.ctx.lineWidth = 2;
+        
+        this.ctx.beginPath();
+        this.ctx.moveTo(px, py0);
+        this.ctx.lineTo(px, py);
+        this.ctx.stroke();
+        
+        // Arrow head
+        let dir = amp > 0 ? 1 : -1;
+        this.ctx.beginPath();
+        this.ctx.moveTo(px, py);
+        this.ctx.lineTo(px - 4, py + dir*6);
+        this.ctx.lineTo(px + 4, py + dir*6);
+        this.ctx.fill();
+    }
+
+    fillRegion(x1, x2, color) {
+        let px1 = this.mapX(x1);
+        let px2 = this.mapX(x2);
+        this.ctx.fillStyle = color;
+        this.ctx.fillRect(px1, 0, px2 - px1, this.h);
+    }
+    
+    fillSpectrum(fn, color, xLimit) {
+        this.ctx.beginPath();
+        this.ctx.fillStyle = color;
+        
+        let steps = 400;
+        let dx = (this.xMax - this.xMin) / steps;
+        
+        this.ctx.moveTo(this.mapX(this.xMin), this.mapY(0));
+        
+        for (let i = 0; i <= steps; i++) {
+            let x = this.xMin + i * dx;
+            if(Math.abs(x) > xLimit) {
+                 this.ctx.lineTo(this.mapX(x), this.mapY(0));
+            } else {
+                 let y = fn(x);
+                 this.ctx.lineTo(this.mapX(x), this.mapY(y));
+            }
+        }
+        this.ctx.lineTo(this.mapX(this.xMax), this.mapY(0));
+        this.ctx.fill();
+    }
+}
+
+// --- Main Render Logic ---
+let plots = {};
+
+function init() {
+    plots.t1 = new Plotter(els.cT1, state.tMin, state.tMax, -1.5, 1.5, "t (s)");
+    plots.f1 = new Plotter(els.cF1, state.fMin, state.fMax, -0.2, 1.2, "f (Hz)");
+    plots.t2 = new Plotter(els.cT2, state.tMin, state.tMax, -1.5, 1.5, "t (s)");
+    plots.f2 = new Plotter(els.cF2, state.fMin, state.fMax, -0.2, 1.2, "f (Hz)");
+    plots.t3 = new Plotter(els.cT3, state.tMin, state.tMax, -1.5, 1.5, "t (s)");
+    plots.f3 = new Plotter(els.cF3, state.fMin, state.fMax, -0.2, 1.2, "f (Hz)");
+
+    bindEvents();
+    window.addEventListener('resize', () => {
+        Object.values(plots).forEach(p => p.resize());
+        render();
+    });
+    
+    updateState();
+}
+
+function bindEvents() {
+    els.preset.addEventListener('change', (e) => { state.preset = e.target.value; updateState(); });
+    els.fsSlider.addEventListener('input', (e) => { state.fs = parseFloat(e.target.value); updateState(); });
+    els.toggleLpf.addEventListener('change', (e) => { state.showLPF = e.target.checked; render(); });
+    els.toggleSincs.addEventListener('change', (e) => { state.showSincs = e.target.checked; render(); });
+    els.toggleAlias.addEventListener('change', (e) => { state.showAlias = e.target.checked; render(); });
+}
+
+function updateState() {
+    const sig = PRESETS[state.preset];
+    els.fsVal.textContent = state.fs.toFixed(1) + " Hz";
+    els.reqFs.textContent = (2 * sig.B).toFixed(1);
+    
+    if (state.fs > 2 * sig.B) {
+        els.badge.className = "badge good";
+        els.badge.textContent = "Nyquist Satisfied";
+    } else {
+        els.badge.className = "badge bad";
+        els.badge.textContent = "Aliasing!";
+    }
+    
+    els.toggleAlias.disabled = (sig.type !== 'impulse');
+    
+    render();
+}
+
+function render() {
+    Object.values(plots).forEach(p => p.clear());
+    const sig = PRESETS[state.preset];
+    const fs = state.fs;
+    
+    // --- 1. Original Signal & Spectrum ---
+    plots.t1.plotFunction(t => getXt(t, sig), 'var(--primary)');
+    
+    if (sig.type === 'impulse') {
+        sig.f_comps.forEach(c => {
+            plots.f1.plotImpulse(c.f, c.a/2, 'var(--primary)');
+            plots.f1.plotImpulse(-c.f, c.a/2, 'var(--primary)');
+        });
+    } else {
+        // Sinc Fourier Transform is a rect
+        plots.f1.fillSpectrum(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, 'var(--primary)', sig.B);
+        plots.f1.plotFunction(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, 'var(--primary)');
+    }
+
+    // --- 2. Sampled Signal & Spectrum ---
+    // Samples in Time
+    const samplePts = [];
+    for (let t = state.tMin; t <= state.tMax; t += 1/fs) {
+        let val = getXt(t, sig);
+        samplePts.push({t: t, v: val});
+        plots.t2.plotStem(t, val, 'var(--samples)');
+    }
+    
+    // Spectrum Replicas
+    if (sig.type === 'impulse') {
+        for(let k = -10; k <= 10; k++) {
+            sig.f_comps.forEach(c => {
+                plots.f2.plotImpulse(c.f + k*fs, c.a/2, 'var(--samples)');
+                plots.f2.plotImpulse(-c.f + k*fs, c.a/2, 'var(--samples)');
+            });
+        }
+    } else {
+        // Add up rects
+        let repSpec = (f) => {
+            let sum = 0;
+            for(let k = -10; k <= 10; k++) {
+                let shiftedF = f - k*fs;
+                if(Math.abs(shiftedF) <= sig.B) sum += 1/(2*sig.B);
+            }
+            return sum;
+        };
+        plots.f2.fillSpectrum(repSpec, 'rgba(15, 23, 42, 0.3)', 20);
+        plots.f2.plotFunction(repSpec, 'var(--samples)');
+    }
+
+    // --- 3. Reconstructed Signal & Spectrum ---
+    if (state.showLPF) {
+        plots.f2.fillRegion(-fs/2, fs/2, 'var(--lpf-fill)');
+        plots.f3.fillRegion(-fs/2, fs/2, 'var(--lpf-fill)');
+    }
+
+    // Recovered Spectrum
+    if (sig.type === 'impulse') {
+        let recImps = [];
+        for(let k = -10; k <= 10; k++) {
+            sig.f_comps.forEach(c => {
+                let f1 = c.f + k*fs;
+                let f2 = -c.f + k*fs;
+                if(state.showLPF) {
+                    if(Math.abs(f1) <= fs/2) recImps.push({f: f1, a: c.a/2});
+                    if(Math.abs(f2) <= fs/2) recImps.push({f: f2, a: c.a/2});
+                } else {
+                    recImps.push({f: f1, a: c.a/2});
+                    recImps.push({f: f2, a: c.a/2});
+                }
+            });
+        }
+        
+        // Sum overlapping impulses for reconstruction plot
+        let finalImps = {};
+        recImps.forEach(imp => {
+            let key = imp.f.toFixed(4);
+            if(finalImps[key]) finalImps[key].a += imp.a;
+            else finalImps[key] = {f: imp.f, a: imp.a};
+        });
+
+        Object.values(finalImps).forEach(imp => {
+            plots.f3.plotImpulse(imp.f, imp.a, 'var(--recon)');
+        });
+        
+    } else {
+        let recSpec = (f) => {
+            if(state.showLPF && Math.abs(f) > fs/2) return 0;
+            let sum = 0;
+            for(let k = -10; k <= 10; k++) {
+                let shiftedF = f - k*fs;
+                if(Math.abs(shiftedF) <= sig.B) sum += 1/(2*sig.B);
+            }
+            return sum;
+        };
+        plots.f3.fillSpectrum(recSpec, 'rgba(217, 119, 6, 0.4)', state.showLPF ? fs/2 : 20);
+        plots.f3.plotFunction(recSpec, 'var(--recon)');
+    }
+
+    // Time Domain Reconstruction
+    let reconstructFn = (t) => {
+        let val = 0;
+        samplePts.forEach(pt => {
+            // Apply sinc interpolation if LPF is on, else it's just impulses (hard to plot continuously, default to sinc)
+            if(state.showLPF) {
+                val += pt.v * sinc(fs * (t - pt.t));
+            } else {
+                 // Without LPF, reconstruction fails completely, but to visualize, we just draw the samples
+            }
+        });
+        return val;
+    };
+
+    if (state.showLPF) {
+        plots.t3.plotFunction(reconstructFn, 'var(--recon)');
+        
+        if (state.showSincs) {
+            samplePts.forEach(pt => {
+                plots.t3.plotFunction(t => pt.v * sinc(fs * (t - pt.t)), 'rgba(217, 119, 6, 0.3)', [5, 5]);
+            });
+        }
+    }
+    
+    // Draw samples on top of reconstruction
+    samplePts.forEach(pt => {
+        plots.t3.plotStem(pt.t, pt.v, 'var(--samples)', 3);
+    });
+
+    // Show Aliased Alternative (Impersonator)
+    if (state.showAlias && sig.type === 'impulse' && state.fs <= 2*sig.B) {
+        // Draw the aliased cosine in the bottom plot
+        let aliasFn = (t) => {
+            let val = 0;
+            sig.f_comps.forEach(c => {
+                let fa = getAliasedFreq(c.f, fs);
+                val += c.a * Math.cos(2 * Math.PI * fa * t);
+            });
+            return val;
+        };
+        plots.t3.plotFunction(aliasFn, 'var(--alias)', [5, 5]);
+    }
+}
+
+// Start
+init();
+
+</script>
+
+</body></html>
