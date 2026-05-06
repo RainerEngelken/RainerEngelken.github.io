@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(40).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Laplace Transform &amp; Region of Convergence</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            --success-color: #28A745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select, input[type="range"] {
+            padding: 0.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+        }
+
+        .slider-value {
+            font-weight: bold;
+            color: var(--uiuc-blue);
+            min-width: 40px;
+        }
+
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            border: 1px solid #EEEEEE;
+            background-color: #FAFAFA;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card.orange-accent {
+            border-left-color: var(--uiuc-orange);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.8rem;
+            font-size: 1.05rem;
+        }
+
+        .status-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .status-yes {
+            background-color: #D4EDDA;
+            color: var(--success-color);
+        }
+
+        .status-no {
+            background-color: #F8D7DA;
+            color: #DC3545;
+        }
+
+        .math {
+            font-family: 'Courier New', Courier, monospace;
+            background: #F1F1F1;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Checkbox toggle styling */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="example-select"><strong>Signal f(t):</strong></label>
+        <select id="example-select">
+            <option value="exp_decay">Exponential Decay: e^{-t}u(t)</option>
+            <option value="exp_growth">Exponential Growth: e^{t}u(t)</option>
+            <option value="sum_exp">Sum of Exponentials: (e^{-t} + e^{t})u(t)</option>
+            <option value="rect_pulse">Rectangular Pulse: u(t) - u(t-1)</option>
+        </select>
+    </div>
+    
+    <div class="control-group">
+        <label for="sigma-slider"><strong>Real part of s (σ):</strong></label>
+        <input type="range" id="sigma-slider" min="-2.5" max="2.5" step="0.1" value="0.5">
+        <span class="slider-value" id="sigma-val">2.3</span>
+    </div>
+
+    <div class="control-group">
+        <label class="toggle-container">
+            <input type="checkbox" id="jw-toggle" checked="">
+            <strong>Highlight jω-axis</strong>
+        </label>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        <div class="panel">
+            <h2>Time Domain Signal <br><span class="math">f(t)</span></h2>
+            <canvas id="canvas-ft" width="400" height="300"></canvas>
+        </div>
+        
+        <div class="panel">
+            <h2>Complex s-plane <br><span class="math">s = σ + jω</span></h2>
+            <canvas id="canvas-splane" width="400" height="300"></canvas>
+        </div>
+        
+        <div class="panel">
+            <h2>Weighted Signal Area <br><span class="math">f(t)e^{-σt}</span></h2>
+            <canvas id="canvas-weighted" width="400" height="300"></canvas>
+        </div>
+    </div>
+
+    <div class="info-cards">
+        <div class="card orange-accent">
+            <h3>What to notice</h3>
+            <ul>
+                <li>Move the <strong>σ</strong> slider to change the real part of the complex frequency variable <em>s</em>.</li>
+                <li>Watch how the <span class="math">e^{-σt}</span> term reweights the signal in the third panel.</li>
+                <li>If the weighted signal completely decays, its integral is finite. This means the Laplace transform exists for that specific <strong>σ</strong>.</li>
+                <li>The Fourier transform is simply the Laplace transform evaluated exactly on the <strong>jω</strong> axis (<span class="math">σ = 0</span>).</li>
+                <li>If the <strong>jω</strong> axis lies inside the shaded Region of Convergence (ROC), the Fourier transform exists.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>System Analysis Status</h3>
+            <div class="status-grid">
+                <span>Laplace Transform exists at current <strong>σ</strong>?</span>
+                <div id="status-laplace" class="status-badge status-yes">Yes</div>
+
+                <span>Fourier Transform exists (<span class="math">σ = 0</span> in ROC)?</span>
+                <div id="status-fourier" class="status-badge status-yes">Yes</div>
+
+                <span>BIBO Stable (if this is impulse response <span class="math">h(t)</span>)?</span>
+                <div id="status-bibo" class="status-badge status-yes">Yes</div>
+            </div>
+            <p style="margin-top: 1.5rem; font-size: 0.9rem; color: var(--text-light);">
+                <em>Note: For causal LTIC systems, BIBO stability requires all poles to be in the strict left-half plane, which guarantees the ROC includes the jω-axis.</em>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // System Data Models
+    const examples = {
+        'exp_decay': {
+            ft: (t) => t >= 0 ? Math.exp(-t) : 0,
+            poles: [-1],
+            rocMin: -1,
+            rocMax: Infinity,
+            description: "Exponential Decay"
+        },
+        'exp_growth': {
+            ft: (t) => t >= 0 ? Math.exp(t) : 0,
+            poles: [1],
+            rocMin: 1,
+            rocMax: Infinity,
+            description: "Exponential Growth"
+        },
+        'sum_exp': {
+            ft: (t) => t >= 0 ? Math.exp(-t) + Math.exp(t) : 0,
+            poles: [-1, 1],
+            rocMin: 1,
+            rocMax: Infinity,
+            description: "Sum of Exponentials"
+        },
+        'rect_pulse': {
+            ft: (t) => (t >= 0 && t <= 1) ? 1 : 0,
+            poles: [], 
+            rocMin: -Infinity,
+            rocMax: Infinity,
+            description: "Rectangular Pulse"
+        }
+    };
+
+    // State
+    let currentState = {
+        exampleId: 'exp_decay',
+        sigma: 0.5,
+        showJw: true
+    };
+
+    // Canvas Contexts
+    const ctxFt = document.getElementById('canvas-ft').getContext('2d');
+    const ctxSplane = document.getElementById('canvas-splane').getContext('2d');
+    const ctxWeighted = document.getElementById('canvas-weighted').getContext('2d');
+
+    // DOM Elements
+    const exampleSelect = document.getElementById('example-select');
+    const sigmaSlider = document.getElementById('sigma-slider');
+    const sigmaVal = document.getElementById('sigma-val');
+    const jwToggle = document.getElementById('jw-toggle');
+    
+    const statusLaplace = document.getElementById('status-laplace');
+    const statusFourier = document.getElementById('status-fourier');
+    const statusBibo = document.getElementById('status-bibo');
+
+    // Colors
+    const COLOR_UIUC_BLUE = '#13294B';
+    const COLOR_UIUC_ORANGE = '#E84A27';
+    const COLOR_AXIS = '#999999';
+    const COLOR_ROC = 'rgba(19, 41, 75, 0.15)';
+    const COLOR_CONVERGE = 'rgba(40, 167, 69, 0.3)';
+    const COLOR_DIVERGE = 'rgba(232, 74, 39, 0.3)';
+
+    // Initialization
+    function init() {
+        exampleSelect.addEventListener('change', (e) => {
+            currentState.exampleId = e.target.value;
+            update();
+        });
+
+        sigmaSlider.addEventListener('input', (e) => {
+            currentState.sigma = parseFloat(e.target.value);
+            sigmaVal.textContent = currentState.sigma.toFixed(1);
+            update();
+        });
+
+        jwToggle.addEventListener('change', (e) => {
+            currentState.showJw = e.target.checked;
+            update();
+        });
+
+        update();
+    }
+
+    // Main Update Loop
+    function update() {
+        const ex = examples[currentState.exampleId];
+        const sigma = currentState.sigma;
+
+        // Determine Statuses
+        const laplaceExists = sigma > ex.rocMin && sigma < ex.rocMax;
+        const fourierExists = 0 > ex.rocMin && 0 < ex.rocMax;
+        const isBibo = fourierExists; // True for these causal examples if jw axis in ROC
+
+        // Update DOM Statuses
+        updateStatusBadge(statusLaplace, laplaceExists);
+        updateStatusBadge(statusFourier, fourierExists);
+        updateStatusBadge(statusBibo, isBibo);
+
+        // Render Canvases
+        renderFt(ex);
+        renderSPlane(ex, sigma, currentState.showJw);
+        renderWeighted(ex, sigma, laplaceExists);
+    }
+
+    function updateStatusBadge(element, isYes) {
+        if (isYes) {
+            element.textContent = "Yes";
+            element.className = "status-badge status-yes";
+        } else {
+            element.textContent = "No";
+            element.className = "status-badge status-no";
+        }
+    }
+
+    // Drawing Utilities
+    function clearCanvas(ctx, width, height) {
+        ctx.clearRect(0, 0, width, height);
+    }
+
+    function drawAxes(ctx, width, height, xMin, xMax, yMin, yMax, labelX, labelY) {
+        ctx.beginPath();
+        ctx.strokeStyle = COLOR_AXIS;
+        ctx.lineWidth = 1;
+
+        // Map 0,0
+        const x0 = mapVal(0, xMin, xMax, 0, width);
+        const y0 = mapVal(0, yMin, yMax, height, 0);
+
+        // X axis
+        if (y0 >= 0 && y0 <= height) {
+            ctx.moveTo(0, y0);
+            ctx.lineTo(width, y0);
+        }
+        
+        // Y axis
+        if (x0 >= 0 && x0 <= width) {
+            ctx.moveTo(x0, 0);
+            ctx.lineTo(x0, height);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = COLOR_AXIS;
+        ctx.font = "12px sans-serif";
+        if (y0 >= 0 && y0 <= height) ctx.fillText(labelX, width - 25, y0 - 5);
+        if (x0 >= 0 && x0 <= width) ctx.fillText(labelY, x0 + 5, 15);
+    }
+
+    function mapVal(val, min, max, screenMin, screenMax) {
+        return screenMin + (val - min) / (max - min) * (screenMax - screenMin);
+    }
+
+    // Panel 1: f(t)
+    function renderFt(ex) {
+        const width = ctxFt.canvas.width;
+        const height = ctxFt.canvas.height;
+        clearCanvas(ctxFt, width, height);
+        
+        const tMin = -1;
+        const tMax = 4;
+        const yMin = -0.5;
+        const yMax = 3;
+
+        drawAxes(ctxFt, width, height, tMin, tMax, yMin, yMax, "t", "f(t)");
+
+        ctxFt.beginPath();
+        ctxFt.strokeStyle = COLOR_UIUC_BLUE;
+        ctxFt.lineWidth = 2;
+
+        let first = true;
+        for (let px = 0; px <= width; px++) {
+            const t = mapVal(px, 0, width, tMin, tMax);
+            const val = ex.ft(t);
+            const py = mapVal(val, yMin, yMax, height, 0);
+
+            // Handle jumps roughly for visual clarity
+            if (first) {
+                ctxFt.moveTo(px, py);
+                first = false;
+            } else {
+                ctxFt.lineTo(px, py);
+            }
+        }
+        ctxFt.stroke();
+    }
+
+    // Panel 2: s-plane
+    function renderSPlane(ex, currentSigma, showJw) {
+        const width = ctxSplane.canvas.width;
+        const height = ctxSplane.canvas.height;
+        clearCanvas(ctxSplane, width, height);
+
+        const sMin = -3;
+        const sMax = 3;
+
+        // Draw ROC Shading
+        if (ex.rocMin < Infinity) {
+            const pxMin = Math.max(0, mapVal(ex.rocMin, sMin, sMax, 0, width));
+            const pxMax = width;
+            ctxSplane.fillStyle = COLOR_ROC;
+            ctxSplane.fillRect(pxMin, 0, pxMax - pxMin, height);
+        }
+
+        drawAxes(ctxSplane, width, height, sMin, sMax, sMin, sMax, "Re(s)", "Im(s)");
+
+        // Highlight jw axis
+        if (showJw) {
+            const pxJw = mapVal(0, sMin, sMax, 0, width);
+            ctxSplane.beginPath();
+            ctxSplane.strokeStyle = COLOR_UIUC_BLUE;
+            ctxSplane.lineWidth = 3;
+            ctxSplane.moveTo(pxJw, 0);
+            ctxSplane.lineTo(pxJw, height);
+            ctxSplane.stroke();
+            
+            // Text annotation for jw axis
+            ctxSplane.fillStyle = COLOR_UIUC_BLUE;
+            ctxSplane.font = "bold 12px sans-serif";
+            ctxSplane.fillText("jω-axis", pxJw + 8, height - 20);
+        }
+
+        // Draw current sigma line
+        const pxSigma = mapVal(currentSigma, sMin, sMax, 0, width);
+        ctxSplane.beginPath();
+        ctxSplane.strokeStyle = COLOR_UIUC_ORANGE;
+        ctxSplane.lineWidth = 2;
+        ctxSplane.setLineDash([5, 5]);
+        ctxSplane.moveTo(pxSigma, 0);
+        ctxSplane.lineTo(pxSigma, height);
+        ctxSplane.stroke();
+        ctxSplane.setLineDash([]);
+        
+        ctxSplane.fillStyle = COLOR_UIUC_ORANGE;
+        ctxSplane.fillText(`σ=${currentSigma.toFixed(1)}`, pxSigma + 5, 30);
+
+        // Draw Poles
+        ctxSplane.strokeStyle = 'red';
+        ctxSplane.lineWidth = 2;
+        const crossSize = 6;
+        ex.poles.forEach(p => {
+            const px = mapVal(p, sMin, sMax, 0, width);
+            const py = mapVal(0, sMin, sMax, height, 0); // Poles are purely real in these examples
+
+            ctxSplane.beginPath();
+            ctxSplane.moveTo(px - crossSize, py - crossSize);
+            ctxSplane.lineTo(px + crossSize, py + crossSize);
+            ctxSplane.moveTo(px + crossSize, py - crossSize);
+            ctxSplane.lineTo(px - crossSize, py + crossSize);
+            ctxSplane.stroke();
+        });
+    }
+
+    // Panel 3: Weighted signal
+    function renderWeighted(ex, sigma, converges) {
+        const width = ctxWeighted.canvas.width;
+        const height = ctxWeighted.canvas.height;
+        clearCanvas(ctxWeighted, width, height);
+
+        const tMin = -1;
+        const tMax = 4;
+        const yMin = -0.5;
+        const yMax = 4;
+
+        drawAxes(ctxWeighted, width, height, tMin, tMax, yMin, yMax, "t", "Amplitude");
+
+        ctxWeighted.beginPath();
+        ctxWeighted.strokeStyle = COLOR_UIUC_BLUE;
+        ctxWeighted.lineWidth = 2;
+
+        let first = true;
+        const y0 = mapVal(0, yMin, yMax, height, 0);
+        
+        // Save points for fill
+        let points = [];
+
+        for (let px = 0; px <= width; px++) {
+            const t = mapVal(px, 0, width, tMin, tMax);
+            let val = ex.ft(t) * Math.exp(-sigma * t);
+            
+            // Cap value for drawing purposes
+            if (val > yMax * 2) val = yMax * 2; 
+
+            const py = mapVal(val, yMin, yMax, height, 0);
+            points.push({x: px, y: py});
+
+            if (first) {
+                ctxWeighted.moveTo(px, py);
+                first = false;
+            } else {
+                ctxWeighted.lineTo(px, py);
+            }
+        }
+        ctxWeighted.stroke();
+
+        // Fill area under curve
+        ctxWeighted.beginPath();
+        ctxWeighted.moveTo(points[0].x, y0);
+        points.forEach(p => {
+            ctxWeighted.lineTo(p.x, p.y);
+        });
+        ctxWeighted.lineTo(points[points.length - 1].x, y0);
+        ctxWeighted.closePath();
+
+        ctxWeighted.fillStyle = converges ? COLOR_CONVERGE : COLOR_DIVERGE;
+        ctxWeighted.fill();
+        
+        // Label the area status
+        ctxWeighted.fillStyle = converges ? "#1e7e34" : "#c82333";
+        ctxWeighted.font = "bold 14px sans-serif";
+        ctxWeighted.fillText(converges ? "Finite Area" : "Infinite Area (Diverges)", 10, 25);
+    }
+
+    // Start
+    window.onload = init;
+
+</script>
+
+</body></html>

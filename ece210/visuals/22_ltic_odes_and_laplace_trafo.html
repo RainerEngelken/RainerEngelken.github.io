@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(48).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: LTIC ODEs and Laplace Transforms</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            
+            --zsr-color: #2196F3;
+            --zir-color: #E84A27;
+            --success-color: #28A745;
+            --danger-color: #DC3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        /* Controls */
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select, button {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        button.primary {
+            background-color: var(--uiuc-blue);
+            color: white;
+            border-color: var(--uiuc-blue);
+            font-weight: 600;
+        }
+        button.primary:hover { background-color: #1a365d; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
+        input[type="checkbox"] {
+            width: 1.2rem;
+            height: 1.2rem;
+            accent-color: var(--uiuc-orange);
+            cursor: pointer;
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+            align-items: center;
+        }
+        .step-dot {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .step-dot.active { background: var(--uiuc-blue); color: white; }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            min-height: 160px;
+        }
+
+        .panel.locked::after {
+            content: "Revealed in Step " attr(data-step);
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 600;
+            border-radius: 8px;
+            z-index: 10;
+            border: 1px dashed var(--border-color);
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Typography & Math */
+        .math-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            font-size: 1.15rem;
+            align-items: center;
+            width: 100%;
+        }
+
+        .equation {
+            background: #F8F9FA;
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+            text-align: center;
+            width: 90%;
+            line-height: 1.8;
+        }
+
+        .m-inline {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .m-inline sub, .m-inline sup { font-style: normal; font-size: 0.7em; }
+        .m-inline .rm { font-style: normal; }
+
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin: 0 0.2rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            line-height: 1.2;
+        }
+        .frac .num {
+            border-bottom: 1px solid currentColor;
+            padding: 0 0.3rem;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .frac .den {
+            padding: 0 0.3rem;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .underbrace {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.5rem;
+        }
+        .underbrace-math { color: var(--text-main); }
+        .brace {
+            width: 100%;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            height: 6px;
+            margin-top: 4px;
+            border-radius: 3px 3px 0 0;
+            border-bottom: none;
+            transform: rotate(180deg);
+        }
+        .underbrace-text {
+            font-size: 0.85rem;
+            font-family: sans-serif;
+            font-style: normal;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+
+        .highlight-ic { color: var(--zir-color); font-weight: bold; }
+        .highlight-sys { color: var(--uiuc-blue); font-weight: bold; }
+
+        .badge-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin-top: 0.5rem;
+            background: #f1f3f5;
+            padding: 1rem;
+            border-radius: 6px;
+            font-size: 1.05rem;
+        }
+        
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+            display: inline-block;
+        }
+        .badge-stable { background-color: #D4EDDA; color: var(--success-color); }
+        .badge-unstable { background-color: #F8D7DA; color: var(--danger-color); }
+
+        /* Info Card */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-orange);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-top: 0.5rem;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .notice-list {
+            margin: 0;
+            padding-left: 1.5rem;
+            line-height: 1.6;
+            font-size: 1.05rem;
+        }
+        .notice-list li { margin-bottom: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="example-select"><strong>System ODE:</strong></label>
+        <select id="example-select">
+            <option value="distinct">y'' + 3y' + 2y = f(t)</option>
+            <option value="complex">y'' + 2y' + 5y = f(t)</option>
+            <option value="first_order">y' + 2y = f(t)</option>
+            <option value="unstable">y'' - y' - 2y = f(t)</option>
+        </select>
+    </div>
+    
+    <div class="control-group" style="margin-left: 1rem;">
+        <label class="toggle-container">
+            <input type="checkbox" id="ic-toggle" checked="">
+            Non-Zero Initial Conditions
+        </label>
+    </div>
+
+    <div class="control-group" style="margin-left: 1rem;">
+        <button id="btn-prev">← Prev</button>
+        <button id="btn-next" class="primary" disabled="">Next Step →</button>
+    </div>
+
+    <div class="stepper">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-dot active" id="dot-2">2</div>
+        <div class="step-dot active" id="dot-3">3</div>
+        <div class="step-dot active" id="dot-4">4</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        
+        <!-- Panel 1: ODE -->
+        <div class="panel" id="panel-1">
+            <h2>1. Time-Domain ODE</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-ode"><span class="m-inline">y''(t) - y'(t) - 2y(t) = f(t)</span></div>
+                <div id="text-ic" style="font-size: 1rem; color: var(--zir-color); font-weight: 600;"><span class="m-inline">Assume: y(0<sup>-</sup>) = 1, y'(0<sup>-</sup>) = 0</span></div>
+            </div>
+        </div>
+        
+        <!-- Panel 2: Laplace Domain -->
+        <div class="panel" id="panel-2" data-step="2">
+            <h2>2. Laplace Transformation</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-laplace-raw" style="font-size: 1rem;"><span class="m-inline">[s<sup>2</sup>Y(s) - <span class="highlight-ic">s(1) - 0</span>] - [sY(s) - <span class="highlight-ic">1</span>] - 2Y(s) = F(s)</span></div>
+                <div style="font-size: 0.9rem; color: var(--text-light);">Grouping terms...</div>
+                <div class="equation" id="eq-laplace-grouped"><span class="m-inline">(s<sup>2</sup> - s - 2)Y(s) = F(s) + <span class="highlight-ic">s - 1</span></span></div>
+            </div>
+        </div>
+
+        <!-- Panel 3: Transfer Function & Modes -->
+        <div class="panel" id="panel-3" data-step="3">
+            <h2>3. Transfer Function &amp; Characteristic Modes</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-tf"><span class="m-inline">H(s) = <span class="frac"><span class="num">1</span><span class="den">s<sup>2</sup> - s - 2</span></span> = <span class="frac"><span class="num">1</span><span class="den">(s-2)(s+1)</span></span></span></div>
+            </div>
+            <div class="badge-grid">
+                <span><strong>Char. Poly D(s):</strong></span> <span id="text-charpoly" class="m-inline">s<sup>2</sup> - s - 2 = (s-2)(s+1)</span>
+                <span><strong>Poles:</strong></span> <span id="text-poles" class="m-inline">p<sub>1</sub> = 2, p<sub>2</sub> = -1</span>
+                <span><strong>Modes:</strong></span> <span id="text-modes" class="m-inline highlight-sys">e<sup>2t</sup>, e<sup>-t</sup></span>
+                <span><strong>Stability:</strong></span> <div id="badge-stability" class="status-badge badge-unstable">Unstable</div>
+            </div>
+        </div>
+
+        <!-- Panel 4: Response Decomposition -->
+        <div class="panel" id="panel-4" data-step="4">
+            <h2>4. Total Response Decomposition Y(s)</h2>
+            <div class="math-box">
+                <div style="font-size: 0.95rem;">Solving for Y(s)...</div>
+                <div class="equation" id="eq-total-y"><span class="m-inline">Y(s) =&nbsp; <span class="underbrace" style="color:var(--zsr-color);">
+            <span class="underbrace-math"><span class="frac"><span class="num">F(s)</span><span class="den">s<sup>2</sup> - s - 2</span></span></span>
+            <div class="brace"></div>
+            <span class="underbrace-text">Y<sub>ZS</sub>(s)</span>
+        </span> &nbsp;+&nbsp; <span class="underbrace" style="color:var(--zir-color);">
+            <span class="underbrace-math"><span class="frac"><span class="num"><span class="highlight-ic">s - 1</span></span><span class="den">s<sup>2</sup> - s - 2</span></span></span>
+            <div class="brace"></div>
+            <span class="underbrace-text">Y<sub>ZI</sub>(s)</span>
+        </span></span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h3>Important Conceptual Connections</h3>
+        <ul class="notice-list">
+            <li><strong>The Transfer Function is a Zero-State Object:</strong> <span class="m-inline">H(s)</span> strictly maps the input <span class="m-inline">F(s)</span> to the output <span class="m-inline">Y(s)</span>. It is defined by assuming <em>all initial conditions are zero</em>.</li>
+            <li><strong>Shared Denominator:</strong> Notice how the characteristic polynomial <span class="m-inline">D(s)</span> forms the denominator for <em>both</em> the Transfer Function <span class="m-inline">H(s)</span> and the Zero-Input Response <span class="m-inline">Y<sub>ZI</sub>(s)</span>.</li>
+            <li><strong>Characteristic Modes:</strong> Because the denominator is shared, the system's fundamental building blocks (the characteristic modes, like <span class="m-inline">e<sup>-t</sup></span> or <span class="m-inline">sin(ωt)</span>) dictate how the system responds to <em>both</em> external inputs and its own stored energy.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Utilities
+    function frac(num, den) {
+        return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+    }
+    function mi(str) { return `<span class="m-inline">${str}</span>`; }
+    function ubrace(mathHTML, label, color) {
+        return `<span class="underbrace" style="color:${color};">
+            <span class="underbrace-math">${mathHTML}</span>
+            <div class="brace"></div>
+            <span class="underbrace-text">${label}</span>
+        </span>`;
+    }
+
+    // Data Models
+    const data = {
+        distinct: {
+            ode: `y''(t) + 3y'(t) + 2y(t) = f(t)`,
+            icText: `Assume: y(0<sup>-</sup>) = 1, y'(0<sup>-</sup>) = 0`,
+            laplaceRaw: (ic) => ic 
+                ? `[s<sup>2</sup>Y(s) - <span class="highlight-ic">s(1) - 0</span>] + 3[sY(s) - <span class="highlight-ic">1</span>] + 2Y(s) = F(s)`
+                : `[s<sup>2</sup>Y(s)] + 3[sY(s)] + 2Y(s) = F(s)`,
+            laplaceGrp: (ic) => ic
+                ? `(s<sup>2</sup> + 3s + 2)Y(s) = F(s) + <span class="highlight-ic">s + 3</span>`
+                : `(s<sup>2</sup> + 3s + 2)Y(s) = F(s)`,
+            tf: `H(s) = ${frac('1', 's<sup>2</sup> + 3s + 2')} = ${frac('1', '(s+1)(s+2)')}`,
+            charPoly: `s<sup>2</sup> + 3s + 2 = (s+1)(s+2)`,
+            poles: `p<sub>1</sub> = -1, p<sub>2</sub> = -2`,
+            modes: `e<sup>-t</sup>, e<sup>-2t</sup>`,
+            isStable: true,
+            totalY: (ic) => {
+                const zsr = frac('F(s)', 's<sup>2</sup> + 3s + 2');
+                const zir = frac('<span class="highlight-ic">s + 3</span>', 's<sup>2</sup> + 3s + 2');
+                if(ic) return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace(zir, 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+                return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace('0', 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+            }
+        },
+        complex: {
+            ode: `y''(t) + 2y'(t) + 5y(t) = f(t)`,
+            icText: `Assume: y(0<sup>-</sup>) = 1, y'(0<sup>-</sup>) = 0`,
+            laplaceRaw: (ic) => ic 
+                ? `[s<sup>2</sup>Y(s) - <span class="highlight-ic">s(1) - 0</span>] + 2[sY(s) - <span class="highlight-ic">1</span>] + 5Y(s) = F(s)`
+                : `[s<sup>2</sup>Y(s)] + 2[sY(s)] + 5Y(s) = F(s)`,
+            laplaceGrp: (ic) => ic
+                ? `(s<sup>2</sup> + 2s + 5)Y(s) = F(s) + <span class="highlight-ic">s + 2</span>`
+                : `(s<sup>2</sup> + 2s + 5)Y(s) = F(s)`,
+            tf: `H(s) = ${frac('1', 's<sup>2</sup> + 2s + 5')} = ${frac('1', '(s+1)<sup>2</sup> + 2<sup>2</sup>')}`,
+            charPoly: `s<sup>2</sup> + 2s + 5 = (s+1)<sup>2</sup> + 4`,
+            poles: `p = -1 &plusmn; j2`,
+            modes: `e<sup>-t</sup>cos(2t), e<sup>-t</sup>sin(2t)`,
+            isStable: true,
+            totalY: (ic) => {
+                const zsr = frac('F(s)', 's<sup>2</sup> + 2s + 5');
+                const zir = frac('<span class="highlight-ic">s + 2</span>', 's<sup>2</sup> + 2s + 5');
+                if(ic) return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace(zir, 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+                return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace('0', 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+            }
+        },
+        first_order: {
+            ode: `y'(t) + 2y(t) = f(t)`,
+            icText: `Assume: y(0<sup>-</sup>) = 1`,
+            laplaceRaw: (ic) => ic 
+                ? `[sY(s) - <span class="highlight-ic">1</span>] + 2Y(s) = F(s)`
+                : `[sY(s)] + 2Y(s) = F(s)`,
+            laplaceGrp: (ic) => ic
+                ? `(s + 2)Y(s) = F(s) + <span class="highlight-ic">1</span>`
+                : `(s + 2)Y(s) = F(s)`,
+            tf: `H(s) = ${frac('1', 's + 2')}`,
+            charPoly: `s + 2`,
+            poles: `p = -2`,
+            modes: `e<sup>-2t</sup>`,
+            isStable: true,
+            totalY: (ic) => {
+                const zsr = frac('F(s)', 's + 2');
+                const zir = frac('<span class="highlight-ic">1</span>', 's + 2');
+                if(ic) return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace(zir, 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+                return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace('0', 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+            }
+        },
+        unstable: {
+            ode: `y''(t) - y'(t) - 2y(t) = f(t)`,
+            icText: `Assume: y(0<sup>-</sup>) = 1, y'(0<sup>-</sup>) = 0`,
+            laplaceRaw: (ic) => ic 
+                ? `[s<sup>2</sup>Y(s) - <span class="highlight-ic">s(1) - 0</span>] - [sY(s) - <span class="highlight-ic">1</span>] - 2Y(s) = F(s)`
+                : `[s<sup>2</sup>Y(s)] - [sY(s)] - 2Y(s) = F(s)`,
+            laplaceGrp: (ic) => ic
+                ? `(s<sup>2</sup> - s - 2)Y(s) = F(s) + <span class="highlight-ic">s - 1</span>`
+                : `(s<sup>2</sup> - s - 2)Y(s) = F(s)`,
+            tf: `H(s) = ${frac('1', 's<sup>2</sup> - s - 2')} = ${frac('1', '(s-2)(s+1)')}`,
+            charPoly: `s<sup>2</sup> - s - 2 = (s-2)(s+1)`,
+            poles: `p<sub>1</sub> = 2, p<sub>2</sub> = -1`,
+            modes: `e<sup>2t</sup>, e<sup>-t</sup>`,
+            isStable: false,
+            totalY: (ic) => {
+                const zsr = frac('F(s)', 's<sup>2</sup> - s - 2');
+                const zir = frac('<span class="highlight-ic">s - 1</span>', 's<sup>2</sup> - s - 2');
+                if(ic) return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace(zir, 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+                return `Y(s) =&nbsp; ${ubrace(zsr, 'Y<sub>ZS</sub>(s)', 'var(--zsr-color)')} &nbsp;+&nbsp; ${ubrace('0', 'Y<sub>ZI</sub>(s)', 'var(--zir-color)')}`;
+            }
+        }
+    };
+
+    // State
+    let state = {
+        example: 'distinct',
+        hasIC: true,
+        step: 1
+    };
+
+    // DOM Elements
+    const exSelect = document.getElementById('example-select');
+    const icToggle = document.getElementById('ic-toggle');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+
+    function init() {
+        exSelect.addEventListener('change', (e) => {
+            state.example = e.target.value;
+            state.step = 1;
+            updateUI();
+        });
+
+        icToggle.addEventListener('change', (e) => {
+            state.hasIC = e.target.checked;
+            updateUI();
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (state.step < 4) { state.step++; updateUI(); }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (state.step > 1) { state.step--; updateUI(); }
+        });
+
+        updateUI();
+    }
+
+    function updateUI() {
+        const model = data[state.example];
+        
+        // Buttons
+        btnPrev.disabled = (state.step === 1);
+        btnNext.disabled = (state.step === 4);
+
+        // Steppers & Panel Locks
+        for (let i = 1; i <= 4; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            const panel = document.getElementById(`panel-${i}`);
+            
+            if (i <= state.step) {
+                dot.classList.add('active');
+                panel.classList.remove('locked');
+            } else {
+                dot.classList.remove('active');
+                panel.classList.add('locked');
+            }
+        }
+
+        // Panel 1
+        document.getElementById('eq-ode').innerHTML = mi(model.ode);
+        document.getElementById('text-ic').innerHTML = state.hasIC ? mi(model.icText) : "Assume zero initial conditions.";
+
+        // Panel 2
+        document.getElementById('eq-laplace-raw').innerHTML = mi(model.laplaceRaw(state.hasIC));
+        document.getElementById('eq-laplace-grouped').innerHTML = mi(model.laplaceGrp(state.hasIC));
+
+        // Panel 3
+        document.getElementById('eq-tf').innerHTML = mi(model.tf);
+        document.getElementById('text-charpoly').innerHTML = model.charPoly;
+        document.getElementById('text-poles').innerHTML = model.poles;
+        document.getElementById('text-modes').innerHTML = model.modes;
+        
+        const badge = document.getElementById('badge-stability');
+        if (model.isStable) {
+            badge.textContent = "BIBO Stable";
+            badge.className = "status-badge badge-stable";
+        } else {
+            badge.textContent = "Unstable";
+            badge.className = "status-badge badge-unstable";
+        }
+
+        // Panel 4
+        document.getElementById('eq-total-y').innerHTML = mi(model.totalY(state.hasIC));
+    }
+
+    window.onload = init;
+</script>
+
+</body></html>

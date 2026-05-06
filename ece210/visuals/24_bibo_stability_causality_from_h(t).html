@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(51).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Stability and Causality from h(t)</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            
+            --causal-color: #D4EDDA;
+            --causal-text: #155724;
+            --noncausal-color: #F8D7DA;
+            --noncausal-text: #721C24;
+            
+            --area-color: rgba(19, 41, 75, 0.2);
+            --area-border: #13294B;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        /* Controls */
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .svg-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        canvas {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background-color: #FAFAFA;
+            border: 1px solid #EEEEEE;
+        }
+
+        /* Prediction Card */
+        .verdict-box {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .question-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+
+        .question-group span {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button.pred-btn {
+            padding: 0.6rem 1.5rem;
+            border: 2px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: all 0.2s;
+        }
+
+        button.pred-btn:hover { background: #F8F9FA; }
+        
+        button.pred-btn.selected {
+            border-color: var(--uiuc-blue);
+            background: var(--uiuc-blue);
+            color: white;
+        }
+
+        button.pred-btn.correct {
+            border-color: #28A745;
+            background: #28A745;
+            color: white;
+        }
+
+        button.pred-btn.incorrect {
+            border-color: #DC3545;
+            background: #DC3545;
+            color: white;
+        }
+
+        button#btn-check {
+            padding: 0.8rem 2rem;
+            background: var(--uiuc-orange);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 0.5rem;
+            box-shadow: 0 2px 4px rgba(232, 74, 39, 0.3);
+        }
+
+        button#btn-check:hover { background: #d04020; }
+        button#btn-check:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; }
+
+        .feedback-area {
+            width: 100%;
+            min-height: 80px;
+            background: #F8F9FA;
+            border: 1px solid #E9ECEF;
+            border-radius: 6px;
+            padding: 1rem;
+            box-sizing: border-box;
+            text-align: center;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .m-inline {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+
+        /* Misconception Card */
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-orange);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .misconception-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .misconception-list li {
+            background: #FFF4F2;
+            padding: 1.2rem;
+            border-radius: 6px;
+            border: 1px solid #FFE3DE;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .misconception-list li strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--uiuc-orange);
+        }
+
+        @media (max-width: 900px) {
+            .panels { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="example-select"><strong>System Impulse Response:</strong></label>
+        <select id="example-select">
+            <option value="exp">h(t) = e⁻ᵗ u(t)</option>
+            <option value="step">h(t) = u(t)</option>
+            <option value="sin_u">h(t) = sin(2t) u(t)</option>
+            <option value="sin_rect">h(t) = sin(2t) rect(t/4)</option>
+            <option value="delta">h(t) = δ(t - 2)</option>
+            <option value="sinc">h(t) = sinc(t)</option>
+        </select>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        
+        <!-- Panel 1: h(t) Plot -->
+        <div class="panel">
+            <h2>1. Impulse Response <span class="m-inline">h(t)</span></h2>
+            <canvas id="canvas-h" width="500" height="250"></canvas>
+            <div style="margin-top:0.5rem; font-size:0.9rem; color:var(--text-light);">
+                Determines how the system reacts to an impulse.
+            </div>
+        </div>
+
+        <!-- Panel 2: |h(t)| Area -->
+        <div class="panel">
+            <h2>2. Absolute Integrability <span class="m-inline">∫ |h(t)| dt</span></h2>
+            <canvas id="canvas-abs" width="500" height="250"></canvas>
+            <div style="margin-top:0.5rem; font-size:0.9rem; font-weight:bold; color:var(--uiuc-blue);" id="area-text">Total ∫ |h(t)| dt = Diverges logarithmically (∞)</div>
+        </div>
+
+        <!-- Panel 3: Causality Timeline -->
+        <div class="panel">
+            <h2>3. Causality Support Timeline</h2>
+            <canvas id="canvas-timeline" width="500" height="150"></canvas>
+            <div style="margin-top:0.5rem; font-size:0.9rem; text-align:center; max-width:90%;">
+                If <span class="m-inline">h(t)</span> is non-zero anywhere in the red region (<span class="m-inline">t &lt; 0</span>), the system anticipates the future.
+            </div>
+        </div>
+
+        <!-- Panel 4: Verdict Prediction -->
+        <div class="panel">
+            <h2>4. Prediction Verdict</h2>
+            <div class="verdict-box">
+                <div class="question-group">
+                    <span>Is this system Causal?</span>
+                    <div class="btn-group">
+                        <button class="pred-btn" data-type="causal" data-val="true">Yes</button>
+                        <button class="pred-btn selected correct" data-type="causal" data-val="false">No</button>
+                    </div>
+                </div>
+                
+                <div class="question-group">
+                    <span>Is this system BIBO Stable?</span>
+                    <div class="btn-group">
+                        <button class="pred-btn" data-type="stable" data-val="true">Yes</button>
+                        <button class="pred-btn selected correct" data-type="stable" data-val="false">No</button>
+                    </div>
+                </div>
+
+                <button id="btn-check" style="display: none;">Check Answer</button>
+
+                <div class="feedback-area" id="feedback-box" style="background: rgb(212, 237, 218); color: rgb(21, 87, 36); border: 1px solid rgb(195, 230, 203);">Correct! Non-causal (extends to -∞). NOT BIBO stable because the absolute integral of sinc diverges.</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h3>Common Conceptual Pitfalls</h3>
+        <ul class="misconception-list">
+            <li>
+                <strong>"Bounded h(t) is enough for stability."</strong>
+                False. A step function u(t) is strictly bounded between 0 and 1, but its absolute integral is infinite. If you feed a constant input of 1 into an integrator, the output ramps to infinity.
+            </li>
+            <li>
+                <strong>"Just check if h(t) stays finite over time."</strong>
+                BIBO stability strictly requires absolute integrability: ∫|h(t)|dt &lt; ∞. Even if a signal decays (like sinc(t)), if it doesn't decay <em>fast enough</em>, the area diverges and the system is unstable.
+            </li>
+            <li>
+                <strong>"Causal means no impulse response before t=0."</strong>
+                Correct. If h(t) ≠ 0 for any t &lt; 0, the system responds to an impulse <em>before</em> the impulse even occurs. This is physically impossible for real-time systems.
+            </li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // --- Data Models ---
+    const examples = {
+        exp: {
+            tMin: -2, tMax: 8, yMin: -0.2, yMax: 1.2,
+            eval: (t) => t >= 0 ? Math.exp(-t) : 0,
+            impulses: [],
+            support: [0, Infinity], // For timeline
+            isCausal: true,
+            isStable: true,
+            areaText: "Finite (Area = 1)",
+            feedback: "Correct! h(t)=0 for t<0 (Causal). The absolute integral converges to 1 (BIBO Stable)."
+        },
+        step: {
+            tMin: -2, tMax: 8, yMin: -0.2, yMax: 1.2,
+            eval: (t) => t >= 0 ? 1 : 0,
+            impulses: [],
+            support: [0, Infinity],
+            isCausal: true,
+            isStable: false,
+            areaText: "Diverges (&infin;)",
+            feedback: "Correct! It's causal (starts at t=0). It's NOT BIBO stable because the area under |u(t)| is infinite."
+        },
+        sin_u: {
+            tMin: -2, tMax: 8, yMin: -1.2, yMax: 1.2,
+            eval: (t) => t >= 0 ? Math.sin(2*t) : 0,
+            impulses: [],
+            support: [0, Infinity],
+            isCausal: true,
+            isStable: false,
+            areaText: "Diverges (&infin;)",
+            feedback: "Correct! Causal, but unstable. A sinusoidal input matching its natural frequency will cause resonance (unbounded output)."
+        },
+        sin_rect: {
+            tMin: -4, tMax: 4, yMin: -1.2, yMax: 1.2,
+            eval: (t) => (t >= -2 && t <= 2) ? Math.sin(2*t) : 0,
+            impulses: [],
+            support: [-2, 2],
+            isCausal: false,
+            isStable: true,
+            areaText: "Finite (Compact Support)",
+            feedback: "Correct! Non-causal because it exists for t<0. BIBO stable because any bounded signal over finite time has a finite integral."
+        },
+        delta: {
+            tMin: -1, tMax: 5, yMin: -0.2, yMax: 1.5,
+            eval: (t) => 0,
+            impulses: [{t: 2, val: 1}],
+            support: [2, 2],
+            isCausal: true,
+            isStable: true,
+            areaText: "Finite (Area = 1)",
+            feedback: "Correct! Causal (occurs at t=2 > 0). BIBO stable because the area of an impulse is exactly 1."
+        },
+        sinc: {
+            tMin: -6, tMax: 6, yMin: -0.4, yMax: 1.2,
+            eval: (t) => t === 0 ? 1 : Math.sin(Math.PI*t)/(Math.PI*t),
+            impulses: [],
+            support: [-Infinity, Infinity],
+            isCausal: false,
+            isStable: false,
+            areaText: "Diverges logarithmically (&infin;)",
+            feedback: "Correct! Non-causal (extends to -∞). NOT BIBO stable because the absolute integral of sinc diverges."
+        }
+    };
+
+    // --- State ---
+    let state = {
+        example: 'exp',
+        predCausal: null, // true, false, null
+        predStable: null, // true, false, null
+        isRevealed: false
+    };
+
+    // --- Elements ---
+    const exSelect = document.getElementById('example-select');
+    const btnCheck = document.getElementById('btn-check');
+    const feedbackBox = document.getElementById('feedback-box');
+    const areaText = document.getElementById('area-text');
+    const predBtns = document.querySelectorAll('.pred-btn');
+
+    // Canvas Contexts
+    const ctxH = document.getElementById('canvas-h').getContext('2d');
+    const ctxAbs = document.getElementById('canvas-abs').getContext('2d');
+    const ctxTime = document.getElementById('canvas-timeline').getContext('2d');
+
+    // --- Init ---
+    function init() {
+        exSelect.addEventListener('change', (e) => {
+            state.example = e.target.value;
+            resetPredictions();
+            updateView();
+        });
+
+        predBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                if (state.isRevealed) return; // Locked after check
+                
+                const type = btn.getAttribute('data-type');
+                const val = btn.getAttribute('data-val') === 'true';
+
+                if (type === 'causal') state.predCausal = val;
+                if (type === 'stable') state.predStable = val;
+
+                // Update UI selection
+                predBtns.forEach(b => {
+                    if (b.getAttribute('data-type') === type) {
+                        b.classList.remove('selected');
+                    }
+                });
+                btn.classList.add('selected');
+
+                checkReady();
+            });
+        });
+
+        btnCheck.addEventListener('click', () => {
+            state.isRevealed = true;
+            revealAnswers();
+        });
+
+        updateView();
+    }
+
+    function resetPredictions() {
+        state.predCausal = null;
+        state.predStable = null;
+        state.isRevealed = false;
+        
+        predBtns.forEach(b => {
+            b.classList.remove('selected', 'correct', 'incorrect');
+        });
+        
+        btnCheck.disabled = true;
+        btnCheck.style.display = 'block';
+        feedbackBox.textContent = "Make your predictions above, then click Check Answer.";
+        feedbackBox.style.background = "#F8F9FA";
+        feedbackBox.style.color = "inherit";
+    }
+
+    function checkReady() {
+        if (state.predCausal !== null && state.predStable !== null) {
+            btnCheck.disabled = false;
+        }
+    }
+
+    function revealAnswers() {
+        const model = examples[state.example];
+        
+        predBtns.forEach(btn => {
+            const type = btn.getAttribute('data-type');
+            const val = btn.getAttribute('data-val') === 'true';
+            const isSelected = btn.classList.contains('selected');
+
+            // Determine truth
+            const truth = (type === 'causal') ? model.isCausal : model.isStable;
+
+            if (isSelected) {
+                if (val === truth) {
+                    btn.classList.add('correct');
+                } else {
+                    btn.classList.add('incorrect');
+                }
+            } else if (val === truth) {
+                // Highlight the correct one they missed
+                btn.style.borderColor = '#28A745';
+                btn.style.color = '#28A745';
+                setTimeout(() => { btn.style.borderColor=''; btn.style.color=''; }, 3000); // revert style hack
+            }
+        });
+
+        btnCheck.style.display = 'none';
+
+        // Set Feedback
+        const allCorrect = (state.predCausal === model.isCausal && state.predStable === model.isStable);
+        feedbackBox.innerHTML = model.feedback;
+        feedbackBox.style.background = allCorrect ? '#D4EDDA' : '#FFF3CD';
+        feedbackBox.style.color = allCorrect ? '#155724' : '#856404';
+        feedbackBox.style.border = allCorrect ? '1px solid #C3E6CB' : '1px solid #FFEEBA';
+    }
+
+    // --- Rendering ---
+    function updateView() {
+        const model = examples[state.example];
+        areaText.innerHTML = `Total &int; |h(t)| dt = ${model.areaText}`;
+        
+        renderH(model);
+        renderAbs(model);
+        renderTimeline(model);
+    }
+
+    function mapX(val, bounds, w) { return (val - bounds.tMin)/(bounds.tMax - bounds.tMin)*w; }
+    function mapY(val, bounds, h) { return h - ((val - bounds.yMin)/(bounds.yMax - bounds.yMin)*h); }
+
+    function drawAxes(ctx, w, h, b, xLabel, yLabel) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#CCC';
+        ctx.lineWidth = 1;
+
+        const x0 = mapX(0, b, w);
+        const y0 = mapY(0, b, h);
+
+        if (y0 >= 0 && y0 <= h) { ctx.moveTo(0, y0); ctx.lineTo(w, y0); }
+        if (x0 >= 0 && x0 <= w) { ctx.moveTo(x0, 0); ctx.lineTo(x0, h); }
+        ctx.stroke();
+
+        ctx.fillStyle = '#888';
+        ctx.font = "12px sans-serif";
+        if (y0 >= 0 && y0 <= h) ctx.fillText(xLabel, w - 15, y0 - 5);
+        if (x0 >= 0 && x0 <= w) ctx.fillText(yLabel, x0 + 5, 15);
+    }
+
+    function renderH(model) {
+        const w = ctxH.canvas.width;
+        const h = ctxH.canvas.height;
+        ctxH.clearRect(0, 0, w, h);
+
+        const b = { tMin: model.tMin, tMax: model.tMax, yMin: model.yMin, yMax: model.yMax };
+        drawAxes(ctxH, w, h, b, "t", "h(t)");
+
+        ctxH.beginPath();
+        ctxH.strokeStyle = '#13294B';
+        ctxH.lineWidth = 2.5;
+
+        const pts = 400;
+        let first = true;
+        for(let i=0; i<=pts; i++) {
+            const t = b.tMin + (i/pts)*(b.tMax - b.tMin);
+            const val = model.eval(t);
+            const px = mapX(t, b, w);
+            const py = mapY(val, b, h);
+
+            if(i>0 && Math.abs(val - model.eval(t-0.001)) > 0.5) {
+                // Vertical jump drawing
+                ctxH.lineTo(px, mapY(model.eval(t-0.001), b, h));
+            }
+
+            if(first) { ctxH.moveTo(px, py); first = false; }
+            else ctxH.lineTo(px, py);
+        }
+        ctxH.stroke();
+
+        // Impulses
+        model.impulses.forEach(imp => {
+            const px = mapX(imp.t, b, w);
+            const py0 = mapY(0, b, h);
+            const py1 = mapY(imp.val, b, h);
+
+            ctxH.beginPath();
+            ctxH.strokeStyle = '#13294B';
+            ctxH.lineWidth = 3;
+            ctxH.moveTo(px, py0);
+            ctxH.lineTo(px, py1);
+            
+            // Arrow
+            const sign = Math.sign(imp.val);
+            ctxH.lineTo(px - 5, py1 + sign*5);
+            ctxH.moveTo(px, py1);
+            ctxH.lineTo(px + 5, py1 + sign*5);
+            ctxH.stroke();
+
+            ctxH.fillStyle = '#13294B';
+            ctxH.font = "bold 14px sans-serif";
+            ctxH.fillText(`δ(t)`, px + 8, py1 + sign*10);
+        });
+    }
+
+    function renderAbs(model) {
+        const w = ctxAbs.canvas.width;
+        const h = ctxAbs.canvas.height;
+        ctxAbs.clearRect(0, 0, w, h);
+
+        const b = { tMin: model.tMin, tMax: model.tMax, yMin: -0.2, yMax: Math.max(model.yMax, Math.abs(model.yMin)) };
+        drawAxes(ctxAbs, w, h, b, "t", "|h(t)|");
+
+        const pts = 400;
+        let points = [];
+        for(let i=0; i<=pts; i++) {
+            const t = b.tMin + (i/pts)*(b.tMax - b.tMin);
+            const val = Math.abs(model.eval(t));
+            const px = mapX(t, b, w);
+            const py = mapY(val, b, h);
+            
+            if(i>0 && Math.abs(val - Math.abs(model.eval(t-0.001))) > 0.5) {
+                points.push({x: px, y: mapY(Math.abs(model.eval(t-0.001)), b, h)});
+            }
+            points.push({x: px, y: py});
+        }
+
+        // Fill Area
+        const y0 = mapY(0, b, h);
+        ctxAbs.beginPath();
+        ctxAbs.moveTo(points[0].x, y0);
+        points.forEach(p => ctxAbs.lineTo(p.x, p.y));
+        ctxAbs.lineTo(points[points.length-1].x, y0);
+        ctxAbs.closePath();
+
+        ctxAbs.fillStyle = 'rgba(19, 41, 75, 0.2)';
+        ctxAbs.fill();
+
+        // Stroke Outline
+        ctxAbs.beginPath();
+        ctxAbs.strokeStyle = '#13294B';
+        ctxAbs.lineWidth = 2;
+        points.forEach((p, i) => {
+            if(i===0) ctxAbs.moveTo(p.x, p.y);
+            else ctxAbs.lineTo(p.x, p.y);
+        });
+        ctxAbs.stroke();
+
+        // Fade out gradient for infinities
+        if (!model.isStable) {
+            const grad = ctxAbs.createLinearGradient(w - 100, 0, w, 0);
+            grad.addColorStop(0, 'transparent');
+            grad.addColorStop(1, 'rgba(250,250,250,1)');
+            ctxAbs.fillStyle = grad;
+            ctxAbs.fillRect(w - 100, 0, 100, h);
+        }
+
+        // Impulses
+        model.impulses.forEach(imp => {
+            const px = mapX(imp.t, b, w);
+            const val = Math.abs(imp.val);
+            const py1 = mapY(val, b, h);
+
+            ctxAbs.beginPath();
+            ctxAbs.strokeStyle = '#E84A27'; // orange for impulse area
+            ctxAbs.lineWidth = 4;
+            ctxAbs.moveTo(px, y0);
+            ctxAbs.lineTo(px, py1);
+            
+            const sign = Math.sign(val);
+            ctxAbs.lineTo(px - 5, py1 + sign*5);
+            ctxAbs.moveTo(px, py1);
+            ctxAbs.lineTo(px + 5, py1 + sign*5);
+            ctxAbs.stroke();
+
+            ctxAbs.fillStyle = '#E84A27';
+            ctxAbs.font = "bold 14px sans-serif";
+            ctxAbs.fillText(`Area = ${val}`, px + 8, py1 + 15);
+        });
+    }
+
+    function renderTimeline(model) {
+        const w = ctxTime.canvas.width;
+        const h = ctxTime.canvas.height;
+        ctxTime.clearRect(0, 0, w, h);
+
+        const b = { tMin: model.tMin, tMax: model.tMax, yMin: -1, yMax: 1 };
+        
+        // Regions
+        const px0 = mapX(0, b, w);
+        
+        // Red Region t < 0
+        ctxTime.fillStyle = 'rgba(220, 53, 69, 0.15)';
+        ctxTime.fillRect(0, 0, px0, h);
+        ctxTime.fillStyle = '#DC3545';
+        ctxTime.font = "bold 14px sans-serif";
+        ctxTime.fillText("t < 0 (Past)", px0/2 - 40, 25);
+
+        // Green Region t > 0
+        ctxTime.fillStyle = 'rgba(40, 167, 69, 0.1)';
+        ctxTime.fillRect(px0, 0, w - px0, h);
+        ctxTime.fillStyle = '#28A745';
+        ctxTime.fillText("t > 0 (Future)", px0 + (w-px0)/2 - 50, 25);
+
+        // Axis
+        const yAxis = h/2;
+        ctxTime.beginPath();
+        ctxTime.strokeStyle = '#CCC';
+        ctxTime.lineWidth = 2;
+        ctxTime.moveTo(0, yAxis);
+        ctxTime.lineTo(w, yAxis);
+        ctxTime.stroke();
+
+        ctxTime.beginPath();
+        ctxTime.moveTo(px0, yAxis - 10);
+        ctxTime.lineTo(px0, yAxis + 10);
+        ctxTime.stroke();
+        ctxTime.fillStyle = '#333';
+        ctxTime.fillText("t=0", px0 - 10, yAxis + 25);
+
+        // Support Line
+        const sMin = Math.max(b.tMin, model.support[0]);
+        const sMax = Math.min(b.tMax, model.support[1]);
+        
+        const pxMin = mapX(sMin, b, w);
+        const pxMax = mapX(sMax, b, w);
+
+        ctxTime.beginPath();
+        ctxTime.strokeStyle = '#13294B';
+        ctxTime.lineWidth = 6;
+        ctxTime.lineCap = "round";
+
+        if (pxMin === pxMax) {
+            // Impulse
+            ctxTime.arc(pxMin, yAxis, 4, 0, 2*Math.PI);
+            ctxTime.fill();
+        } else {
+            ctxTime.moveTo(pxMin, yAxis);
+            ctxTime.lineTo(pxMax, yAxis);
+            ctxTime.stroke();
+        }
+
+        // Warning Icon if non-causal
+        if (!model.isCausal) {
+            ctxTime.fillStyle = '#E84A27';
+            ctxTime.font = "bold 16px sans-serif";
+            ctxTime.fillText("⚠ Non-zero in past!", px0/2 - 70, yAxis - 15);
+        }
+    }
+
+    // Init
+    window.onload = init;
+</script>
+
+</body></html>

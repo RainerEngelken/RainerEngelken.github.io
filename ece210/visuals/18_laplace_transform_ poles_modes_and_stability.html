@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(42).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Poles, Modes, and Stability</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            --success-color: #28A745;
+            --danger-color: #DC3545;
+            --warning-color: #FFC107;
+            --stable-bg: rgba(40, 167, 69, 0.08);
+            --unstable-bg: rgba(220, 53, 69, 0.08);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select {
+            padding: 0.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 0.5rem;
+            user-select: none;
+        }
+
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .panel h2 {
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 500px;
+            height: 350px;
+            border: 1px solid #EEEEEE;
+            background-color: #FAFAFA;
+            touch-action: none; /* Prevent scrolling while dragging */
+        }
+
+        #canvas-splane {
+            cursor: grab;
+        }
+        #canvas-splane:active {
+            cursor: grabbing;
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card.orange-accent {
+            border-left-color: var(--uiuc-orange);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            color: var(--uiuc-blue);
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 1rem;
+            align-items: center;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .status-label {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .status-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .badge-stable { background-color: #D4EDDA; color: var(--success-color); }
+        .badge-unstable { background-color: #F8D7DA; color: var(--danger-color); }
+        .badge-marginal { background-color: #FFF3CD; color: #856404; }
+
+        .formula-box {
+            background: #F1F5F9;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1.3rem;
+            color: var(--uiuc-blue);
+            border: 1px solid #E2E8F0;
+        }
+
+        ul {
+            margin: 0;
+            padding-left: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="preset-select"><strong>Example:</strong></label>
+        <select id="preset-select">
+            <option value="real_lhp">Real pole in LHP (Decay)</option>
+            <option value="real_rhp">Real pole in RHP (Growth)</option>
+            <option value="origin">Pole at the origin (Step)</option>
+            <option value="conj_lhp">Conjugate pair in LHP (Decaying Oscillation)</option>
+            <option value="conj_jw">Conjugate pair on jω-axis (Pure Oscillation)</option>
+        </select>
+    </div>
+    
+    <div class="control-group" style="margin-left: 2rem;">
+        <label class="toggle-container">
+            <input type="checkbox" id="conj-toggle">
+            <strong>Complex Conjugate Pair Mode</strong>
+        </label>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        <div class="panel">
+            <h2>s-plane (Drag the 'X')</h2>
+            <canvas id="canvas-splane" width="500" height="350"></canvas>
+        </div>
+        
+        <div class="panel">
+            <h2>Time-Domain Mode <br><span style="font-size: 0.9rem; font-weight: normal; color: var(--text-light);">h(t) vs t</span></h2>
+            <canvas id="canvas-time" width="500" height="350"></canvas>
+        </div>
+    </div>
+
+    <div class="info-cards">
+        <div class="card">
+            <h3>System Stability &amp; Characteristic Mode</h3>
+            
+            <div class="status-grid">
+                <div class="status-label">Behavior:</div>
+                <div id="status-behavior" class="status-badge badge-stable">Decaying Oscillation</div>
+                
+                <div class="status-label">BIBO Stability:</div>
+                <div id="status-stability" class="status-badge badge-stable">Stable</div>
+            </div>
+
+            <div class="status-label" style="margin-bottom: 0.5rem; display:block;">Time-Domain Formula:</div>
+            <div class="formula-box" id="formula-display">h(t) = e<sup>-0.16t</sup> cos(4.85t) u(t)</div>
+            
+            <div class="note">
+                <strong>Recall:</strong> The pole location <span style="font-family: monospace;">p = σ + jω</span> directly determines the characteristic mode. The real part (σ) governs exponential growth/decay, and the imaginary part (ω) governs the oscillation frequency.
+            </div>
+        </div>
+
+        <div class="card orange-accent">
+            <h3>What to notice</h3>
+            <ul>
+                <li><strong>Drag the poles</strong> in the s-plane to see the time-domain mode change instantly.</li>
+                <li>Notice how poles in the <strong>Left Half-Plane (LHP)</strong> always produce decaying signals (Stable).</li>
+                <li>Poles in the <strong>Right Half-Plane (RHP)</strong> produce growing signals that eventually blow up (Unstable).</li>
+                <li>Moving a pole vertically changes the <strong>frequency of oscillation</strong> without affecting the decay/growth rate.</li>
+                <li>Poles exactly on the <strong>jω-axis</strong> cause pure, sustained oscillations (Marginally stable).</li>
+                <li>A pole exactly at the <strong>origin</strong> (s=0) produces a constant step function (integrator).</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- State Management ---
+    let state = {
+        sigma: -1.0,
+        omega: 0.0,
+        isConjugate: false,
+        isDragging: false,
+        dragTarget: null // 1 for upper pole, -1 for lower pole
+    };
+
+    const presets = {
+        'real_lhp': { sigma: -1.0, omega: 0.0, isConjugate: false },
+        'real_rhp': { sigma: 0.5, omega: 0.0, isConjugate: false },
+        'origin':   { sigma: 0.0, omega: 0.0, isConjugate: false },
+        'conj_lhp': { sigma: -0.5, omega: 3.0, isConjugate: true },
+        'conj_jw':  { sigma: 0.0, omega: 3.0, isConjugate: true }
+    };
+
+    // --- Canvas Setup ---
+    const canvasS = document.getElementById('canvas-splane');
+    const ctxS = canvasS.getContext('2d');
+    const canvasT = document.getElementById('canvas-time');
+    const ctxT = canvasT.getContext('2d');
+
+    // Coordinate boundaries
+    const sBounds = { xMin: -4, xMax: 4, yMin: -5, yMax: 5 };
+    const tBounds = { xMin: 0, xMax: 10, yMin: -2.5, yMax: 2.5 };
+
+    // --- DOM Elements ---
+    const presetSelect = document.getElementById('preset-select');
+    const conjToggle = document.getElementById('conj-toggle');
+    const statusBehavior = document.getElementById('status-behavior');
+    const statusStability = document.getElementById('status-stability');
+    const formulaDisplay = document.getElementById('formula-display');
+
+    // Colors
+    const C_BLUE = '#13294B';
+    const C_ORANGE = '#E84A27';
+    const C_AXIS = '#AAAAAA';
+
+    // --- Initialization ---
+    function init() {
+        presetSelect.addEventListener('change', (e) => {
+            const p = presets[e.target.value];
+            state.sigma = p.sigma;
+            state.omega = p.omega;
+            state.isConjugate = p.isConjugate;
+            conjToggle.checked = state.isConjugate;
+            updateAll();
+        });
+
+        conjToggle.addEventListener('change', (e) => {
+            state.isConjugate = e.target.checked;
+            if (!state.isConjugate) state.omega = 0; // Snap to real axis if turned off
+            presetSelect.value = ""; // Custom state now
+            updateAll();
+        });
+
+        // Mouse Events for Canvas
+        canvasS.addEventListener('mousedown', handleMouseDown);
+        canvasS.addEventListener('mousemove', handleMouseMove);
+        window.addEventListener('mouseup', handleMouseUp);
+        
+        // Touch Events for Mobile
+        canvasS.addEventListener('touchstart', handleTouchStart, {passive: false});
+        canvasS.addEventListener('touchmove', handleTouchMove, {passive: false});
+        window.addEventListener('touchend', handleMouseUp);
+
+        updateAll();
+    }
+
+    // --- Core Update Logic ---
+    function updateAll() {
+        renderSPlane();
+        renderTimeDomain();
+        updateStatus();
+    }
+
+    // --- Coordinate Mappings ---
+    function mapX(val, bounds, width) {
+        return (val - bounds.xMin) / (bounds.xMax - bounds.xMin) * width;
+    }
+    function mapY(val, bounds, height) {
+        return height - ((val - bounds.yMin) / (bounds.yMax - bounds.yMin) * height);
+    }
+    function unmapX(px, bounds, width) {
+        return px / width * (bounds.xMax - bounds.xMin) + bounds.xMin;
+    }
+    function unmapY(py, bounds, height) {
+        return (height - py) / height * (bounds.yMax - bounds.yMin) + bounds.yMin;
+    }
+
+    // --- Dragging Logic ---
+    function getPointerPos(e) {
+        const rect = canvasS.getBoundingClientRect();
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if(e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        }
+        return {
+            x: clientX - rect.left,
+            y: clientY - rect.top
+        };
+    }
+
+    function handleMouseDown(e) {
+        const pos = getPointerPos(e);
+        const sX = unmapX(pos.x, sBounds, canvasS.width);
+        const sY = unmapY(pos.y, sBounds, canvasS.height);
+
+        // Check distance to pole(s)
+        const hitRadius = 0.5; // in s-plane units
+        
+        const distUpper = Math.hypot(sX - state.sigma, sY - state.omega);
+        if (distUpper < hitRadius) {
+            state.isDragging = true;
+            state.dragTarget = 1;
+            presetSelect.value = ""; 
+            if(e.cancelable) e.preventDefault();
+            return;
+        }
+
+        if (state.isConjugate) {
+            const distLower = Math.hypot(sX - state.sigma, sY - (-state.omega));
+            if (distLower < hitRadius) {
+                state.isDragging = true;
+                state.dragTarget = -1;
+                presetSelect.value = "";
+                if(e.cancelable) e.preventDefault();
+            }
+        }
+    }
+
+    function handleTouchStart(e) { handleMouseDown(e); }
+
+    function handleMouseMove(e) {
+        if (!state.isDragging) return;
+
+        const pos = getPointerPos(e);
+        let newSigma = unmapX(pos.x, sBounds, canvasS.width);
+        let newOmega = unmapY(pos.y, sBounds, canvasS.height);
+
+        // Snapping logic
+        if (Math.abs(newSigma) < 0.15) newSigma = 0;
+        if (Math.abs(newOmega) < 0.25) newOmega = 0;
+
+        // Apply constraints
+        newSigma = Math.max(sBounds.xMin, Math.min(sBounds.xMax, newSigma));
+        newOmega = Math.max(sBounds.yMin, Math.min(sBounds.yMax, newOmega));
+
+        state.sigma = newSigma;
+
+        if (state.isConjugate) {
+            // Apply symmetric drag
+            if (state.dragTarget === 1) {
+                state.omega = Math.abs(newOmega); // Keep it positive
+            } else {
+                state.omega = Math.abs(newOmega); 
+            }
+        } else {
+            state.omega = 0;
+        }
+
+        updateAll();
+    }
+
+    function handleTouchMove(e) { 
+        if(state.isDragging && e.cancelable) e.preventDefault(); 
+        handleMouseMove(e); 
+    }
+
+    function handleMouseUp() {
+        state.isDragging = false;
+        state.dragTarget = null;
+    }
+
+    // --- Rendering ---
+    function drawAxes(ctx, bounds, w, h, xLabel, yLabel) {
+        const x0 = mapX(0, bounds, w);
+        const y0 = mapY(0, bounds, h);
+
+        ctx.beginPath();
+        ctx.strokeStyle = C_AXIS;
+        ctx.lineWidth = 1;
+
+        // X axis
+        if (y0 >= 0 && y0 <= h) {
+            ctx.moveTo(0, y0); ctx.lineTo(w, y0);
+        }
+        // Y axis
+        if (x0 >= 0 && x0 <= w) {
+            ctx.moveTo(x0, 0); ctx.lineTo(x0, h);
+        }
+        ctx.stroke();
+
+        ctx.fillStyle = "#888";
+        ctx.font = "12px sans-serif";
+        if (y0 >= 0 && y0 <= h) ctx.fillText(xLabel, w - 30, y0 - 8);
+        if (x0 >= 0 && x0 <= w) ctx.fillText(yLabel, x0 + 8, 15);
+    }
+
+    function drawCross(ctx, x, y, color) {
+        const size = 6;
+        ctx.beginPath();
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.5;
+        ctx.moveTo(x - size, y - size);
+        ctx.lineTo(x + size, y + size);
+        ctx.moveTo(x + size, y - size);
+        ctx.lineTo(x - size, y + size);
+        ctx.stroke();
+    }
+
+    function renderSPlane() {
+        const w = canvasS.width;
+        const h = canvasS.height;
+        ctxS.clearRect(0, 0, w, h);
+
+        // Shading LHP (Stable) vs RHP (Unstable)
+        const x0 = mapX(0, sBounds, w);
+        ctxS.fillStyle = "var(--stable-bg)";
+        ctxS.fillRect(0, 0, x0, h);
+        ctxS.fillStyle = "var(--unstable-bg)";
+        ctxS.fillRect(x0, 0, w - x0, h);
+
+        drawAxes(ctxS, sBounds, w, h, "σ", "jω");
+
+        // Draw jw axis highlight
+        ctxS.beginPath();
+        ctxS.strokeStyle = (Math.abs(state.sigma) < 0.01) ? C_ORANGE : C_BLUE;
+        ctxS.lineWidth = (Math.abs(state.sigma) < 0.01) ? 3 : 1;
+        ctxS.moveTo(x0, 0); ctxS.lineTo(x0, h);
+        ctxS.stroke();
+
+        // Draw Pole(s)
+        const px = mapX(state.sigma, sBounds, w);
+        
+        if (state.isConjugate) {
+            const py1 = mapY(state.omega, sBounds, h);
+            const py2 = mapY(-state.omega, sBounds, h);
+            drawCross(ctxS, px, py1, C_ORANGE);
+            drawCross(ctxS, px, py2, C_ORANGE);
+            
+            // Draw connecting dashed line
+            ctxS.beginPath();
+            ctxS.strokeStyle = 'rgba(232, 74, 39, 0.4)';
+            ctxS.setLineDash([4, 4]);
+            ctxS.moveTo(px, py1);
+            ctxS.lineTo(px, py2);
+            ctxS.stroke();
+            ctxS.setLineDash([]);
+        } else {
+            const py = mapY(0, sBounds, h);
+            drawCross(ctxS, px, py, C_ORANGE);
+        }
+
+        // Add coordinates text
+        ctxS.fillStyle = C_BLUE;
+        ctxS.font = "bold 13px sans-serif";
+        let coordText = `p = ${state.sigma.toFixed(2)}`;
+        if (state.isConjugate) coordText += ` ± j${state.omega.toFixed(2)}`;
+        ctxS.fillText(coordText, 10, h - 15);
+    }
+
+    function renderTimeDomain() {
+        const w = canvasT.width;
+        const h = canvasT.height;
+        ctxT.clearRect(0, 0, w, h);
+
+        drawAxes(ctxT, tBounds, w, h, "t", "h(t)");
+
+        // Function: e^(sigma*t) * cos(omega*t)
+        const dt = (tBounds.xMax - tBounds.xMin) / w;
+        
+        // Draw Envelope if there is decay/growth and oscillation
+        if (state.isConjugate && state.omega > 0.1 && Math.abs(state.sigma) > 0.05) {
+            ctxT.beginPath();
+            ctxT.strokeStyle = 'rgba(19, 41, 75, 0.2)';
+            ctxT.lineWidth = 1.5;
+            ctxT.setLineDash([5, 5]);
+            for (let px = 0; px <= w; px++) {
+                const t = unmapX(px, tBounds, w);
+                const env = Math.exp(state.sigma * t);
+                const py1 = mapY(env, tBounds, h);
+                const py2 = mapY(-env, tBounds, h);
+                
+                if (px === 0) {
+                    ctxT.moveTo(px, py1);
+                } else {
+                    ctxT.lineTo(px, py1);
+                }
+            }
+            ctxT.stroke();
+            ctxT.beginPath();
+            for (let px = 0; px <= w; px++) {
+                const t = unmapX(px, tBounds, w);
+                const env = Math.exp(state.sigma * t);
+                const py2 = mapY(-env, tBounds, h);
+                
+                if (px === 0) {
+                    ctxT.moveTo(px, py2);
+                } else {
+                    ctxT.lineTo(px, py2);
+                }
+            }
+            ctxT.stroke();
+            ctxT.setLineDash([]);
+        }
+
+        // Draw main signal
+        ctxT.beginPath();
+        ctxT.strokeStyle = C_UIUC_BLUE = '#13294B';
+        ctxT.lineWidth = 2.5;
+
+        for (let px = 0; px <= w; px++) {
+            const t = unmapX(px, tBounds, w);
+            let val = Math.exp(state.sigma * t);
+            if (state.isConjugate) val *= Math.cos(state.omega * t);
+
+            // Cap the visual rendering to avoid crazy lines when blowing up
+            val = Math.max(-10, Math.min(10, val));
+
+            const py = mapY(val, tBounds, h);
+
+            if (px === 0) {
+                ctxT.moveTo(px, py);
+            } else {
+                ctxT.lineTo(px, py);
+            }
+        }
+        ctxT.stroke();
+    }
+
+    function updateStatus() {
+        const s = state.sigma;
+        const w = state.omega;
+
+        // 1. Behavior Text
+        let behavior = "";
+        let bClass = "";
+        let stab = "";
+        let sClass = "";
+
+        if (s < -0.01) {
+            behavior = (state.isConjugate && w > 0.1) ? "Decaying Oscillation" : "Decays (Exponential)";
+            bClass = "badge-stable";
+            stab = "Stable";
+            sClass = "badge-stable";
+        } else if (s > 0.01) {
+            behavior = (state.isConjugate && w > 0.1) ? "Growing Oscillation" : "Grows (Exponential)";
+            bClass = "badge-unstable";
+            stab = "Unstable";
+            sClass = "badge-unstable";
+        } else {
+            behavior = (state.isConjugate && w > 0.1) ? "Pure Oscillation" : "Constant (Step)";
+            bClass = "badge-marginal";
+            stab = "Marginally Stable";
+            sClass = "badge-marginal";
+        }
+
+        statusBehavior.textContent = behavior;
+        statusBehavior.className = "status-badge " + bClass;
+        
+        statusStability.textContent = stab;
+        statusStability.className = "status-badge " + sClass;
+
+        // 2. Formula Generation
+        let sStr = s.toFixed(2);
+        let wStr = Math.abs(w).toFixed(2);
+        
+        let html = "";
+        if (!state.isConjugate || Math.abs(w) < 0.05) {
+            if (Math.abs(s) < 0.01) {
+                html = "h(t) = u(t)";
+            } else {
+                html = `h(t) = e<sup>${sStr}t</sup> u(t)`;
+            }
+        } else {
+            if (Math.abs(s) < 0.01) {
+                html = `h(t) = cos(${wStr}t) u(t)`;
+            } else {
+                html = `h(t) = e<sup>${sStr}t</sup> cos(${wStr}t) u(t)`;
+            }
+        }
+        formulaDisplay.innerHTML = html;
+    }
+
+    // Start Applet
+    window.onload = init;
+
+</script>
+
+</body></html>

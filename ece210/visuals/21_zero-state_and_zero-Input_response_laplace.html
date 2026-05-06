@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(47).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Zero-State and Zero-Input Response</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --zsr-color: #2196F3;
+            --zir-color: #E84A27;
+            --total-color: #13294B;
+            
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select, button {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        button.reset-btn {
+            background-color: #f1f3f5;
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        button.reset-btn:hover { background-color: #e9ecef; }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
+        }
+        .slider-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .slider-group input { width: 120px; }
+
+        .toggles {
+            display: flex;
+            gap: 1rem;
+            padding: 0.5rem 1rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        
+        .c-zsr { color: var(--zsr-color); }
+        .c-zir { color: var(--zir-color); }
+        .c-tot { color: var(--total-color); }
+
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .svg-container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 200px;
+        }
+        svg { max-width: 100%; height: auto; display: block; }
+
+        .plot-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            width: 100%;
+            max-width: 500px;
+            height: 250px;
+            background-color: #FAFAFA;
+            border: 1px solid #EEEEEE;
+        }
+        .legend {
+            display: flex;
+            gap: 1.5rem;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .math-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 1rem;
+            font-size: 1.15rem;
+            margin-top: 1rem;
+        }
+
+        .equation {
+            background: #F8F9FA;
+            padding: 1.5rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+            text-align: center;
+            width: 90%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .m-inline {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            white-space: nowrap;
+        }
+        .m-inline sub, .m-inline sup { font-style: normal; font-size: 0.7em; }
+        
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            vertical-align: middle;
+            margin: 0 0.2rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            line-height: 1.2;
+        }
+        .frac .num {
+            border-bottom: 1px solid currentColor;
+            padding: 0 0.3rem;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .frac .den {
+            padding: 0 0.3rem;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .underbrace {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.5rem;
+        }
+        .underbrace-math {
+            color: var(--text-main);
+        }
+        .brace {
+            width: 100%;
+            border-top: 2px solid currentColor;
+            border-left: 2px solid currentColor;
+            border-right: 2px solid currentColor;
+            height: 6px;
+            margin-top: 4px;
+            border-radius: 3px 3px 0 0;
+            border-bottom: none;
+            transform: rotate(180deg);
+        }
+        .underbrace-text {
+            font-size: 0.8rem;
+            font-family: sans-serif;
+            font-style: normal;
+            font-weight: bold;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="preset-select"><strong>Preset:</strong></label>
+        <select id="preset-select">
+            <option value="rc_step">RC Circuit (Step Input)</option>
+            <option value="rl_exp">RL Circuit (Exponential Input)</option>
+            <option value="zero_state">Zero Initial Energy (ZSR Only)</option>
+            <option value="zero_input">Input Suppressed (ZIR Only)</option>
+        </select>
+    </div>
+    
+    <div class="slider-group">
+        <label>Input Amplitude <span id="val-A" style="color:var(--zsr-color);">0</span></label>
+        <input type="range" id="slider-A" min="-5" max="5" step="0.5" value="2">
+    </div>
+
+    <div class="slider-group">
+        <label>Initial Condition <span id="val-IC" style="color:var(--zir-color);">3</span></label>
+        <input type="range" id="slider-IC" min="-5" max="5" step="0.5" value="-1">
+    </div>
+
+    <div class="toggles">
+        <label class="toggle-item c-zsr">
+            <input type="checkbox" id="chk-zsr" checked=""> y<sub>ZS</sub>(t)
+        </label>
+        <label class="toggle-item c-zir">
+            <input type="checkbox" id="chk-zir" checked=""> y<sub>ZI</sub>(t)
+        </label>
+        <label class="toggle-item c-tot">
+            <input type="checkbox" id="chk-tot" checked=""> Total y(t)
+        </label>
+    </div>
+
+    <button id="btn-reset" class="reset-btn">Reset</button>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        <div class="panel">
+            <h2>1. Time-Domain Switched Circuit (t ≥ 0)</h2>
+            <div class="svg-container" id="svg-time">
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    
+        <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"></path></marker>
+            <marker id="arr-s" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"></path></marker>
+            <marker id="arr-tot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--total-color)"></path></marker>
+        </defs>
+    
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"></circle>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">0 u(t)</text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="60" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="60" x2="110" y2="60" stroke="black" stroke-width="2"></line>
+                    <line x1="110" y1="60" x2="140" y2="45" stroke="black" stroke-width="2"></line>
+                    <path d="M 125 45 Q 135 55 135 60" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arr)"></path>
+                    <circle cx="110" cy="60" r="3" fill="black"></circle>
+                    <circle cx="140" cy="60" r="3" fill="black"></circle>
+                    <text x="125" y="35" font-size="14" font-weight="bold" text-anchor="middle">t=0</text>
+                    
+                    <line x1="140" y1="60" x2="170" y2="60" stroke="black" stroke-width="2"></line>
+                    <path d="M 170 60 L 175 50 L 185 70 L 195 50 L 205 70 L 215 50 L 225 70 L 235 50 L 240 60 L 250 60" fill="none" stroke="black" stroke-width="2"></path>
+                    <text x="205" y="40" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">R=1Ω</text>
+                    
+                    <line x1="250" y1="60" x2="320" y2="60" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="140" x2="80" y2="180" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="180" x2="320" y2="180" stroke="black" stroke-width="2"></line>
+                    
+                    <line x1="320" y1="60" x2="320" y2="100" stroke="black" stroke-width="2"></line>
+                    <line x1="300" y1="100" x2="340" y2="100" stroke="black" stroke-width="3"></line>
+                    <line x1="300" y1="120" x2="340" y2="120" stroke="black" stroke-width="3"></line>
+                    <line x1="320" y1="120" x2="320" y2="180" stroke="black" stroke-width="2"></line>
+                    
+                    <text x="355" y="115" font-family="Times New Roman" font-style="italic" font-size="16">C=1F</text>
+                    <text x="355" y="140" font-family="Times New Roman" font-style="italic" font-size="14" fill="var(--zir-color)">v<tspan dy="3" font-size="10">C</tspan><tspan dy="-3">(0</tspan></text></svg><sup>-</sup><tspan>)=3V</tspan>
+                    
+                    <circle cx="320" cy="60" r="4" fill="var(--total-color)">
+                    <circle cx="320" cy="180" r="4" fill="var(--total-color)">
+                    <text x="320" y="45" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="middle">v<tspan dy="3" font-size="10">out</tspan><tspan dy="-3">(t)</tspan></text>
+                </circle></circle></div>
+        </div>
+
+        <div class="panel">
+            <h2>2. s-Domain Equivalent Circuit</h2>
+            <div class="svg-container" id="svg-s">
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    
+        <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"></path></marker>
+            <marker id="arr-s" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"></path></marker>
+            <marker id="arr-tot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--total-color)"></path></marker>
+        </defs>
+    
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"></circle>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">0/s</text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="40" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="40" x2="160" y2="40" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="140" x2="80" y2="190" stroke="black" stroke-width="2"></line>
+                    <line x1="80" y1="190" x2="320" y2="190" stroke="black" stroke-width="2"></line>
+                    
+                    <rect x="160" y="30" width="40" height="20" fill="none" stroke="black" stroke-width="2"></rect>
+                    <text x="180" y="22" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">1</text>
+                    <line x1="200" y1="40" x2="320" y2="40" stroke="black" stroke-width="2"></line>
+                    
+                    <circle cx="320" cy="40" r="4" fill="var(--total-color)"></circle>
+                    <circle cx="320" cy="190" r="4" fill="var(--total-color)"></circle>
+                    <text x="320" y="25" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="middle">V̂<tspan dy="3" font-size="10">out</tspan><tspan dy="-3">(s)</tspan></text>
+
+                    <line x1="320" y1="40" x2="320" y2="60" stroke="black" stroke-width="2"></line>
+                    <rect x="305" y="60" width="30" height="30" fill="none" stroke="black" stroke-width="2"></rect>
+                    <text x="345" y="80" font-family="Times New Roman" font-style="italic" font-size="16">1/s</text>
+                    <line x1="320" y1="90" x2="320" y2="120" stroke="black" stroke-width="2"></line>
+                    
+                    <circle cx="320" cy="140" r="20" fill="rgba(232,74,39,0.08)" stroke="var(--zir-color)" stroke-width="2"></circle>
+                    <text x="320" y="133" font-size="16" fill="var(--zir-color)" text-anchor="middle">+</text>
+                    <text x="320" y="157" font-size="16" fill="var(--zir-color)" text-anchor="middle">-</text>
+                    <text x="350" y="145" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zir-color)">3/s</text>
+                    <line x1="320" y1="160" x2="320" y2="190" stroke="black" stroke-width="2"></line>
+                </svg></div>
+        </div>
+
+        <div class="panel">
+            <h2>3. Time-Domain Response</h2>
+            <div class="plot-container">
+                <canvas id="plot-canvas" width="500" height="250"></canvas>
+                <div class="legend">
+                    <span class="c-zsr">--- y<sub>ZS</sub>(t)</span>
+                    <span class="c-zir">... y<sub>ZI</sub>(t)</span>
+                    <span class="c-tot">— Total y(t)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>4. Total Response Formula (s-domain → t-domain)</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-s-domain"><span class="m-inline">V̂<sub>out</sub>(s) =&nbsp; <span class="underbrace" style="color:var(--zsr-color);">
+            <span class="underbrace-math"><span class="frac"><span class="num">0</span><span class="den">s(s+1)</span></span></span>
+            <div class="brace"></div>
+            <span class="underbrace-text">Ŷ<sub>ZS</sub>(s)</span>
+        </span> &nbsp;+&nbsp; <span class="underbrace" style="color:var(--zir-color);">
+            <span class="underbrace-math"><span class="frac"><span class="num">3</span><span class="den">s+1</span></span></span>
+            <div class="brace"></div>
+            <span class="underbrace-text">Ŷ<sub>ZI</sub>(s)</span>
+        </span></span></div>
+                <div class="equation" id="eq-t-domain"><span class="m-inline">v<sub>out</sub>(t) =&nbsp; <span class="underbrace" style="color:var(--zsr-color);">
+            <span class="underbrace-math">0(1 - e<sup>-t</sup>)u(t)</span>
+            <div class="brace"></div>
+            <span class="underbrace-text">y<sub>ZS</sub>(t)</span>
+        </span> &nbsp;+&nbsp; <span class="underbrace" style="color:var(--zir-color);">
+            <span class="underbrace-math">3 e<sup>-t</sup>u(t)</span>
+            <div class="brace"></div>
+            <span class="underbrace-text">y<sub>ZI</sub>(t)</span>
+        </span></span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Math Utilities
+    function frac(num, den) {
+        return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`;
+    }
+    function mi(str) {
+        return `<span class="m-inline">${str}</span>`;
+    }
+    function ubrace(mathHTML, label, color) {
+        return `<span class="underbrace" style="color:${color};">
+            <span class="underbrace-math">${mathHTML}</span>
+            <div class="brace"></div>
+            <span class="underbrace-text">${label}</span>
+        </span>`;
+    }
+
+    // Application State
+    let state = {
+        circuitType: 'rc',
+        A: 2,
+        IC: -1,
+        showZSR: true,
+        showZIR: true,
+        showTotal: true
+    };
+
+    const presets = {
+        'rc_step':    { type: 'rc', A: 2, IC: -1 },
+        'rl_exp':     { type: 'rl', A: 4, IC: 2 },
+        'zero_state': { type: 'rc', A: 3, IC: 0 },
+        'zero_input': { type: 'rc', A: 0, IC: 3 }
+    };
+
+    // DOM Elements
+    const presetSelect = document.getElementById('preset-select');
+    const sliderA = document.getElementById('slider-A');
+    const sliderIC = document.getElementById('slider-IC');
+    const valA = document.getElementById('val-A');
+    const valIC = document.getElementById('val-IC');
+    
+    const chkZsr = document.getElementById('chk-zsr');
+    const chkZir = document.getElementById('chk-zir');
+    const chkTot = document.getElementById('chk-tot');
+    const btnReset = document.getElementById('btn-reset');
+
+    const svgTime = document.getElementById('svg-time');
+    const svgS = document.getElementById('svg-s');
+    const plotCanvas = document.getElementById('plot-canvas');
+    const ctx = plotCanvas.getContext('2d');
+    
+    const eqS = document.getElementById('eq-s-domain');
+    const eqT = document.getElementById('eq-t-domain');
+
+    // SVG Defs to inject in each SVG
+    const svgDefs = `
+        <defs>
+            <marker id="arr" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"/></marker>
+            <marker id="arr-s" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="black"/></marker>
+            <marker id="arr-tot" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="var(--total-color)"/></marker>
+        </defs>
+    `;
+
+    // Circuit Generators
+    const circuits = {
+        rc: {
+            getTimeSvg: (A, IC) => `
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    ${svgDefs}
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"/>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">${A} u(t)</text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="60" x2="110" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="110" y1="60" x2="140" y2="45" stroke="black" stroke-width="2"/>
+                    <path d="M 125 45 Q 135 55 135 60" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <circle cx="110" cy="60" r="3" fill="black"/>
+                    <circle cx="140" cy="60" r="3" fill="black"/>
+                    <text x="125" y="35" font-size="14" font-weight="bold" text-anchor="middle">t=0</text>
+                    
+                    <line x1="140" y1="60" x2="170" y2="60" stroke="black" stroke-width="2"/>
+                    <path d="M 170 60 L 175 50 L 185 70 L 195 50 L 205 70 L 215 50 L 225 70 L 235 50 L 240 60 L 250 60" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="205" y="40" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">R=1Ω</text>
+                    
+                    <line x1="250" y1="60" x2="320" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="140" x2="80" y2="180" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="180" x2="320" y2="180" stroke="black" stroke-width="2"/>
+                    
+                    <line x1="320" y1="60" x2="320" y2="100" stroke="black" stroke-width="2"/>
+                    <line x1="300" y1="100" x2="340" y2="100" stroke="black" stroke-width="3"/>
+                    <line x1="300" y1="120" x2="340" y2="120" stroke="black" stroke-width="3"/>
+                    <line x1="320" y1="120" x2="320" y2="180" stroke="black" stroke-width="2"/>
+                    
+                    <text x="355" y="115" font-family="Times New Roman" font-style="italic" font-size="16">C=1F</text>
+                    <text x="355" y="140" font-family="Times New Roman" font-style="italic" font-size="14" fill="var(--zir-color)">v<tspan dy="3" font-size="10">C</tspan><tspan dy="-3">(0</tspan><sup>-</sup><tspan>)=${IC}V</tspan></text>
+                    
+                    <circle cx="320" cy="60" r="4" fill="var(--total-color)"/>
+                    <circle cx="320" cy="180" r="4" fill="var(--total-color)"/>
+                    <text x="320" y="45" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="middle">v<tspan dy="3" font-size="10">out</tspan><tspan dy="-3">(t)</tspan></text>
+                </svg>`,
+            getSSvg: (A, IC) => `
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    ${svgDefs}
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"/>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">${A}/s</text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="40" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="40" x2="160" y2="40" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="140" x2="80" y2="190" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="190" x2="320" y2="190" stroke="black" stroke-width="2"/>
+                    
+                    <rect x="160" y="30" width="40" height="20" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="180" y="22" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">1</text>
+                    <line x1="200" y1="40" x2="320" y2="40" stroke="black" stroke-width="2"/>
+                    
+                    <circle cx="320" cy="40" r="4" fill="var(--total-color)"/>
+                    <circle cx="320" cy="190" r="4" fill="var(--total-color)"/>
+                    <text x="320" y="25" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="middle">V&#770;<tspan dy="3" font-size="10">out</tspan><tspan dy="-3">(s)</tspan></text>
+
+                    <line x1="320" y1="40" x2="320" y2="60" stroke="black" stroke-width="2"/>
+                    <rect x="305" y="60" width="30" height="30" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="345" y="80" font-family="Times New Roman" font-style="italic" font-size="16">1/s</text>
+                    <line x1="320" y1="90" x2="320" y2="120" stroke="black" stroke-width="2"/>
+                    
+                    <circle cx="320" cy="140" r="20" fill="rgba(232,74,39,0.08)" stroke="var(--zir-color)" stroke-width="2"/>
+                    <text x="320" y="133" font-size="16" fill="var(--zir-color)" text-anchor="middle">+</text>
+                    <text x="320" y="157" font-size="16" fill="var(--zir-color)" text-anchor="middle">-</text>
+                    <text x="350" y="145" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zir-color)">${IC}/s</text>
+                    <line x1="320" y1="160" x2="320" y2="190" stroke="black" stroke-width="2"/>
+                </svg>`,
+            calcEqs: (A, IC) => {
+                const eqS = `V&#770;<sub>out</sub>(s) =&nbsp; ` + 
+                            ubrace(frac(A, 's(s+1)'), 'Y&#770;<sub>ZS</sub>(s)', 'var(--zsr-color)') + 
+                            ` &nbsp;+&nbsp; ` + 
+                            ubrace(frac(IC, 's+1'), 'Y&#770;<sub>ZI</sub>(s)', 'var(--zir-color)');
+                
+                const eqT = `v<sub>out</sub>(t) =&nbsp; ` +
+                            ubrace(`${A}(1 - e<sup>-t</sup>)u(t)`, 'y<sub>ZS</sub>(t)', 'var(--zsr-color)') +
+                            ` &nbsp;+&nbsp; ` +
+                            ubrace(`${IC} e<sup>-t</sup>u(t)`, 'y<sub>ZI</sub>(t)', 'var(--zir-color)');
+                return { eqS, eqT };
+            },
+            evalPlot: (A, IC, t) => {
+                if (t < 0) return { zs: 0, zi: 0, tot: 0 };
+                const zs = A * (1 - Math.exp(-t));
+                const zi = IC * Math.exp(-t);
+                return { zs, zi, tot: zs + zi };
+            }
+        },
+        rl: {
+            getTimeSvg: (A, IC) => `
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    ${svgDefs}
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"/>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">${A}e<tspan dy="-5" font-size="10">-2t</tspan><tspan dy="5">u(t)</tspan></text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="60" x2="110" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="110" y1="60" x2="140" y2="45" stroke="black" stroke-width="2"/>
+                    <path d="M 125 45 Q 135 55 135 60" fill="none" stroke="black" stroke-width="1.5" marker-end="url(#arr)"/>
+                    <circle cx="110" cy="60" r="3" fill="black"/>
+                    <circle cx="140" cy="60" r="3" fill="black"/>
+                    <text x="125" y="35" font-size="14" font-weight="bold" text-anchor="middle">t=0</text>
+                    
+                    <line x1="140" y1="60" x2="170" y2="60" stroke="black" stroke-width="2"/>
+                    <path d="M 170 60 L 175 50 L 185 70 L 195 50 L 205 70 L 215 50 L 225 70 L 235 50 L 240 60 L 250 60" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="205" y="40" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">R=1Ω</text>
+                    
+                    <line x1="250" y1="60" x2="320" y2="60" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="140" x2="80" y2="180" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="180" x2="320" y2="180" stroke="black" stroke-width="2"/>
+                    
+                    <line x1="320" y1="60" x2="320" y2="80" stroke="black" stroke-width="2"/>
+                    <path d="M 320 80 Q 340 87 320 95 Q 340 102 320 110 Q 340 117 320 125 Q 340 132 320 140" fill="none" stroke="black" stroke-width="3"/>
+                    <line x1="320" y1="140" x2="320" y2="180" stroke="black" stroke-width="2"/>
+                    
+                    <text x="355" y="110" font-family="Times New Roman" font-style="italic" font-size="16">L=1H</text>
+                    <text x="355" y="135" font-family="Times New Roman" font-style="italic" font-size="14" fill="var(--zir-color)">i<tspan dy="3" font-size="10">L</tspan><tspan dy="-3">(0</tspan><sup>-</sup><tspan>)=${IC}A</tspan></text>
+                    
+                    <line x1="320" y1="60" x2="320" y2="75" stroke="var(--total-color)" stroke-width="2.5" marker-end="url(#arr-tot)"/>
+                    <text x="305" y="70" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="end">i(t)</text>
+                </svg>`,
+            getSSvg: (A, IC) => `
+                <svg width="420" height="220" viewBox="0 0 420 220">
+                    ${svgDefs}
+                    <circle cx="80" cy="120" r="20" fill="none" stroke="var(--zsr-color)" stroke-width="2"/>
+                    <text x="80" y="113" font-size="14" fill="var(--zsr-color)" text-anchor="middle">+</text>
+                    <text x="80" y="137" font-size="14" fill="var(--zsr-color)" text-anchor="middle">-</text>
+                    <text x="50" y="125" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zsr-color)" text-anchor="end">${A}/(s+2)</text>
+                    
+                    <line x1="80" y1="100" x2="80" y2="40" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="40" x2="160" y2="40" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="140" x2="80" y2="190" stroke="black" stroke-width="2"/>
+                    <line x1="80" y1="190" x2="320" y2="190" stroke="black" stroke-width="2"/>
+                    
+                    <rect x="160" y="30" width="40" height="20" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="180" y="22" font-family="Times New Roman" font-style="italic" font-size="16" text-anchor="middle">1</text>
+                    <line x1="200" y1="40" x2="320" y2="40" stroke="black" stroke-width="2"/>
+                    
+                    <line x1="280" y1="40" x2="300" y2="40" stroke="var(--total-color)" stroke-width="2.5" marker-end="url(#arr-tot)"/>
+                    <text x="290" y="30" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--total-color)" text-anchor="middle">I&#770;(s)</text>
+                    
+                    <line x1="320" y1="40" x2="320" y2="60" stroke="black" stroke-width="2"/>
+                    <rect x="305" y="60" width="30" height="30" fill="none" stroke="black" stroke-width="2"/>
+                    <text x="345" y="80" font-family="Times New Roman" font-style="italic" font-size="16">s</text>
+                    <line x1="320" y1="90" x2="320" y2="120" stroke="black" stroke-width="2"/>
+                    
+                    <circle cx="320" cy="140" r="20" fill="rgba(232,74,39,0.08)" stroke="var(--zir-color)" stroke-width="2"/>
+                    <text x="320" y="133" font-size="16" fill="var(--zir-color)" text-anchor="middle">-</text>
+                    <text x="320" y="157" font-size="16" fill="var(--zir-color)" text-anchor="middle">+</text>
+                    <text x="350" y="145" font-family="Times New Roman" font-style="italic" font-size="16" fill="var(--zir-color)">${IC}</text>
+                    <line x1="320" y1="160" x2="320" y2="190" stroke="black" stroke-width="2"/>
+                </svg>`,
+            calcEqs: (A, IC) => {
+                const eqS = `I&#770;(s) =&nbsp; ` + 
+                            ubrace(frac(A, '(s+1)(s+2)'), 'Y&#770;<sub>ZS</sub>(s)', 'var(--zsr-color)') + 
+                            ` &nbsp;+&nbsp; ` + 
+                            ubrace(frac(IC, 's+1'), 'Y&#770;<sub>ZI</sub>(s)', 'var(--zir-color)');
+                
+                const eqT = `i(t) =&nbsp; ` +
+                            ubrace(`${A}(e<sup>-t</sup> - e<sup>-2t</sup>)u(t)`, 'y<sub>ZS</sub>(t)', 'var(--zsr-color)') +
+                            ` &nbsp;+&nbsp; ` +
+                            ubrace(`${IC} e<sup>-t</sup>u(t)`, 'y<sub>ZI</sub>(t)', 'var(--zir-color)');
+                return { eqS, eqT };
+            },
+            evalPlot: (A, IC, t) => {
+                if (t < 0) return { zs: 0, zi: 0, tot: 0 };
+                const zs = A * (Math.exp(-t) - Math.exp(-2*t));
+                const zi = IC * Math.exp(-t);
+                return { zs, zi, tot: zs + zi };
+            }
+        }
+    };
+
+    function init() {
+        presetSelect.addEventListener('change', (e) => {
+            const p = presets[e.target.value];
+            state.circuitType = p.type;
+            state.A = p.A;
+            state.IC = p.IC;
+            sliderA.value = p.A;
+            sliderIC.value = p.IC;
+            updateView();
+        });
+
+        sliderA.addEventListener('input', (e) => { state.A = parseFloat(e.target.value); presetSelect.value = ""; updateView(); });
+        sliderIC.addEventListener('input', (e) => { state.IC = parseFloat(e.target.value); presetSelect.value = ""; updateView(); });
+        chkZsr.addEventListener('change', (e) => { state.showZSR = e.target.checked; updateView(); });
+        chkZir.addEventListener('change', (e) => { state.showZIR = e.target.checked; updateView(); });
+        chkTot.addEventListener('change', (e) => { state.showTotal = e.target.checked; updateView(); });
+
+        btnReset.addEventListener('click', () => {
+            presetSelect.value = 'rc_step';
+            presetSelect.dispatchEvent(new Event('change'));
+            chkZsr.checked = true; chkZir.checked = true; chkTot.checked = true;
+            state.showZSR = true; state.showZIR = true; state.showTotal = true;
+            updateView();
+        });
+
+        updateView();
+    }
+
+    function updateView() {
+        valA.textContent = state.A;
+        valIC.textContent = state.IC;
+
+        const model = circuits[state.circuitType];
+
+        svgTime.innerHTML = model.getTimeSvg(state.A, state.IC);
+        svgS.innerHTML = model.getSSvg(state.A, state.IC);
+
+        const eqs = model.calcEqs(state.A, state.IC);
+        eqS.innerHTML = mi(eqs.eqS);
+        eqT.innerHTML = mi(eqs.eqT);
+
+        renderPlot(model);
+    }
+
+    function renderPlot(model) {
+        const w = plotCanvas.width;
+        const h = plotCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const bounds = { tMin: -0.5, tMax: 5, yMin: -6, yMax: 6 };
+        const y0 = h - ((0 - bounds.yMin) / (bounds.yMax - bounds.yMin) * h);
+        const x0 = (0 - bounds.tMin) / (bounds.tMax - bounds.tMin) * w;
+
+        ctx.beginPath();
+        ctx.strokeStyle = '#CCC';
+        ctx.lineWidth = 1;
+        ctx.moveTo(0, y0); ctx.lineTo(w, y0);
+        ctx.moveTo(x0, 0); ctx.lineTo(x0, h);
+        ctx.stroke();
+
+        ctx.fillStyle = '#666';
+        ctx.font = '12px sans-serif';
+        ctx.fillText('t', w - 15, y0 - 5);
+        ctx.fillText('y(t)', x0 + 5, 15);
+
+        const pts = 200;
+        
+        if (state.showZIR) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#E84A27';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([4, 4]);
+            plotLine(model, bounds, w, h, pts, 'zi');
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        if (state.showZSR) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#2196F3';
+            ctx.lineWidth = 2.5;
+            ctx.setLineDash([8, 4]);
+            plotLine(model, bounds, w, h, pts, 'zs');
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        if (state.showTotal) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#13294B';
+            ctx.lineWidth = 3;
+            plotLine(model, bounds, w, h, pts, 'tot');
+            ctx.stroke();
+        }
+    }
+
+    function plotLine(model, bounds, w, h, pts, key) {
+        let first = true;
+        for(let i=0; i<=pts; i++) {
+            const t = bounds.tMin + (i/pts)*(bounds.tMax - bounds.tMin);
+            let yVal = model.evalPlot(state.A, state.IC, t)[key];
+            yVal = Math.max(bounds.yMin, Math.min(bounds.yMax, yVal));
+            
+            const px = (t - bounds.tMin) / (bounds.tMax - bounds.tMin) * w;
+            const py = h - ((yVal - bounds.yMin) / (bounds.yMax - bounds.yMin) * h);
+
+            if (t > 0 && t - (bounds.xMax-bounds.xMin)/pts <= 0) {
+                 const yBefore = model.evalPlot(state.A, state.IC, -0.001)[key];
+                 ctx.lineTo(px, h - ((yBefore - bounds.yMin) / (bounds.yMax - bounds.yMin) * h));
+            }
+
+            if (first) { ctx.moveTo(px, py); first = false; } 
+            else { ctx.lineTo(px, py); }
+        }
+    }
+
+    window.onload = init;
+</script>
+
+</body></html>

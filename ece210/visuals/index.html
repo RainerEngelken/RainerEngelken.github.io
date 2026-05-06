@@ -9,224 +9,1005 @@
     :root {
       --uiuc-blue: #13294B;
       --uiuc-orange: #FF5F05;
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #1f2937;
-      --muted: #6b7280;
-      --border: #e5e7eb;
-      --warn-bg: #fff7ed;
-      --warn-border: #fdba74;
+      --blue-soft: #eaf1fb;
+      --orange-soft: #fff3eb;
+      --ink: #172033;
+      --text: #263244;
+      --muted: #64748b;
+      --line: #dbe3ee;
+      --card: rgba(255,255,255,0.94);
+      --bg: #f7fafc;
+      --shadow: 0 18px 40px rgba(19,41,75,0.10);
+      --shadow-soft: 0 8px 24px rgba(19,41,75,0.08);
+      --radius-xl: 24px;
+      --radius-lg: 18px;
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--bg);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 0%, rgba(255,95,5,0.15), transparent 28rem),
+        radial-gradient(circle at 88% 4%, rgba(19,41,75,0.13), transparent 30rem),
+        linear-gradient(180deg, #fbfdff 0%, var(--bg) 42%, #ffffff 100%);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.55;
     }
 
+    a { color: inherit; }
+
     .wrap {
-      max-width: 980px;
+      width: min(1180px, calc(100% - 40px));
       margin: 0 auto;
-      padding: 32px 20px 56px;
+      padding: 30px 0 64px;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.12fr) minmax(330px, 0.88fr);
+      gap: 24px;
+      align-items: stretch;
+      margin-bottom: 22px;
+    }
+
+    .hero-main,
+    .hero-visual,
+    .notice {
+      background: var(--card);
+      border: 1px solid rgba(219,227,238,0.88);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-main {
+      border-radius: var(--radius-xl);
+      padding: clamp(24px, 4vw, 42px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -120px auto;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, rgba(255,95,5,0.16), transparent 66%);
+      pointer-events: none;
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: var(--blue-soft);
+      color: var(--uiuc-blue);
+      font-size: 0.82rem;
+      font-weight: 780;
+      letter-spacing: 0.025em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    .kicker-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--uiuc-orange);
+      box-shadow: 0 0 0 5px rgba(255,95,5,0.14);
     }
 
     h1 {
       color: var(--uiuc-blue);
-      margin-bottom: 0.25rem;
-      font-size: 2.1rem;
+      font-size: clamp(2.35rem, 5vw, 4.4rem);
+      line-height: 0.96;
+      letter-spacing: -0.055em;
+      margin: 0 0 18px;
+      max-width: 800px;
     }
 
     .subtitle {
+      color: #40536c;
+      font-size: clamp(1.04rem, 2vw, 1.23rem);
+      max-width: 720px;
+      margin: 0;
+    }
+
+    .hero-visual {
+      border-radius: var(--radius-xl);
+      padding: 18px;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      min-height: 260px;
+    }
+
+    .domain-panel {
+      border-radius: 18px;
+      border: 1px solid var(--line);
+      background: linear-gradient(145deg, #ffffff, #f7fbff);
+      padding: 12px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      overflow: hidden;
+    }
+
+    .domain-title {
+      color: var(--uiuc-blue);
+      font-size: 0.88rem;
+      font-weight: 850;
+      letter-spacing: -0.01em;
+      margin-bottom: 8px;
+    }
+
+    .domain-panel svg {
+      width: 100%;
+      min-height: 120px;
+      display: block;
+    }
+
+    .domain-note {
       color: var(--muted);
-      margin-top: 0;
-      margin-bottom: 1.25rem;
-      font-size: 1.05rem;
+      font-size: 0.78rem;
+      font-weight: 680;
+      margin-top: 8px;
     }
 
     .notice {
-      background: var(--warn-bg);
-      border: 1px solid var(--warn-border);
-      border-left: 6px solid var(--uiuc-orange);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 30px;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+      border-radius: var(--radius-lg);
+      padding: 15px 17px;
+      margin-bottom: 26px;
+      border-left: 7px solid var(--uiuc-orange);
+      background: rgba(255,247,237,0.78);
+      color: #56351d;
     }
 
+    .notice-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: rgba(255,95,5,0.14);
+      color: var(--uiuc-orange);
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+    }
+
+    .notice p { margin: 0; }
+
+    .section { margin-top: 30px; }
+
     .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
       color: var(--uiuc-blue);
-      margin-top: 2rem;
-      margin-bottom: 0.75rem;
-      font-size: 1.25rem;
-      border-bottom: 2px solid var(--border);
-      padding-bottom: 0.3rem;
+      font-size: clamp(1.22rem, 2vw, 1.5rem);
+      letter-spacing: -0.025em;
+      margin: 0 0 12px;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 10px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--uiuc-orange);
+      box-shadow: 0 0 0 5px rgba(255,95,5,0.11);
+      flex: 0 0 auto;
     }
 
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 14px;
+      grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+      gap: 16px;
     }
 
     .card {
-      display: block;
+      display: grid;
+      grid-template-rows: 132px 1fr;
+      min-height: 258px;
       background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 14px 16px;
+      border: 1px solid rgba(219,227,238,0.94);
+      border-radius: 20px;
       text-decoration: none;
       color: inherit;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-      transition: transform 0.08s ease, box-shadow 0.08s ease;
+      box-shadow: 0 8px 22px rgba(19,41,75,0.07);
+      overflow: hidden;
+      transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
     }
 
-    .card:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    .card:hover,
+    .card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+      border-color: rgba(255,95,5,0.42);
+      outline: none;
     }
+
+    .thumb {
+      padding: 12px 12px 0;
+      background:
+        linear-gradient(180deg, rgba(234,241,251,0.72), rgba(255,255,255,0));
+    }
+
+    .thumb svg {
+      width: 100%;
+      height: 120px;
+      display: block;
+    }
+
+    .card-body { padding: 13px 16px 17px; }
 
     .card-title {
-      font-weight: 700;
       color: var(--uiuc-blue);
-      margin-bottom: 4px;
+      font-weight: 850;
+      font-size: 1.03rem;
+      line-height: 1.22;
+      margin-bottom: 7px;
+      letter-spacing: -0.015em;
     }
 
     .card-desc {
       color: var(--muted);
-      font-size: 0.97rem;
+      font-size: 0.94rem;
+      line-height: 1.42;
     }
 
-    .footer-note {
-      margin-top: 32px;
-      color: var(--muted);
-      font-size: 0.92rem;
+    @media (max-width: 840px) {
+      .hero { grid-template-columns: 1fr; }
+      .hero-visual { min-height: auto; }
     }
 
-    code {
-      background: #eef2f7;
-      padding: 0.1rem 0.35rem;
-      border-radius: 6px;
-      font-size: 0.92em;
+    @media (max-width: 640px) {
+      .wrap { width: min(100% - 28px, 1180px); padding-top: 18px; }
+      .hero-visual { grid-template-columns: 1fr; }
+      .domain-panel svg { min-height: 92px; }
+      .card { grid-template-rows: 116px 1fr; min-height: 234px; }
+      .thumb svg { height: 104px; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>ECE 210 Interactive Visuals</h1>
-    <p class="subtitle">Supplementary demos for intuition, exploration, and self-study.</p>
+    <header class="hero">
+      <div class="hero-main">
+        <div class="kicker"><span class="kicker-dot"></span> ECE 210 supplemental resource</div>
+        <h1>Interactive Visuals</h1>
+        <p class="subtitle">Short, visual demos for building intuition across time-domain, frequency-domain, and s-domain ideas in analog signal processing.</p>
+      </div>
+
+      <div class="hero-visual" aria-label="Three analysis domains: time domain, frequency domain, and s-domain">
+        <div class="domain-panel">
+          <div class="domain-title">Time domain</div>
+          <svg viewBox="0 0 180 130" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 104H162M34 112V18" stroke="#d7e2ef" stroke-width="2"/>
+            <path d="M24 72C42 38 60 38 78 72S114 106 132 72S150 38 168 72" fill="none" stroke="#13294B" stroke-width="5" stroke-linecap="round"/>
+            <path d="M34 104V72M62 104V45M90 104V81M118 104V99M146 104V54" stroke="#FF5F05" stroke-width="4" stroke-linecap="round" opacity="0.95"/>
+            <text x="42" y="28" fill="#64748b" font-size="13" font-weight="700">x(t), h(t), y(t)</text>
+          </svg>
+          <div class="domain-note">signals, convolution, responses</div>
+        </div>
+
+        <div class="domain-panel">
+          <div class="domain-title">Frequency domain</div>
+          <svg viewBox="0 0 180 130" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 104H164M90 112V18" stroke="#d7e2ef" stroke-width="2"/>
+            <path d="M36 104C48 66 58 42 72 72C82 94 98 94 108 72C122 42 134 66 146 104" fill="none" stroke="#13294B" stroke-width="5" stroke-linecap="round"/>
+            <path d="M45 104V82M65 104V56M85 104V44M105 104V56M125 104V82" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+            <text x="62" y="28" fill="#64748b" font-size="13" font-weight="700">X(ω), H(ω)</text>
+          </svg>
+          <div class="domain-note">spectra, bandwidth, modulation</div>
+        </div>
+
+        <div class="domain-panel">
+          <div class="domain-title">s-domain</div>
+          <svg viewBox="0 0 180 130" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+            <path d="M90 112V18M24 72H160" stroke="#d7e2ef" stroke-width="2"/>
+            <rect x="92" y="26" width="58" height="92" rx="10" fill="rgba(255,95,5,0.14)" stroke="#FF5F05" stroke-width="3"/>
+            <path d="M60 48l-10 10M50 48l10 10M126 86l-10 10M116 86l10 10" stroke="#13294B" stroke-width="5" stroke-linecap="round"/>
+            <text x="102" y="62" fill="#FF5F05" font-size="17" font-weight="900">ROC</text>
+            <text x="132" y="68" fill="#64748b" font-size="13" font-weight="700">jω</text>
+          </svg>
+          <div class="domain-note">Laplace, poles, circuits</div>
+        </div>
+      </div>
+    </header>
 
     <div class="notice">
-      <strong>Important:</strong> These visualizations are experimental supplementary materials.
-      They may contain mistakes or simplifications. Use them as intuition-building aids, not
-      as an authoritative source for definitions, notation, or grading expectations.
+      <div class="notice-icon">!</div>
+      <p><strong>Important:</strong> These visualizations are experimental supplementary materials. They may contain mistakes or simplifications. Use them as intuition-building aids, not as an authoritative source for definitions, notation, or grading expectations.</p>
     </div>
 
-    <h2 class="section-title">Complex numbers and phasors</h2>
-    <div class="grid">
+    <section class="section" aria-labelledby="complex-numbers-and-phasors">
+      <h2 class="section-title" id="complex-numbers-and-phasors">Complex numbers and phasors</h2>
+      <div class="grid">
       <a class="card" href="00_angle_conversion.html">
-        <div class="card-title">The Angle Challenge</div>
-        <div class="card-desc">Practice angle representations and conversions.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <circle cx="138" cy="88" r="50" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M138 88L183 88" stroke="#6c7f99" stroke-width="4" stroke-linecap="round"/>
+      <path d="M138 88L166 47" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M162 88A24 24 0 0 0 151 68" fill="none" stroke="#FF5F05" stroke-width="3"/>
+      <text x="174" y="62" fill="#13294B" font-size="22" font-weight="800">θ</text>
+      <text x="80" y="132" fill="#6c7f99" font-size="15">degrees ↔ radians</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">The Angle Challenge</div>
+          <div class="card-desc">Practice angle representations, reference angles, and conversions.</div>
+        </div>
       </a>
 
       <a class="card" href="01_complex_numbers.html">
-        <div class="card-title">Complex Numbers and Phasors</div>
-        <div class="card-desc">Explore magnitude, phase, rectangular form, polar form, and Euler’s identity.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M64 108L226 48" stroke="#FF5F05" stroke-width="6" stroke-linecap="round" filter="url(#soft)"/>
+      <circle cx="226" cy="48" r="8" fill="#FF5F05"/>
+      <path d="M64 108H226V48" stroke="#13294B" stroke-width="3" stroke-dasharray="7 7" fill="none"/>
+      <text x="236" y="51" fill="#13294B" font-size="18" font-weight="800">z</text>
+      <text x="78" y="56" fill="#6c7f99" font-size="15">Re + j Im</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Complex Numbers and Phasors</div>
+          <div class="card-desc">Explore magnitude, phase, rectangular form, polar form, and Euler’s identity.</div>
+        </div>
       </a>
-    </div>
-
-    <h2 class="section-title">LTI systems, responses, and properties</h2>
-    <div class="grid">
+      </div>
+    </section>
+    <section class="section" aria-labelledby="lti-systems,-responses,-and-properties">
+      <h2 class="section-title" id="lti-systems,-responses,-and-properties">LTI systems, responses, and properties</h2>
+      <div class="grid">
       <a class="card" href="02_zir_zsr_superposition_example.html">
-        <div class="card-title">ZIR, ZSR, and Superposition</div>
-        <div class="card-desc">Build intuition for zero-input response, zero-state response, and how they combine.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M56 52C88 52 88 108 120 108S152 52 184 52S216 108 248 108" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M56 104C92 80 122 73 156 80S214 108 260 80" fill="none" stroke="#FF5F05" stroke-width="4"/>
+      <circle cx="156" cy="80" r="24" fill="#e8f0fb" stroke="#13294B" stroke-width="2"/>
+      <text x="145" y="87" fill="#13294B" font-size="20" font-weight="900">+</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">ZIR, ZSR, and Superposition</div>
+          <div class="card-desc">Build intuition for zero-input response, zero-state response, and how they combine.</div>
+        </div>
       </a>
 
       <a class="card" href="10_impulse_response_step_response.html">
-        <div class="card-title">Impulse Response and Step Response</div>
-        <div class="card-desc">Compare step response, derivatives, and the true impulse response.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 118H118V52H260" fill="none" stroke="#13294B" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M58 118C98 118 110 84 126 65C152 34 198 46 260 46" fill="none" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <text x="80" y="42" fill="#6c7f99" font-size="15">g(t) → h(t)</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Impulse Response and Step Response</div>
+          <div class="card-desc">Compare step response, derivatives, and the true impulse response.</div>
+        </div>
       </a>
 
       <a class="card" href="12_causality_bibo_linearity_time-invariance-explorer.html">
-        <div class="card-title">System Properties Explorer</div>
-        <div class="card-desc">Test causality, BIBO stability, linearity, and time invariance on example systems.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <rect x="70" y="40" width="180" height="82" rx="16" fill="#fff" stroke="#13294B" stroke-width="3" filter="url(#soft)"/>
+      <path d="M95 66l11 11l22-26" stroke="#0f766e" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M95 98l11 11l22-26" stroke="#0f766e" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M160 65h58M160 99h58" stroke="#6c7f99" stroke-width="4" stroke-linecap="round"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">System Properties Explorer</div>
+          <div class="card-desc">Test causality, BIBO stability, linearity, and time invariance on example systems.</div>
+        </div>
       </a>
-    </div>
 
-    <h2 class="section-title">Convolution and impulses</h2>
-    <div class="grid">
+      <a class="card" href="23_recovering_h%28t%29_from%20g%28t%29.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M60 112H104V48H258" fill="none" stroke="#13294B" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M62 114C105 114 112 69 126 55C153 28 194 43 258 43" fill="none" stroke="#FF5F05" stroke-width="4"/>
+      <path d="M126 55L126 114" stroke="#FF5F05" stroke-width="3" stroke-dasharray="5 5"/>
+      <text x="173" y="94" fill="#13294B" font-size="18" font-weight="800">d/dt</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Recovering h(t) from g(t)</div>
+          <div class="card-desc">See why the impulse response is the derivative of the step response.</div>
+        </div>
+      </a>
+
+      <a class="card" href="24_bibo_stability_causality_from_h%28t%29.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 83C78 28 105 28 122 83S169 138 194 83S238 54 264 83" fill="none" stroke="#FF5F05" stroke-width="4"/>
+      <path d="M60 104C95 75 130 68 160 72S220 91 260 64" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M108 34l46 94l46-94" fill="none" stroke="#0f766e" stroke-width="3" stroke-dasharray="6 6"/>
+      <text x="212" y="40" fill="#13294B" font-size="17" font-weight="800">∫|h|</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">BIBO Stability and Causality from h(t)</div>
+          <div class="card-desc">Use the impulse response to judge stability and causality directly.</div>
+        </div>
+      </a>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="convolution-and-impulses">
+      <h2 class="section-title" id="convolution-and-impulses">Convolution and impulses</h2>
+      <div class="grid">
       <a class="card" href="07_interactive_convolution.html">
-        <div class="card-title">Interactive Convolution</div>
-        <div class="card-desc">Visualize continuous-time convolution through flipping, shifting, multiplying, and integrating.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 112L102 58L146 112Z" fill="#e8f0fb" stroke="#13294B" stroke-width="4"/>
+      <path d="M176 112C192 52 236 52 252 112" fill="none" stroke="#FF5F05" stroke-width="5"/>
+      <path d="M146 82H176" stroke="#6c7f99" stroke-width="4" stroke-dasharray="6 6"/>
+      <text x="134" y="44" fill="#13294B" font-size="20" font-weight="900">*</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Interactive Convolution</div>
+          <div class="card-desc">Visualize continuous-time convolution by flipping, shifting, multiplying, and integrating.</div>
+        </div>
       </a>
 
       <a class="card" href="08_another_interactive_convolution.html">
-        <div class="card-title">Continuous Convolution Visualization</div>
-        <div class="card-desc">A second convolution demo with a different presentation and perspective.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <rect x="58" y="74" width="84" height="42" rx="8" fill="#e8f0fb" stroke="#13294B" stroke-width="4"/>
+      <rect x="178" y="54" width="70" height="62" rx="8" fill="#fff" stroke="#FF5F05" stroke-width="4"/>
+      <path d="M72 130C104 102 132 98 160 105S218 128 260 82" fill="none" stroke="#13294B" stroke-width="4"/>
+      <text x="151" y="70" fill="#6c7f99" font-size="17" font-weight="800">shift</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Continuous Convolution Visualization</div>
+          <div class="card-desc">A second convolution demo with a different presentation and perspective.</div>
+        </div>
       </a>
 
       <a class="card" href="09_dirac_impulse_sifting.html">
-        <div class="card-title">Dirac Impulse and Sifting Property</div>
-        <div class="card-desc">Develop intuition for impulses, weighted impulses, and the sifting property.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M88 122V42" stroke="#FF5F05" stroke-width="6" stroke-linecap="round"/>
+      <path d="M88 42l-12 19M88 42l12 19" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M56 106C96 76 138 70 178 84S238 114 268 70" fill="none" stroke="#13294B" stroke-width="4"/>
+      <circle cx="88" cy="82" r="7" fill="#13294B"/>
+      <text x="114" y="54" fill="#13294B" font-size="18" font-weight="800">δ(t−t₀)</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Dirac Impulse and Sifting Property</div>
+          <div class="card-desc">Develop intuition for impulses, weighted impulses, and the sifting property.</div>
+        </div>
       </a>
 
       <a class="card" href="13_interactive_impulse_and_convolution.html">
-        <div class="card-title">Impulses and Convolution Sandbox</div>
-        <div class="card-desc">Experiment with impulse-based constructions and their effect on convolution.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M70 122V66M112 122V42M154 122V84" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M70 66l-9 14M70 66l9 14M112 42l-9 14M112 42l9 14M154 84l-9 14M154 84l9 14" stroke="#FF5F05" stroke-width="4" stroke-linecap="round"/>
+      <path d="M184 112C204 76 230 64 262 78" fill="none" stroke="#13294B" stroke-width="5"/>
+      <circle cx="224" cy="84" r="22" fill="#e8f0fb" stroke="#13294B" stroke-width="2"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Impulses and Convolution Sandbox</div>
+          <div class="card-desc">Experiment with impulse-based constructions and their effect on convolution.</div>
+        </div>
       </a>
-    </div>
-
-    <h2 class="section-title">Fourier series and Fourier transform</h2>
-    <div class="grid">
+      </div>
+    </section>
+    <section class="section" aria-labelledby="fourier-series-and-fourier-transform">
+      <h2 class="section-title" id="fourier-series-and-fourier-transform">Fourier series and Fourier transform</h2>
+      <div class="grid">
       <a class="card" href="03_harmonics_superposition.html">
-        <div class="card-title">Harmonics and Superposition</div>
-        <div class="card-desc">See how sinusoidal harmonics combine to form richer signals.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 80C82 38 106 38 130 80S178 122 202 80S250 38 274 80" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M58 80C70 58 82 58 94 80S118 102 130 80S154 58 166 80S190 102 202 80S226 58 238 80S262 102 274 80" fill="none" stroke="#FF5F05" stroke-width="3" opacity="0.9"/>
+      <text x="82" y="132" fill="#6c7f99" font-size="15">harmonic superposition</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Harmonics and Superposition</div>
+          <div class="card-desc">See how sinusoidal harmonics combine to form richer signals.</div>
+        </div>
       </a>
 
       <a class="card" href="04_fourier_series_visualization.html">
-        <div class="card-title">Fourier Series Visualization</div>
-        <div class="card-desc">Explore Fourier series coefficients and signal reconstruction.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 78H92V48H126V110H160V48H194V110H228V78H262" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M70 130V98M105 130V72M140 130V52M175 130V72M210 130V98M245 130V116" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <text x="88" y="42" fill="#6c7f99" font-size="15">coefficients</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Fourier Series Visualization</div>
+          <div class="card-desc">Explore Fourier series coefficients and signal reconstruction.</div>
+        </div>
       </a>
 
       <a class="card" href="05_another_fourier_series_visualization.html">
-        <div class="card-title">Fourier Series Multi-Form Visualization</div>
-        <div class="card-desc">Compare multiple forms and views of Fourier series representations.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 82C82 44 108 48 132 82S182 120 206 82S252 48 274 82" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M70 130V98M104 130V78M138 130V62M172 130V74M206 130V98M240 130V116" stroke="#FF5F05" stroke-width="4" stroke-linecap="round"/>
+      <path d="M58 82H274" stroke="#6c7f99" stroke-width="2" stroke-dasharray="5 5"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Fourier Series Multi-Form Visualization</div>
+          <div class="card-desc">Compare multiple forms and views of Fourier series representations.</div>
+        </div>
       </a>
 
       <a class="card" href="06_from_fourier_series_to_fourier_transform.html">
-        <div class="card-title">From Fourier Series to Fourier Transform</div>
-        <div class="card-desc">Build intuition for the limiting transition from periodic spectra to continuous spectra.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M62 126V92M96 126V70M130 126V54M164 126V70M198 126V92" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M210 126C224 94 238 66 264 52" stroke="#13294B" stroke-width="5" fill="none" stroke-linecap="round"/>
+      <path d="M212 126C226 118 246 110 272 106" stroke="#13294B" stroke-width="3" opacity="0.45" fill="none"/>
+      <text x="112" y="42" fill="#6c7f99" font-size="15">T ↑, spacing ↓</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">From Fourier Series to Fourier Transform</div>
+          <div class="card-desc">Build intuition for the limiting transition from periodic spectra to continuous spectra.</div>
+        </div>
       </a>
 
       <a class="card" href="15_fourier_quantities_energy_bandwidth_explorer.html">
-        <div class="card-title">Fourier Quantities Explorer</div>
-        <div class="card-desc">Interact with energy, spectra, and bandwidth-related quantities in the Fourier domain.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 112C92 52 124 52 158 112S224 112 262 58" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M74 126C96 92 124 76 158 78S220 104 250 70" fill="none" stroke="#FF5F05" stroke-width="5"/>
+      <circle cx="158" cy="78" r="18" fill="#e8f0fb" stroke="#13294B" stroke-width="2"/>
+      <text x="141" y="84" fill="#13294B" font-size="17" font-weight="900">|X|²</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Fourier Quantities Explorer</div>
+          <div class="card-desc">Interact with energy, spectra, and bandwidth-related quantities in the Fourier domain.</div>
+        </div>
       </a>
-    </div>
-
-    <h2 class="section-title">Sampling, modulation, and aliasing</h2>
-    <div class="grid">
+      </div>
+    </section>
+    <section class="section" aria-labelledby="sampling,-modulation,-and-aliasing">
+      <h2 class="section-title" id="sampling,-modulation,-and-aliasing">Sampling, modulation, and aliasing</h2>
+      <div class="grid">
       <a class="card" href="11_sampling_reconstruction_aliasing.html">
-        <div class="card-title">Sampling, Reconstruction, and Aliasing</div>
-        <div class="card-desc">See how sampling rate affects spectral replication, aliasing, and reconstruction.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 84C86 40 114 40 142 84S198 128 226 84S254 40 282 84" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M74 124V67M106 124V48M138 124V77M170 124V112M202 124V116M234 124V73M266 124V47" stroke="#FF5F05" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="74" cy="67" r="5" fill="#FF5F05"/><circle cx="106" cy="48" r="5" fill="#FF5F05"/><circle cx="138" cy="77" r="5" fill="#FF5F05"/><circle cx="170" cy="112" r="5" fill="#FF5F05"/><circle cx="202" cy="116" r="5" fill="#FF5F05"/><circle cx="234" cy="73" r="5" fill="#FF5F05"/><circle cx="266" cy="47" r="5" fill="#FF5F05"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Sampling, Reconstruction, and Aliasing</div>
+          <div class="card-desc">See how sampling rate affects spectral replication, aliasing, and reconstruction.</div>
+        </div>
       </a>
 
       <a class="card" href="14_modulation_frequency-shifting-and-low-pass_filtering.html">
-        <div class="card-title">Modulation, Frequency Shifting, and Low-Pass Filtering</div>
-        <div class="card-desc">Explore mixing, spectral shifting, and low-pass filtering in a modulation pipeline.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 82C90 40 120 40 152 82S214 124 260 64" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M60 82C68 62 76 62 84 82S100 102 108 82S124 62 132 82S148 102 156 82S172 62 180 82S196 102 204 82S220 62 228 82S244 102 252 82" fill="none" stroke="#FF5F05" stroke-width="3"/>
+      <path d="M82 132h54M184 132h54" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <text x="142" y="137" fill="#6c7f99" font-size="15">mix</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Modulation, Frequency Shifting, and Low-Pass Filtering</div>
+          <div class="card-desc">Explore mixing, spectral shifting, and low-pass filtering in a modulation pipeline.</div>
+        </div>
       </a>
 
       <a class="card" href="16_continuous-time_sampling_spectral_replication_aliasing_reconstruction.html">
-        <div class="card-title">Continuous-Time Sampling, Spectral Replication, Aliasing, and Reconstruction</div>
-        <div class="card-desc">A more detailed sampling demo showing replicas, aliasing, and recovery conditions.</div>
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M60 86C88 42 116 42 144 86S200 130 228 86S256 42 284 86" fill="none" stroke="#13294B" stroke-width="4"/>
+      <path d="M70 126V70M110 126V46M150 126V94M190 126V119M230 126V82M270 126V48" stroke="#FF5F05" stroke-width="4" stroke-linecap="round"/>
+      <path d="M72 50C106 40 140 40 174 50M180 50C214 40 248 40 282 50" fill="none" stroke="#13294B" stroke-width="3" opacity="0.5"/>
+      <text x="102" y="34" fill="#6c7f99" font-size="15">spectral replicas</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Continuous-Time Sampling and Reconstruction</div>
+          <div class="card-desc">A more detailed sampling demo showing replicas, aliasing, and recovery conditions.</div>
+        </div>
       </a>
-    </div>
+      </div>
+    </section>
+    <section class="section" aria-labelledby="laplace-transform-and-s-domain-analysis">
+      <h2 class="section-title" id="laplace-transform-and-s-domain-analysis">Laplace transform and s-domain analysis</h2>
+      <div class="grid">
+      <a class="card" href="17_%20laplace_transform_region%20of_convergence.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M152 132V28M74 80H258" stroke="#13294B" stroke-width="3"/>
+      <rect x="154" y="32" width="98" height="96" rx="10" fill="rgba(255,95,5,0.14)" stroke="#FF5F05" stroke-width="3"/>
+      <path d="M116 55l-14 14M102 55l14 14M116 101l-14 14M102 101l14 14" stroke="#13294B" stroke-width="4" stroke-linecap="round"/>
+      <text x="178" y="83" fill="#FF5F05" font-size="20" font-weight="900">ROC</text>
+      <text x="238" y="75" fill="#6c7f99" font-size="16">jω</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Laplace Transform and Region of Convergence</div>
+          <div class="card-desc">Connect time-domain decay or growth to convergence regions in the s-plane.</div>
+        </div>
+      </a>
 
-    <p class="footer-note">
-      These files are served as static HTML from <code>/ece210/visuals/</code>.
-    </p>
+      <a class="card" href="18_laplace_transform_%20poles_modes_and_stability.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M158 132V28M74 80H258" stroke="#13294B" stroke-width="3"/>
+      <path d="M110 58l-12 12M98 58l12 12M214 96l-12 12M202 96l12 12" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M68 118C100 54 142 48 174 80S228 120 262 58" fill="none" stroke="#13294B" stroke-width="4"/>
+      <text x="184" y="46" fill="#6c7f99" font-size="15">poles → modes</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Poles, Modes, and Stability</div>
+          <div class="card-desc">Move poles in the s-plane and see the corresponding time-domain modes.</div>
+        </div>
+      </a>
+
+      <a class="card" href="19_inverse_laplace_partial_fraction_expansion.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <rect x="62" y="42" width="74" height="74" rx="14" fill="#fff" stroke="#13294B" stroke-width="3"/>
+      <text x="80" y="85" fill="#13294B" font-size="20" font-weight="900">F(s)</text>
+      <path d="M150 80H174" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M174 80l-10-10M174 80l-10 10" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M202 54l-12 12M190 54l12 12M238 104l-12 12M226 104l12 12" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M198 126C214 94 232 74 260 50" stroke="#13294B" stroke-width="4" fill="none"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Inverse Laplace and Partial Fractions</div>
+          <div class="card-desc">Relate rational transforms, poles, residues, and time-domain components.</div>
+        </div>
+      </a>
+
+      <a class="card" href="20_s-domain_circuit_translation.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 82H92M128 82H164M204 82H260" stroke="#13294B" stroke-width="5" stroke-linecap="round"/>
+      <path d="M92 82h8l6-16l12 32l12-32l6 16h-8" stroke="#FF5F05" stroke-width="4" fill="none" stroke-linejoin="round"/>
+      <path d="M164 58V106M176 58V106" stroke="#13294B" stroke-width="5" stroke-linecap="round"/>
+      <path d="M204 58V106M204 58C226 58 226 106 204 106" stroke="#FF5F05" stroke-width="4" fill="none"/>
+      <text x="114" y="132" fill="#6c7f99" font-size="17" font-weight="800">R, sL, 1/sC</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">s-Domain Circuit Translation</div>
+          <div class="card-desc">Translate capacitors, inductors, and sources into algebraic s-domain circuit models.</div>
+        </div>
+      </a>
+
+      <a class="card" href="21_zero-state_and_zero-Input_response_laplace.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <path d="M58 110C91 61 122 61 154 110" fill="none" stroke="#13294B" stroke-width="5"/>
+      <path d="M58 92C100 121 132 121 172 82" fill="none" stroke="#FF5F05" stroke-width="5"/>
+      <path d="M188 98h62" stroke="#6c7f99" stroke-width="4" stroke-linecap="round"/>
+      <text x="200" y="74" fill="#13294B" font-size="18" font-weight="900">ZSR</text>
+      <text x="200" y="122" fill="#FF5F05" font-size="18" font-weight="900">ZIR</text>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">Zero-State and Zero-Input Response with Laplace</div>
+          <div class="card-desc">Compare input-driven and initial-condition-driven parts of a circuit response.</div>
+        </div>
+      </a>
+
+      <a class="card" href="22_ltic_odes_and_laplace_trafo.html">
+        <div class="thumb"><svg viewBox="0 0 320 160" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#f7fbff"/>
+          <stop offset="1" stop-color="#fff3eb"/>
+        </linearGradient>
+        <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#13294B" flood-opacity="0.12"/>
+        </filter>
+      </defs>
+      <rect width="320" height="160" rx="20" fill="url(#bg)"/>
+      <path d="M28 124H292" stroke="#d7e2ef" stroke-width="2"/>
+      <path d="M46 136V24" stroke="#d7e2ef" stroke-width="2"/>
+    
+      <rect x="58" y="50" width="88" height="58" rx="14" fill="#fff" stroke="#13294B" stroke-width="3"/>
+      <text x="72" y="85" fill="#13294B" font-size="21" font-weight="900">ODE</text>
+      <path d="M158 80H184" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <path d="M184 80l-10-10M184 80l-10 10" stroke="#FF5F05" stroke-width="5" stroke-linecap="round"/>
+      <rect x="198" y="50" width="70" height="58" rx="14" fill="#fff" stroke="#FF5F05" stroke-width="3"/>
+      <text x="216" y="85" fill="#FF5F05" font-size="20" font-weight="900">Y(s)</text>
+      <path d="M72 128C104 112 136 112 168 128S232 144 264 116" fill="none" stroke="#13294B" stroke-width="3"/>
+    </svg></div>
+        <div class="card-body">
+          <div class="card-title">LTIC ODEs and Laplace Transforms</div>
+          <div class="card-desc">Connect differential equations, transfer functions, modes, and total response.</div>
+        </div>
+      </a>
+      </div>
+    </section>
   </div>
 </body>
 </html>

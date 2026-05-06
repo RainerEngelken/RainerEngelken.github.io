@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(50).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Recovering h(t) from g(t)</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            --g-color: #2196F3;
+            --h-color: #E84A27;
+            --tangent-color: #28A745;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select {
+            padding: 0.4rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .slider-group input { width: 150px; }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+        input[type="checkbox"] { width: 1.2rem; height: 1.2rem; accent-color: var(--uiuc-orange); cursor: pointer; }
+
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 450px;
+            height: 250px;
+            background-color: #FAFAFA;
+            border: 1px solid #EEEEEE;
+            cursor: crosshair;
+        }
+
+        .math-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            gap: 1rem;
+            font-size: 1.15rem;
+        }
+
+        .equation {
+            background: #F8F9FA;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+            text-align: left;
+            width: 90%;
+            line-height: 2;
+        }
+
+        .m-inline {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .m-inline sub, .m-inline sup { font-style: normal; font-size: 0.7em; }
+        
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.2rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+            line-height: 1;
+        }
+        .frac .num { border-bottom: 1px solid currentColor; padding: 0.1rem 0.3rem; }
+        .frac .den { padding: 0.1rem 0.3rem; }
+
+        .highlight-jump { color: var(--uiuc-orange); font-weight: bold; }
+        .highlight-cont { color: #2196F3; font-weight: bold; }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-orange);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .card h3 { margin-top: 0; margin-bottom: 1rem; font-size: 1.2rem; color: var(--text-main); }
+        .card ul { margin: 0; padding-left: 1.5rem; line-height: 1.6; }
+
+        .cursor-info {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 1.05rem;
+            color: var(--uiuc-blue);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="example-select"><strong>Step Response g(t):</strong></label>
+        <select id="example-select">
+            <option value="ex1">1/3(1 - e⁻³ᵗ)u(t) [Smooth start]</option>
+            <option value="ex2">e⁻ᵗu(t) [Jump at t=0]</option>
+            <option value="ex3">t(u(t) - u(t-2)) [Ramp and Drop]</option>
+            <option value="ex4">5(u(t) - u(t-6)) [Pulse]</option>
+        </select>
+    </div>
+    
+    <div class="slider-group" style="margin-left: 1rem;">
+        <label><strong>Time Cursor (t):</strong> <span id="val-t" style="color:var(--tangent-color); font-weight:bold;">-1.00</span></label>
+        <input type="range" id="slider-t" min="-1" max="4" step="0.05" value="1">
+    </div>
+
+    <div class="control-group" style="margin-left: 1rem;">
+        <label class="toggle-container">
+            <input type="checkbox" id="chk-impulses" checked="">
+            Include Impulses at Jumps
+        </label>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        
+        <!-- Panel 1: Step Response g(t) -->
+        <div class="panel">
+            <h2>1. Step Response g(t)</h2>
+            <canvas id="canvas-g" width="450" height="250"></canvas>
+            <div class="cursor-info">
+                <span>g(<span id="txt-g-t">-1.00</span>) = <span id="txt-g-val" style="color:var(--g-color);">0.00</span></span>
+            </div>
+        </div>
+
+        <!-- Panel 2: Impulse Response h(t) -->
+        <div class="panel">
+            <h2>2. Impulse Response h(t)</h2>
+            <canvas id="canvas-h" width="450" height="250"></canvas>
+            <div class="cursor-info">
+                <span>h(<span id="txt-h-t">-1.00</span>) = <span id="txt-h-val" style="color: var(--h-color);">0.00</span></span>
+            </div>
+        </div>
+
+        <!-- Panel 3: Local Derivative Vis -->
+        <div class="panel">
+            <h2>3. Local Derivative Visualization</h2>
+            <canvas id="canvas-zoom" width="450" height="250"></canvas>
+            <div style="margin-top:0.5rem; text-align:center; font-size:0.95rem;">
+                <span class="m-inline" style="color:var(--tangent-color);">Slope = dg/dt</span>
+            </div>
+        </div>
+
+        <!-- Panel 4: Mathematical Evaluation -->
+        <div class="panel">
+            <h2>4. Mathematical Differentiation</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-math">g(t) = t [u(t) - u(t-2)] <br><br>
+                          h(t) = 1·[u(t) - u(t-2)] + t [ δ(t) - δ(t-2) ] <br><br>h(t) = <span class="highlight-cont">[u(t) - u(t-2)]</span> <span class="highlight-jump">- 2δ(t-2)</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="card">
+        <h3>What to notice</h3>
+        <ul>
+            <li>By definition, the step response <span class="m-inline">g(t) = h(t) * u(t)</span>. Differentiating both sides yields <span class="m-inline">dg(t)/dt = h(t) * δ(t) = h(t)</span>.</li>
+            <li>Drag the time cursor. The <strong>slope</strong> (derivative) of <span class="m-inline">g(t)</span> exactly forms the continuous part of <span class="m-inline">h(t)</span>.</li>
+            <li><strong>Crucial:</strong> If <span class="m-inline">g(t)</span> has an abrupt jump (discontinuity), the derivative is infinite at that instant. This produces a <strong>Dirac delta impulse</strong> <span class="m-inline">δ(t)</span> in <span class="m-inline">h(t)</span> with an area equal to the jump height.</li>
+            <li>Try turning off "Include Impulses at Jumps". The resulting function is just the ordinary derivative and fails to correctly describe the system's full impulse response.</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+    // Utilities
+    function frac(num, den) { return `<span class="frac"><span class="num">${num}</span><span class="den">${den}</span></span>`; }
+    function mi(str) { return `<span class="m-inline">${str}</span>`; }
+
+    // Data Models
+    const models = {
+        ex1: {
+            tMin: -1, tMax: 3, yMinG: -0.2, yMaxG: 0.5, yMinH: -0.2, yMaxH: 1.2,
+            g: (t) => t < 0 ? 0 : (1/3)*(1 - Math.exp(-3*t)),
+            hCont: (t) => t < 0 ? 0 : Math.exp(-3*t),
+            impulses: [],
+            mathText: (showImp) => `
+                g(t) = ${frac('1','3')}(1 - e<sup>-3t</sup>) u(t) <br><br>
+                h(t) = ${frac('d','dt')} [ ${frac('1','3')}(1 - e<sup>-3t</sup>) ] u(t) + [ ${frac('1','3')}(1 - e<sup>-3t</sup>) ] &delta;(t) <br><br>
+                h(t) = <span class="highlight-cont">e<sup>-3t</sup> u(t)</span> + 0 &middot; &delta;(t)
+            `
+        },
+        ex2: {
+            tMin: -1, tMax: 4, yMinG: -0.2, yMaxG: 1.2, yMinH: -1.2, yMaxH: 1.5,
+            g: (t) => t < 0 ? 0 : Math.exp(-t),
+            hCont: (t) => t < 0 ? 0 : -Math.exp(-t),
+            impulses: [{ t: 0, area: 1 }],
+            mathText: (showImp) => {
+                let eq = `g(t) = e<sup>-t</sup> u(t) <br><br>
+                          h(t) = [ ${frac('d','dt')} e<sup>-t</sup> ] u(t) + e<sup>-t</sup> [ ${frac('d','dt')} u(t) ] <br><br>`;
+                if(showImp) {
+                    eq += `h(t) = <span class="highlight-cont">-e<sup>-t</sup> u(t)</span> + <span class="highlight-jump">&delta;(t)</span>`;
+                } else {
+                    eq += `<span style="color:red; text-decoration:line-through;">h(t) = <span class="highlight-cont">-e<sup>-t</sup> u(t)</span> + &delta;(t)</span><br>
+                           <span style="color:red; font-size:0.9em;">(Incorrect! Missed product rule delta term)</span>`;
+                }
+                return eq;
+            }
+        },
+        ex3: {
+            tMin: -1, tMax: 4, yMinG: -0.5, yMaxG: 2.5, yMinH: -2.5, yMaxH: 1.5,
+            g: (t) => {
+                if (t < 0) return 0;
+                if (t < 2) return t;
+                return 0;
+            },
+            hCont: (t) => {
+                if (t < 0 || t > 2) return 0;
+                return 1;
+            },
+            impulses: [{ t: 2, area: -2 }],
+            mathText: (showImp) => {
+                let eq = `g(t) = t [u(t) - u(t-2)] <br><br>
+                          h(t) = 1&middot;[u(t) - u(t-2)] + t [ &delta;(t) - &delta;(t-2) ] <br><br>`;
+                if(showImp) {
+                    eq += `h(t) = <span class="highlight-cont">[u(t) - u(t-2)]</span> <span class="highlight-jump">- 2&delta;(t-2)</span>`;
+                } else {
+                    eq += `<span style="color:red;">h(t) = <span class="highlight-cont">[u(t) - u(t-2)]</span> </span> (Missed drop at t=2)`;
+                }
+                return eq;
+            }
+        },
+        ex4: {
+            tMin: -1, tMax: 8, yMinG: -1, yMaxG: 6, yMinH: -6, yMaxH: 6,
+            g: (t) => (t >= 0 && t < 6) ? 5 : 0,
+            hCont: (t) => 0,
+            impulses: [{ t: 0, area: 5 }, { t: 6, area: -5 }],
+            mathText: (showImp) => {
+                let eq = `g(t) = 5 [u(t) - u(t-6)] <br><br>`;
+                if(showImp) {
+                    eq += `h(t) = <span class="highlight-jump">5&delta;(t) - 5&delta;(t-6)</span>`;
+                } else {
+                    eq += `<span style="color:red;">h(t) = 0</span> (Missed both edges!)`;
+                }
+                return eq;
+            }
+        }
+    };
+
+    // State
+    let state = {
+        ex: 'ex1',
+        tCursor: 1.0,
+        showImp: true
+    };
+
+    // Elements
+    const exSelect = document.getElementById('example-select');
+    const sliderT = document.getElementById('slider-t');
+    const chkImp = document.getElementById('chk-impulses');
+    
+    const valT = document.getElementById('val-t');
+    const txtGT = document.getElementById('txt-g-t');
+    const txtGVal = document.getElementById('txt-g-val');
+    const txtHT = document.getElementById('txt-h-t');
+    const txtHVal = document.getElementById('txt-h-val');
+    
+    const ctxG = document.getElementById('canvas-g').getContext('2d');
+    const ctxH = document.getElementById('canvas-h').getContext('2d');
+    const ctxZ = document.getElementById('canvas-zoom').getContext('2d');
+    const eqMath = document.getElementById('eq-math');
+
+    function init() {
+        exSelect.addEventListener('change', (e) => {
+            state.ex = e.target.value;
+            const model = models[state.ex];
+            sliderT.min = model.tMin;
+            sliderT.max = model.tMax;
+            
+            // Constrain cursor if needed
+            if(state.tCursor < model.tMin) state.tCursor = model.tMin;
+            if(state.tCursor > model.tMax) state.tCursor = model.tMax;
+            sliderT.value = state.tCursor;
+            
+            updateView();
+        });
+
+        sliderT.addEventListener('input', (e) => {
+            state.tCursor = parseFloat(e.target.value);
+            updateView();
+        });
+
+        chkImp.addEventListener('change', (e) => {
+            state.showImp = e.target.checked;
+            updateView();
+        });
+
+        updateView();
+    }
+
+    function updateView() {
+        valT.textContent = state.tCursor.toFixed(2);
+        txtGT.textContent = state.tCursor.toFixed(2);
+        txtHT.textContent = state.tCursor.toFixed(2);
+
+        const model = models[state.ex];
+
+        // Values at cursor
+        const gVal = model.g(state.tCursor);
+        const hValCont = model.hCont(state.tCursor);
+        
+        let isImpulse = false;
+        let impulseArea = 0;
+        model.impulses.forEach(imp => {
+            if (Math.abs(state.tCursor - imp.t) < 0.02) {
+                isImpulse = true;
+                impulseArea = imp.area;
+            }
+        });
+
+        txtGVal.textContent = gVal.toFixed(2);
+        if (isImpulse && state.showImp) {
+            txtHVal.innerHTML = `&infin; (${impulseArea}&delta;)`;
+            txtHVal.style.color = 'var(--uiuc-orange)';
+        } else {
+            txtHVal.textContent = hValCont.toFixed(2);
+            txtHVal.style.color = 'var(--h-color)';
+        }
+
+        // Equations
+        eqMath.innerHTML = model.mathText(state.showImp);
+
+        // Canvases
+        renderG(model);
+        renderH(model);
+        renderZoom(model);
+    }
+
+    // Canvas Plotting Utilities
+    function drawAxes(ctx, w, h, b, xLabel, yLabel) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#CCC';
+        ctx.lineWidth = 1;
+
+        const x0 = (0 - b.tMin) / (b.tMax - b.tMin) * w;
+        const y0 = h - ((0 - b.yMin) / (b.yMax - b.yMin) * h);
+
+        if (y0 >= 0 && y0 <= h) { ctx.moveTo(0, y0); ctx.lineTo(w, y0); }
+        if (x0 >= 0 && x0 <= w) { ctx.moveTo(x0, 0); ctx.lineTo(x0, h); }
+        ctx.stroke();
+
+        ctx.fillStyle = '#888';
+        ctx.font = "12px sans-serif";
+        if (y0 >= 0 && y0 <= h) ctx.fillText(xLabel, w - 15, y0 - 5);
+        if (x0 >= 0 && x0 <= w) ctx.fillText(yLabel, x0 + 5, 15);
+    }
+
+    function renderG(model) {
+        const w = ctxG.canvas.width;
+        const h = ctxG.canvas.height;
+        ctxG.clearRect(0, 0, w, h);
+
+        const b = { tMin: model.tMin, tMax: model.tMax, yMin: model.yMinG, yMax: model.yMaxG };
+        drawAxes(ctxG, w, h, b, "t", "g(t)");
+
+        // Draw g(t)
+        ctxG.beginPath();
+        ctxG.strokeStyle = '#2196F3'; // var(--g-color)
+        ctxG.lineWidth = 2.5;
+
+        const pts = 300;
+        let first = true;
+        for(let i=0; i<=pts; i++) {
+            const t = b.tMin + (i/pts)*(b.tMax - b.tMin);
+            const val = model.g(t);
+            const px = (t - b.tMin)/(b.tMax - b.tMin)*w;
+            const py = h - ((val - b.yMin)/(b.yMax - b.yMin)*h);
+
+            // Discontinuity detection
+            if (i > 0 && Math.abs(val - model.g(t - 0.001)) > 0.1) {
+                // Draw vertical line for jump
+                const yOld = h - ((model.g(t - 0.001) - b.yMin)/(b.yMax - b.yMin)*h);
+                ctxG.lineTo(px, yOld);
+                ctxG.lineTo(px, py);
+            }
+
+            if(first) { ctxG.moveTo(px, py); first = false; }
+            else ctxG.lineTo(px, py);
+        }
+        ctxG.stroke();
+
+        // Draw Cursor
+        const pxCursor = (state.tCursor - b.tMin)/(b.tMax - b.tMin)*w;
+        ctxG.beginPath();
+        ctxG.strokeStyle = '#666';
+        ctxG.lineWidth = 1;
+        ctxG.setLineDash([4, 4]);
+        ctxG.moveTo(pxCursor, 0); ctxG.lineTo(pxCursor, h);
+        ctxG.stroke();
+        ctxG.setLineDash([]);
+
+        // Draw Tangent (if not at impulse)
+        let isImp = false;
+        model.impulses.forEach(imp => { if(Math.abs(state.tCursor - imp.t)<0.02) isImp=true; });
+        
+        if (!isImp) {
+            const gVal = model.g(state.tCursor);
+            const slope = model.hCont(state.tCursor);
+            
+            const pxC = pxCursor;
+            const pyC = h - ((gVal - b.yMin)/(b.yMax - b.yMin)*h);
+
+            // Tangent line endpoints
+            const dtPix = 30; // pixels
+            const dtReal = dtPix / w * (b.tMax - b.tMin);
+            const dyReal = slope * dtReal;
+            const dyPix = dyReal / (b.yMax - b.yMin) * h;
+
+            ctxG.beginPath();
+            ctxG.strokeStyle = '#28A745'; // tangent-color
+            ctxG.lineWidth = 2;
+            ctxG.moveTo(pxC - dtPix, pyC + dyPix);
+            ctxG.lineTo(pxC + dtPix, pyC - dyPix);
+            ctxG.stroke();
+
+            ctxG.beginPath();
+            ctxG.fillStyle = '#28A745';
+            ctxG.arc(pxC, pyC, 4, 0, 2*Math.PI);
+            ctxG.fill();
+        } else {
+            // Highlight vertical jump
+            const val1 = model.g(state.tCursor - 0.01);
+            const val2 = model.g(state.tCursor + 0.01);
+            const py1 = h - ((val1 - b.yMin)/(b.yMax - b.yMin)*h);
+            const py2 = h - ((val2 - b.yMin)/(b.yMax - b.yMin)*h);
+
+            ctxG.beginPath();
+            ctxG.strokeStyle = 'var(--uiuc-orange)';
+            ctxG.lineWidth = 3;
+            ctxG.moveTo(pxCursor, py1);
+            ctxG.lineTo(pxCursor, py2);
+            ctxG.stroke();
+        }
+    }
+
+    function renderH(model) {
+        const w = ctxH.canvas.width;
+        const h = ctxH.canvas.height;
+        ctxH.clearRect(0, 0, w, h);
+
+        const b = { tMin: model.tMin, tMax: model.tMax, yMin: model.yMinH, yMax: model.yMaxH };
+        drawAxes(ctxH, w, h, b, "t", "h(t)");
+
+        // Draw Continuous part
+        ctxH.beginPath();
+        ctxH.strokeStyle = '#E84A27'; // var(--h-color)
+        ctxH.lineWidth = 2;
+
+        const pts = 300;
+        let first = true;
+        for(let i=0; i<=pts; i++) {
+            const t = b.tMin + (i/pts)*(b.tMax - b.tMin);
+            const val = model.hCont(t);
+            const px = (t - b.tMin)/(b.tMax - b.tMin)*w;
+            const py = h - ((val - b.yMin)/(b.yMax - b.yMin)*h);
+
+            // Don't draw vertical jumps in derivative for simple viewing
+            if (i > 0 && Math.abs(val - model.hCont(t - 0.001)) > 0.5) {
+                first = true; // Break line
+            }
+
+            if(first) { ctxH.moveTo(px, py); first = false; }
+            else { ctxH.lineTo(px, py); }
+        }
+        ctxH.stroke();
+
+        // Draw Impulses
+        const y0 = h - ((0 - b.yMin) / (b.yMax - b.yMin) * h);
+        if (state.showImp) {
+            model.impulses.forEach(imp => {
+                const px = (imp.t - b.tMin)/(b.tMax - b.tMin)*w;
+                const sign = Math.sign(imp.area);
+                const aHeight = sign * 40; // Pixel height of arrow
+                
+                ctxH.beginPath();
+                ctxH.strokeStyle = 'var(--uiuc-orange)';
+                ctxH.lineWidth = 3;
+                ctxH.moveTo(px, y0);
+                ctxH.lineTo(px, y0 - aHeight);
+                
+                // Arrowhead
+                ctxH.lineTo(px - 5, y0 - aHeight + sign*5);
+                ctxH.moveTo(px, y0 - aHeight);
+                ctxH.lineTo(px + 5, y0 - aHeight + sign*5);
+                ctxH.stroke();
+
+                ctxH.fillStyle = 'var(--uiuc-orange)';
+                ctxH.font = "bold 14px sans-serif";
+                ctxH.fillText(`${imp.area}δ(t)`, px + 8, y0 - aHeight/2);
+            });
+        }
+
+        // Draw Cursor
+        const pxCursor = (state.tCursor - b.tMin)/(b.tMax - b.tMin)*w;
+        ctxH.beginPath();
+        ctxH.strokeStyle = '#666';
+        ctxH.lineWidth = 1;
+        ctxH.setLineDash([4, 4]);
+        ctxH.moveTo(pxCursor, 0); ctxH.lineTo(pxCursor, h);
+        ctxH.stroke();
+        ctxH.setLineDash([]);
+
+        // Highlight point
+        let isImp = false;
+        model.impulses.forEach(imp => { if(Math.abs(state.tCursor - imp.t)<0.02) isImp=true; });
+        if (!isImp) {
+            const hVal = model.hCont(state.tCursor);
+            const py = h - ((hVal - b.yMin)/(b.yMax - b.yMin)*h);
+            ctxH.beginPath();
+            ctxH.fillStyle = '#E84A27';
+            ctxH.arc(pxCursor, py, 4, 0, 2*Math.PI);
+            ctxH.fill();
+        }
+    }
+
+    function renderZoom(model) {
+        const w = ctxZ.canvas.width;
+        const h = ctxZ.canvas.height;
+        ctxZ.clearRect(0, 0, w, h);
+
+        let isImp = false;
+        model.impulses.forEach(imp => { if(Math.abs(state.tCursor - imp.t)<0.02) isImp=true; });
+
+        if (isImp && state.showImp) {
+            ctxZ.fillStyle = 'var(--uiuc-orange)';
+            ctxZ.font = "bold 18px sans-serif";
+            ctxZ.textAlign = "center";
+            ctxZ.fillText("Discontinuity (Jump)", w/2, h/2 - 15);
+            ctxZ.fillText("Slope &rarr; &infin;", w/2, h/2 + 15);
+            ctxZ.textAlign = "left";
+            return;
+        }
+
+        if (isImp && !state.showImp) {
+            ctxZ.fillStyle = 'red';
+            ctxZ.font = "bold 16px sans-serif";
+            ctxZ.textAlign = "center";
+            ctxZ.fillText("Jump Ignored!", w/2, h/2);
+            ctxZ.textAlign = "left";
+            return;
+        }
+
+        // Zoomed in view
+        const t = state.tCursor;
+        const gVal = model.g(t);
+        const slope = model.hCont(t);
+
+        // Box width in time = 0.2
+        const tWidth = 0.2; 
+        const yRange = 0.2;
+
+        const b = { tMin: t - tWidth/2, tMax: t + tWidth/2, yMin: gVal - yRange/2, yMax: gVal + yRange/2 };
+        
+        // Draw grid
+        ctxZ.strokeStyle = '#EEE';
+        ctxZ.lineWidth = 1;
+        for(let i=1; i<4; i++) {
+            ctxZ.beginPath(); ctxZ.moveTo(0, i*h/4); ctxZ.lineTo(w, i*h/4); ctxZ.stroke();
+            ctxZ.beginPath(); ctxZ.moveTo(i*w/4, 0); ctxZ.lineTo(i*w/4, h); ctxZ.stroke();
+        }
+
+        // Draw g(t) segment
+        ctxZ.beginPath();
+        ctxZ.strokeStyle = '#2196F3';
+        ctxZ.lineWidth = 3;
+        const pts = 50;
+        for(let i=0; i<=pts; i++) {
+            const ti = b.tMin + (i/pts)*tWidth;
+            const yi = model.g(ti);
+            const px = (ti - b.tMin)/tWidth * w;
+            const py = h - ((yi - b.yMin)/yRange * h);
+            if(i===0) ctxZ.moveTo(px,py); else ctxZ.lineTo(px,py);
+        }
+        ctxZ.stroke();
+
+        // Draw Tangent Triangle
+        const pxC = w/2;
+        const pyC = h/2; // Center
+
+        const dtReal = tWidth * 0.4; // triangle width
+        const dyReal = slope * dtReal;
+        
+        const pxRight = pxC + (dtReal/tWidth * w);
+        const pyTop = pyC - (dyReal/yRange * h);
+
+        ctxZ.beginPath();
+        ctxZ.strokeStyle = 'var(--tangent-color)';
+        ctxZ.lineWidth = 2;
+        ctxZ.moveTo(pxC, pyC);
+        ctxZ.lineTo(pxRight, pyC);
+        ctxZ.lineTo(pxRight, pyTop);
+        ctxZ.lineTo(pxC, pyC);
+        ctxZ.stroke();
+        
+        ctxZ.fillStyle = 'rgba(40, 167, 69, 0.1)';
+        ctxZ.fill();
+
+        ctxZ.fillStyle = 'var(--tangent-color)';
+        ctxZ.font = "bold 14px sans-serif";
+        ctxZ.fillText("dt", pxC + (pxRight-pxC)/2 - 10, pyC + 15);
+        ctxZ.fillText("dg", pxRight + 5, pyC - (pyC-pyTop)/2 + 5);
+
+        // Center dot
+        ctxZ.beginPath();
+        ctxZ.fillStyle = '#13294B';
+        ctxZ.arc(pxC, pyC, 5, 0, 2*Math.PI);
+        ctxZ.fill();
+    }
+
+    window.onload = init;
+</script>
+
+</body></html>

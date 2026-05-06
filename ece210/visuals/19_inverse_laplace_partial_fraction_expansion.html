@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(43).html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECE 210 Applet: Inverse Laplace &amp; Partial Fraction Expansion</title>
+    <style>
+        :root {
+            --uiuc-blue: #13294B;
+            --uiuc-orange: #E84A27;
+            --bg-color: #F8F9FA;
+            --panel-bg: #FFFFFF;
+            --border-color: #DDDDDD;
+            --text-main: #333333;
+            --text-light: #666666;
+            --success-color: #28A745;
+            --accent-light: #E8F0FE;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+        }
+
+        header {
+            background-color: var(--uiuc-blue);
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .disclaimer {
+            font-size: 0.8rem;
+            color: #A5B6C9;
+            font-style: italic;
+        }
+
+        /* Controls */
+        .controls {
+            background-color: var(--panel-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            flex-wrap: wrap;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        select, button {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+        }
+
+        button.primary {
+            background-color: var(--uiuc-blue);
+            color: white;
+            border-color: var(--uiuc-blue);
+            font-weight: 600;
+        }
+        
+        button.primary:hover { background-color: #1a365d; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .toggle-btn {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--uiuc-orange);
+            color: var(--uiuc-orange);
+            font-weight: 600;
+            display: none; /* Hidden by default */
+        }
+        .toggle-btn.active {
+            background-color: var(--uiuc-orange);
+            color: white;
+        }
+
+        /* Progress Stepper */
+        .stepper {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+            align-items: center;
+        }
+        .step-dot {
+            width: 1.5rem;
+            height: 1.5rem;
+            border-radius: 50%;
+            background: #E2E8F0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .step-dot.active { background: var(--uiuc-blue); color: white; }
+
+        /* Main Content */
+        .main-content {
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .panels {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 250px;
+            position: relative;
+        }
+
+        .panel.locked::after {
+            content: "Revealed in Step " attr(data-step);
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-light);
+            font-weight: 600;
+            border-radius: 8px;
+            z-index: 10;
+        }
+
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--uiuc-blue);
+            text-align: center;
+            width: 100%;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        canvas {
+            width: 100%;
+            max-width: 400px;
+            height: 220px;
+            background-color: #FAFAFA;
+            border: 1px solid #EEEEEE;
+        }
+
+        /* Math Formatting (CSS only) */
+        .math-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            font-size: 1.3rem;
+            gap: 1rem;
+            width: 100%;
+        }
+
+        .equation {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #F8F9FA;
+            padding: 0.8rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #E9ECEF;
+        }
+
+        .cover-up-box {
+            display: none;
+            background: var(--accent-light);
+            padding: 0.8rem;
+            border-radius: 6px;
+            border: 1px dashed var(--uiuc-blue);
+            font-size: 1.1rem;
+            width: 90%;
+            text-align: center;
+        }
+
+        .m-inline {
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .m-inline sup, .m-inline sub { font-style: normal; font-size: 0.7em; }
+        .m-inline .rm { font-style: normal; }
+
+        .frac {
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            vertical-align: middle;
+            margin: 0 0.2rem;
+            font-family: 'Times New Roman', Times, serif;
+            font-style: italic;
+        }
+        .frac .num {
+            border-bottom: 1.5px solid currentColor;
+            padding: 0 0.3rem;
+        }
+        .frac .den {
+            padding: 0 0.3rem;
+        }
+
+        /* Info Cards */
+        .info-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-left: 5px solid var(--uiuc-blue);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .card.orange-accent { border-left-color: var(--uiuc-orange); }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 0.8rem;
+            font-size: 1.1rem;
+        }
+
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+        .signature-table th, .signature-table td {
+            text-align: left;
+            padding: 0.4rem;
+            border-bottom: 1px solid #eee;
+        }
+        .signature-table th { color: var(--text-light); }
+
+        ul { margin: 0; padding-left: 1.5rem; line-height: 1.5; font-size: 0.95rem; }
+
+        /* Strike-through for cover-up */
+        .strike { position: relative; display: inline-block; }
+        .strike::after {
+            content: '';
+            position: absolute;
+            left: 0; top: 50%; width: 100%;
+            border-bottom: 2px solid red;
+            transform: rotate(-15deg);
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>ECE 210: Analog Signal Processing</h1>
+    <div class="disclaimer">Supplementary intuition aid, not official course material.</div>
+</header>
+
+<div class="controls">
+    <div class="control-group">
+        <label for="example-select"><strong>System F(s):</strong></label>
+        <select id="example-select">
+            <option value="distinct">Distinct Real Poles</option>
+            <option value="repeated">Repeated Pole</option>
+            <option value="complex">Complex-Conjugate Pair</option>
+            <option value="delay">Delayed Term</option>
+        </select>
+    </div>
+    
+    <div class="control-group">
+        <button id="btn-prev">← Prev Step</button>
+        <button id="btn-next" class="primary" disabled="">Next Step →</button>
+    </div>
+
+    <button id="btn-coverup" class="toggle-btn" style="display: none;">Show Cover-up Method</button>
+
+    <div class="stepper">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-dot active" id="dot-2">2</div>
+        <div class="step-dot active" id="dot-3">3</div>
+        <div class="step-dot active" id="dot-4">4</div>
+    </div>
+</div>
+
+<div class="main-content">
+    <div class="panels">
+        
+        <!-- Panel 1: Rational Transform -->
+        <div class="panel" id="panel-1">
+            <h2>1. Rational Transform F(s)</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-raw">F(s) = <div class="frac"><span class="num">e<sup>-2s</sup></span><span class="den">s+1</span></div></div>
+                <div class="equation" id="eq-factored" style="display: flex; margin-top: 1rem; border-color: var(--uiuc-blue);">Isolate the delay: <br>F(s) = e<sup>-2s</sup> · <div class="frac"><span class="num">1</span><span class="den">s+1</span></div></div>
+            </div>
+        </div>
+        
+        <!-- Panel 2: Pole Plot -->
+        <div class="panel" id="panel-2" data-step="2">
+            <h2>2. s-plane &amp; Poles</h2>
+            <canvas id="canvas-splane" width="400" height="220"></canvas>
+            <div style="margin-top:0.8rem; font-size:0.9rem;" id="pole-text">Pole at <span class="m-inline">s = -1</span>. The e<sup>-2s</sup> term is a pure delay.</div>
+        </div>
+
+        <!-- Panel 3: Partial Fraction Expansion -->
+        <div class="panel" id="panel-3" data-step="3">
+            <h2>3. Partial Fraction Expansion</h2>
+            <div class="math-box">
+                <div class="equation" id="eq-pfe-general">e<sup>-2s</sup> · [ <div class="frac"><span class="num">1</span><span class="den">s+1</span></div> ]</div>
+                <div class="cover-up-box" id="eq-coverup" style="display: none;">
+                    <!-- Injected via JS -->
+                </div>
+                <div class="equation" id="eq-pfe-solved" style="display: none; color: var(--uiuc-blue);">F(s) = <div class="frac"><span class="num">1</span><span class="den">2</span></div> · <div class="frac"><span class="num">2</span><span class="den">(s+1)<sup>2</sup> + 2<sup>2</sup></span></div></div>
+            </div>
+        </div>
+
+        <!-- Panel 4: Time-Domain Result -->
+        <div class="panel" id="panel-4" data-step="4">
+            <h2>4. Time-Domain Signal f(t)</h2>
+            <canvas id="canvas-time" width="400" height="220"></canvas>
+            <div class="equation" style="margin-top: 0.8rem; font-size: 1.1rem; border-color: var(--uiuc-orange);" id="eq-time">f(t) = <span style="color:#28A745">e<sup>-(t-2)</sup> u(t-2)</span></div>
+        </div>
+
+    </div>
+
+    <div class="info-cards">
+        <div class="card">
+            <h3>Pole Type → Time-Domain Signature</h3>
+            <table class="signature-table">
+                <tbody><tr>
+                    <th>Pole Location</th>
+                    <th>Term in F(s)</th>
+                    <th>Time Domain f(t)</th>
+                </tr>
+                <tr>
+                    <td>Real: <span class="m-inline">s = -p</span></td>
+                    <td><div class="frac"><span class="num">1</span><span class="den">s+p</span></div></td>
+                    <td><span class="m-inline">e<sup>-pt</sup> u(t)</span></td>
+                </tr>
+                <tr>
+                    <td>Repeated: <span class="m-inline">s = -p</span> (x2)</td>
+                    <td><div class="frac"><span class="num">1</span><span class="den">(s+p)<sup>2</sup></span></div></td>
+                    <td><span class="m-inline">t e<sup>-pt</sup> u(t)</span></td>
+                </tr>
+                <tr>
+                    <td>Complex: <span class="m-inline">-σ ± jω</span></td>
+                    <td><div class="frac"><span class="num">ω</span><span class="den">(s+σ)<sup>2</sup>+ω<sup>2</sup></span></div></td>
+                    <td><span class="m-inline">e<sup>-σt</sup> sin(ωt) u(t)</span></td>
+                </tr>
+                <tr>
+                    <td><em>(Numerator delay)</em></td>
+                    <td><span class="m-inline">e<sup>-as</sup></span></td>
+                    <td>Shift right: <span class="m-inline">f(t-a)</span></td>
+                </tr>
+            </tbody></table>
+        </div>
+
+        <div class="card orange-accent">
+            <h3>What to notice</h3>
+            <ul id="notice-list"><li>The exponential term e<sup>-2s</sup> in the numerator represents a time shift, not a pole.</li><li>First find the inverse transform of the rational part (which is e<sup>-t</sup>u(t)).</li><li>Then shift every 't' to 't-2' to get the final delayed response.</li></ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- Math Formatting Helpers ---
+    function frac(num, den) {
+        return `<div class="frac"><span class="num">${num}</span><span class="den">${den}</span></div>`;
+    }
+    function mline(str) {
+        return `<span class="m-inline">${str}</span>`;
+    }
+
+    // --- Examples Data ---
+    const examples = {
+        'distinct': {
+            raw: `F(s) = ${frac('s', 's<sup>2</sup> + 3s + 2')}`,
+            factored: `F(s) = ${frac('s', '(s+1)(s+2)')}`,
+            poleText: `Poles at ${mline('s = -1')} and ${mline('s = -2')}.`,
+            poles: [{r: -1, i: 0}, {r: -2, i: 0}],
+            pfeGen: `${frac('A', 's+1')} + ${frac('B', 's+2')}`,
+            pfeCoverUp: `
+                A = ${frac('s', '<span class="strike">(s+1)</span>(s+2)')} |<sub>s=-1</sub> = ${frac('-1', '1')} = -1 <br><br>
+                B = ${frac('s', '(s+1)<span class="strike">(s+2)</span>')} |<sub>s=-2</sub> = ${frac('-2', '-1')} = 2
+            `,
+            pfeSol: `${frac('-1', 's+1')} + ${frac('2', 's+2')}`,
+            timeEq: `f(t) = <span style="color:#2196F3">(-e<sup>-t</sup></span> + <span style="color:#FF9800">2e<sup>-2t</sup>)</span> u(t)`,
+            components: [
+                { eval: (t) => -Math.exp(-t), color: '#2196F3' },
+                { eval: (t) => 2*Math.exp(-2*t), color: '#FF9800' }
+            ],
+            notices: [
+                "Two distinct real poles create two exponential terms.",
+                "The Cover-Up method is a fast way to find the coefficients A and B.",
+                "Because both poles are in the Left-Half Plane, the signal decays (stable)."
+            ]
+        },
+        'repeated': {
+            raw: `F(s) = ${frac('1', 's<sup>2</sup> + 4s + 4')}`,
+            factored: `F(s) = ${frac('1', '(s+2)<sup>2</sup>')}`,
+            poleText: `Repeated pole (order 2) at ${mline('s = -2')}.`,
+            poles: [{r: -2, i: 0}],
+            pfeGen: `Already in minimal form:<br>${frac('1', '(s+2)<sup>2</sup>')}`,
+            pfeCoverUp: "",
+            pfeSol: "",
+            timeEq: `f(t) = <span style="color:#E84A27">t e<sup>-2t</sup> u(t)</span>`,
+            components: [
+                { eval: (t) => t * Math.exp(-2*t), color: '#E84A27' }
+            ],
+            notices: [
+                "A repeated pole generates an extra factor of <em>t</em> in the time domain.",
+                "The form 1/(s+a)&sup2; directly maps to t e<sup>-at</sup>.",
+                "Notice how the signal initially grows due to <em>t</em>, but eventually decays because e<sup>-2t</sup> dominates."
+            ]
+        },
+        'complex': {
+            raw: `F(s) = ${frac('1', 's<sup>2</sup> + 2s + 5')}`,
+            factored: `Complete the square: <br>F(s) = ${frac('1', '(s+1)<sup>2</sup> + 2<sup>2</sup>')}`,
+            poleText: `Complex conjugate pair at ${mline('s = -1 &plusmn; j2')}.`,
+            poles: [{r: -1, i: 2}, {r: -1, i: -2}],
+            pfeGen: `Group into sine form:<br>${frac('&omega;', '(s+&sigma;)<sup>2</sup> + &omega;<sup>2</sup>')}`,
+            pfeCoverUp: "",
+            pfeSol: `F(s) = ${frac('1', '2')} &middot; ${frac('2', '(s+1)<sup>2</sup> + 2<sup>2</sup>')}`,
+            timeEq: `f(t) = <span style="color:#13294B">&frac12; e<sup>-t</sup> sin(2t) u(t)</span>`,
+            components: [
+                { eval: (t) => 0.5 * Math.exp(-t) * Math.sin(2*t), color: '#13294B' }
+            ],
+            notices: [
+                "Complex conjugate poles always combine to form real sinusoidal oscillations.",
+                "Completing the square exposes the decay rate (&sigma;=1) and frequency (&omega;=2).",
+                "We multiply and divide by &omega;=2 to match the standard transform pair."
+            ]
+        },
+        'delay': {
+            raw: `F(s) = ${frac('e<sup>-2s</sup>', 's+1')}`,
+            factored: `Isolate the delay: <br>F(s) = e<sup>-2s</sup> &middot; ${frac('1', 's+1')}`,
+            poleText: `Pole at ${mline('s = -1')}. The e<sup>-2s</sup> term is a pure delay.`,
+            poles: [{r: -1, i: 0}],
+            pfeGen: `e<sup>-2s</sup> &middot; [ ${frac('1', 's+1')} ]`,
+            pfeCoverUp: "",
+            pfeSol: "",
+            timeEq: `f(t) = <span style="color:#28A745">e<sup>-(t-2)</sup> u(t-2)</span>`,
+            components: [
+                { eval: (t) => t >= 2 ? Math.exp(-(t-2)) : 0, color: '#28A745', isDelay: true }
+            ],
+            notices: [
+                "The exponential term e<sup>-2s</sup> in the numerator represents a time shift, not a pole.",
+                "First find the inverse transform of the rational part (which is e<sup>-t</sup>u(t)).",
+                "Then shift every 't' to 't-2' to get the final delayed response."
+            ]
+        }
+    };
+
+    // --- State ---
+    let state = {
+        example: 'distinct',
+        step: 1,
+        showCoverUp: false
+    };
+
+    // --- Elements ---
+    const selectEx = document.getElementById('example-select');
+    const btnNext = document.getElementById('btn-next');
+    const btnPrev = document.getElementById('btn-prev');
+    const btnCoverUp = document.getElementById('btn-coverup');
+    
+    // Canvases
+    const ctxS = document.getElementById('canvas-splane').getContext('2d');
+    const ctxT = document.getElementById('canvas-time').getContext('2d');
+
+    // --- Initialization ---
+    function init() {
+        selectEx.addEventListener('change', (e) => {
+            state.example = e.target.value;
+            state.step = 1;
+            state.showCoverUp = false;
+            updateUI();
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (state.step < 4) { state.step++; updateUI(); }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (state.step > 1) { state.step--; updateUI(); }
+        });
+
+        btnCoverUp.addEventListener('click', () => {
+            state.showCoverUp = !state.showCoverUp;
+            updateUI();
+        });
+
+        updateUI();
+    }
+
+    // --- Core UI Update ---
+    function updateUI() {
+        const ex = examples[state.example];
+
+        // 1. Update Buttons & Dots
+        btnPrev.disabled = (state.step === 1);
+        btnNext.disabled = (state.step === 4);
+
+        for (let i = 1; i <= 4; i++) {
+            const dot = document.getElementById(`dot-${i}`);
+            if (i <= state.step) dot.classList.add('active');
+            else dot.classList.remove('active');
+
+            const panel = document.getElementById(`panel-${i}`);
+            if (i <= state.step) panel.classList.remove('locked');
+            else panel.classList.add('locked');
+        }
+
+        // 2. Panel 1 Update
+        document.getElementById('eq-raw').innerHTML = ex.raw;
+        const eqFac = document.getElementById('eq-factored');
+        if (state.step >= 2) {
+            eqFac.style.display = 'flex';
+            eqFac.innerHTML = ex.factored;
+        } else {
+            eqFac.style.display = 'none';
+        }
+
+        // 3. Panel 2 Update
+        document.getElementById('pole-text').innerHTML = ex.poleText;
+        if (state.step >= 2) renderSPlane(ex);
+        else ctxS.clearRect(0,0, ctxS.canvas.width, ctxS.canvas.height);
+
+        // 4. Panel 3 Update
+        document.getElementById('eq-pfe-general').innerHTML = ex.pfeGen;
+        const eqSol = document.getElementById('eq-pfe-solved');
+        const eqCov = document.getElementById('eq-coverup');
+        
+        // Show/hide coverup button logic
+        if (state.example === 'distinct' && state.step >= 3) {
+            btnCoverUp.style.display = 'inline-block';
+            if (state.showCoverUp) {
+                btnCoverUp.classList.add('active');
+                eqCov.style.display = 'block';
+                eqCov.innerHTML = ex.pfeCoverUp;
+            } else {
+                btnCoverUp.classList.remove('active');
+                eqCov.style.display = 'none';
+            }
+        } else {
+            btnCoverUp.style.display = 'none';
+            eqCov.style.display = 'none';
+        }
+
+        if (state.step >= 4 && ex.pfeSol !== "") {
+            eqSol.style.display = 'flex';
+            eqSol.innerHTML = ex.pfeSol;
+        } else {
+            eqSol.style.display = 'none';
+        }
+
+        // 5. Panel 4 Update
+        document.getElementById('eq-time').innerHTML = ex.timeEq;
+        if (state.step >= 4) renderTimeDomain(ex);
+        else ctxT.clearRect(0,0, ctxT.canvas.width, ctxT.canvas.height);
+
+        // 6. Notices Update
+        const ul = document.getElementById('notice-list');
+        ul.innerHTML = ex.notices.map(n => `<li>${n}</li>`).join('');
+    }
+
+    // --- Drawing Utilities ---
+    function drawAxes(ctx, w, h, b, xLabel, yLabel) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#999';
+        ctx.lineWidth = 1;
+
+        const x0 = (0 - b.xMin) / (b.xMax - b.xMin) * w;
+        const y0 = h - ((0 - b.yMin) / (b.yMax - b.yMin) * h);
+
+        if (y0 >= 0 && y0 <= h) { ctx.moveTo(0, y0); ctx.lineTo(w, y0); }
+        if (x0 >= 0 && x0 <= w) { ctx.moveTo(x0, 0); ctx.lineTo(x0, h); }
+        ctx.stroke();
+
+        ctx.fillStyle = '#666';
+        ctx.font = "12px sans-serif";
+        if (y0 >= 0 && y0 <= h) ctx.fillText(xLabel, w - 20, y0 - 5);
+        if (x0 >= 0 && x0 <= w) ctx.fillText(yLabel, x0 + 5, 15);
+    }
+
+    function renderSPlane(ex) {
+        const w = ctxS.canvas.width;
+        const h = ctxS.canvas.height;
+        ctxS.clearRect(0, 0, w, h);
+
+        const b = { xMin: -3, xMax: 1, yMin: -3, yMax: 3 };
+        drawAxes(ctxS, w, h, b, "Re", "Im");
+
+        // Draw jw axis thicker
+        const x0 = (0 - b.xMin) / (b.xMax - b.xMin) * w;
+        ctxS.beginPath(); ctxS.strokeStyle = '#13294B'; ctxS.lineWidth = 2;
+        ctxS.moveTo(x0, 0); ctxS.lineTo(x0, h); ctxS.stroke();
+
+        // Draw Poles
+        ctxS.strokeStyle = '#E84A27';
+        ctxS.lineWidth = 2;
+        const size = 6;
+        
+        ex.poles.forEach(p => {
+            const px = (p.r - b.xMin) / (b.xMax - b.xMin) * w;
+            const py = h - ((p.i - b.yMin) / (b.yMax - b.yMin) * h);
+
+            ctxS.beginPath();
+            ctxS.moveTo(px - size, py - size); ctxS.lineTo(px + size, py + size);
+            ctxS.moveTo(px + size, py - size); ctxS.lineTo(px - size, py + size);
+            ctxS.stroke();
+
+            // Label for repeated
+            if (state.example === 'repeated') {
+                ctxS.fillStyle = '#E84A27';
+                ctxS.fillText("(x2)", px + 8, py - 8);
+            }
+        });
+    }
+
+    function renderTimeDomain(ex) {
+        const w = ctxT.canvas.width;
+        const h = ctxT.canvas.height;
+        ctxT.clearRect(0, 0, w, h);
+
+        const b = { xMin: -1, xMax: 5, yMin: -1.5, yMax: 2 };
+        drawAxes(ctxT, w, h, b, "t", "f(t)");
+
+        const pts = 200;
+        
+        // Draw individual components if multiple
+        if (ex.components.length > 1) {
+            ex.components.forEach(comp => {
+                ctxT.beginPath();
+                ctxT.strokeStyle = comp.color;
+                ctxT.lineWidth = 1.5;
+                ctxT.setLineDash([4, 4]);
+
+                for(let i=0; i<=pts; i++) {
+                    const t = b.xMin + (i/pts)*(b.xMax - b.xMin);
+                    const val = t >= 0 ? comp.eval(t) : 0;
+                    const px = (t - b.xMin)/(b.xMax - b.xMin) * w;
+                    const py = h - ((val - b.yMin)/(b.yMax - b.yMin) * h);
+                    if (i===0) ctxT.moveTo(px,py); else ctxT.lineTo(px,py);
+                }
+                ctxT.stroke();
+                ctxT.setLineDash([]);
+            });
+        }
+
+        // Draw Total Sum
+        ctxT.beginPath();
+        ctxT.strokeStyle = (ex.components.length === 1) ? ex.components[0].color : '#13294B';
+        ctxT.lineWidth = 2.5;
+
+        for(let i=0; i<=pts; i++) {
+            const t = b.xMin + (i/pts)*(b.xMax - b.xMin);
+            let total = 0;
+            if (state.example === 'delay') {
+                 if (t >= 2) total = ex.components[0].eval(t);
+            } else {
+                 if (t >= 0) {
+                     ex.components.forEach(c => total += c.eval(t));
+                 }
+            }
+            
+            const px = (t - b.xMin)/(b.xMax - b.xMin) * w;
+            const py = h - ((total - b.yMin)/(b.yMax - b.yMin) * h);
+            if (i===0) ctxT.moveTo(px,py); else ctxT.lineTo(px,py);
+        }
+        ctxT.stroke();
+    }
+
+    // Run
+    window.onload = init;
+
+</script>
+
+</body></html>
