@@ -259,7 +259,7 @@
                 <div id="status-behavior" class="status-badge badge-stable">Decaying Oscillation</div>
                 
                 <div class="status-label">BIBO Stability:</div>
-                <div id="status-stability" class="status-badge badge-stable">Stable</div>
+                <div id="status-stability" class="status-badge badge-stable">BIBO Stable</div>
             </div>
 
             <div class="status-label" style="margin-bottom: 0.5rem; display:block;">Time-Domain Formula:</div>
@@ -274,11 +274,11 @@
             <h3>What to notice</h3>
             <ul>
                 <li><strong>Drag the poles</strong> in the s-plane to see the time-domain mode change instantly.</li>
-                <li>Notice how poles in the <strong>Left Half-Plane (LHP)</strong> always produce decaying signals (Stable).</li>
+                <li>For a causal impulse response, poles in the <strong>Left Half-Plane (LHP)</strong> produce decaying modes and are BIBO stable.</li>
                 <li>Poles in the <strong>Right Half-Plane (RHP)</strong> produce growing signals that eventually blow up (Unstable).</li>
                 <li>Moving a pole vertically changes the <strong>frequency of oscillation</strong> without affecting the decay/growth rate.</li>
-                <li>Poles exactly on the <strong>jω-axis</strong> cause pure, sustained oscillations (Marginally stable).</li>
-                <li>A pole exactly at the <strong>origin</strong> (s=0) produces a constant step function (integrator).</li>
+                <li>Poles exactly on the <strong>jω-axis</strong> cause sustained modes. They are marginal as natural modes, but not BIBO stable as impulse responses.</li>
+                <li>A pole exactly at the <strong>origin</strong> (s=0) produces <span class="m-inline">u(t)</span>, which is not absolutely integrable and is not BIBO stable.</li>
             </ul>
         </div>
     </div>
@@ -632,18 +632,18 @@
         if (s < -0.01) {
             behavior = (state.isConjugate && w > 0.1) ? "Decaying Oscillation" : "Decays (Exponential)";
             bClass = "badge-stable";
-            stab = "Stable";
+            stab = "BIBO Stable";
             sClass = "badge-stable";
         } else if (s > 0.01) {
             behavior = (state.isConjugate && w > 0.1) ? "Growing Oscillation" : "Grows (Exponential)";
             bClass = "badge-unstable";
-            stab = "Unstable";
+            stab = "Not BIBO Stable";
             sClass = "badge-unstable";
         } else {
             behavior = (state.isConjugate && w > 0.1) ? "Pure Oscillation" : "Constant (Step)";
             bClass = "badge-marginal";
-            stab = "Marginally Stable";
-            sClass = "badge-marginal";
+            stab = "Not BIBO Stable";
+            sClass = "badge-unstable";
         }
 
         statusBehavior.textContent = behavior;

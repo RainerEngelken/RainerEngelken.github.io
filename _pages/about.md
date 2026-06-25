@@ -19,15 +19,15 @@ Welcome! We are a computational neuroscience lab working at the interface of **d
 
 ---
 
-###  PhD Recruitment: Fall 2026
+###  PhD Recruitment: Fall 2027
 
 I am recruiting **1–3 fully funded PhD students** to join my lab at UIUC.
 
 **Application paths and deadlines:**
 - **ECE (Electrical & Computer Engineering):**  
-  Priority deadline **December 15, 2025** · Final deadline **January 15, 2026**
+  Priority deadline **December 15, 2026** · Final deadline **January 15, 2027**
 - **CS (Siebel School of Computing and Data Science):**  
-  Deadline **December 15, 2025**
+  Deadline **December 15, 2026**
 
 I particularly encourage applications from students with strong backgrounds in **physics, mathematics, computer science, or engineering**, who enjoy thinking deeply with **equations and code**.
 
