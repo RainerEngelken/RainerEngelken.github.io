@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(29).html -->
 <html lang="en"><head>
   <meta name="robots" content="noindex, nofollow"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <title>ECE 210: Sampling, Reconstruction &amp; Aliasing</title>
     <style>
         :root {
@@ -245,7 +248,8 @@
     </div>
 
     <div class="explanation">
-        <h3>Instructor Notes &amp; Conceptual Guide</h3>
+        <h3>Conceptual Guide</h3>
+        <p><strong>Plotting note:</strong> Spectrum shapes are normalized for comparison. For exact impulse-train sampling, the replicated spectrum also carries the scale factor <span class="math">f<sub>s</sub></span>; that factor does not change replica spacing or the aliasing geometry shown here.</p>
         <p><strong>Energy vs. Power Signals:</strong> In the presets, the <em>Sinc Pulse</em> is an <strong>Energy Signal</strong> (finite energy, decays to 0). Its Fourier Transform is a continuous rectangular function. The <em>Cosines</em> are <strong>Power Signals</strong> (infinite energy, finite average power, never decay). Because they do not decay, the standard Fourier integral diverges. We mathematically represent them in the frequency domain using <strong>Dirac delta functions (impulses)</strong>, shown here as arrows.</p>
         <p><strong>The Mechanism of Sampling:</strong> Sampling in the time domain is mathematically modeled as multiplying $x(t)$ by an impulse train. Multiplication in time corresponds to <em>convolution in frequency</em>. Convolving a spectrum with an impulse train creates infinitely many shifted copies (replicas) of the original spectrum spaced by $f_s$.</p>
         <p><strong>Nyquist Criterion &amp; Aliasing:</strong> To recover the signal, we apply an ideal Low-Pass Filter (LPF) from $-f_s/2$ to $f_s/2$. If $f_s &gt; 2B$, the central replica is isolated, and the LPF perfectly extracts $X(f)$. If $f_s \le 2B$, the replicas overlap (<strong>Aliasing</strong>). <em>Try the 6 Hz Cosine preset with $f_s = 5$ Hz.</em> Turn on the "Show Impersonator Signal" toggle. You will see that the samples of a 6 Hz cosine perfectly match a 1 Hz cosine. Because the LPF only extracts frequencies up to $2.5$ Hz, it outputs the 1 Hz "impersonator" instead of the 6 Hz original.</p>
@@ -263,7 +267,7 @@ const PRESETS = {
     'cos_low': { type: 'impulse', f_comps: [{f: 1, a: 1}], B: 1 },
     'cos_high': { type: 'impulse', f_comps: [{f: 6, a: 1}], B: 6 },
     'twotone': { type: 'impulse', f_comps: [{f: 1, a: 1}, {f: 3, a: 0.5}], B: 3 },
-    'sinc': { type: 'continuous', B: 2 } // sinc(2*pi*B*t) -> rect(f / 2B)
+    'sinc': { type: 'continuous', B: 2 } // normalized sinc(2*B*t) -> rect(f / 2B)
 };
 
 // --- Application State ---
@@ -306,7 +310,7 @@ function getXt(t, sig) {
         return val;
     } else if (sig.type === 'continuous') {
         // We defined sinc preset as sinc(2*B*t) so it has bandwidth B
-        return Math.sin(2 * Math.PI * sig.B * t) / (2 * Math.PI * sig.B * t || 1);
+        return sinc(2 * sig.B * t);
     }
 }
 
@@ -527,17 +531,17 @@ function render() {
     const fs = state.fs;
     
     // --- 1. Original Signal & Spectrum ---
-    plots.t1.plotFunction(t => getXt(t, sig), 'var(--primary)');
+    plots.t1.plotFunction(t => getXt(t, sig), '#0284c7');
     
     if (sig.type === 'impulse') {
         sig.f_comps.forEach(c => {
-            plots.f1.plotImpulse(c.f, c.a/2, 'var(--primary)');
-            plots.f1.plotImpulse(-c.f, c.a/2, 'var(--primary)');
+            plots.f1.plotImpulse(c.f, c.a/2, '#0284c7');
+            plots.f1.plotImpulse(-c.f, c.a/2, '#0284c7');
         });
     } else {
         // Sinc Fourier Transform is a rect
-        plots.f1.fillSpectrum(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, 'var(--primary)', sig.B);
-        plots.f1.plotFunction(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, 'var(--primary)');
+        plots.f1.fillSpectrum(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, 'rgba(2, 132, 199, 0.15)', sig.B);
+        plots.f1.plotFunction(f => Math.abs(f) <= sig.B ? 1/(2*sig.B) : 0, '#0284c7');
     }
 
     // --- 2. Sampled Signal & Spectrum ---
@@ -546,15 +550,15 @@ function render() {
     for (let t = state.tMin; t <= state.tMax; t += 1/fs) {
         let val = getXt(t, sig);
         samplePts.push({t: t, v: val});
-        plots.t2.plotStem(t, val, 'var(--samples)');
+        plots.t2.plotStem(t, val, '#0f172a');
     }
     
     // Spectrum Replicas
     if (sig.type === 'impulse') {
         for(let k = -10; k <= 10; k++) {
             sig.f_comps.forEach(c => {
-                plots.f2.plotImpulse(c.f + k*fs, c.a/2, 'var(--samples)');
-                plots.f2.plotImpulse(-c.f + k*fs, c.a/2, 'var(--samples)');
+                plots.f2.plotImpulse(c.f + k*fs, c.a/2, '#0f172a');
+                plots.f2.plotImpulse(-c.f + k*fs, c.a/2, '#0f172a');
             });
         }
     } else {
@@ -568,13 +572,13 @@ function render() {
             return sum;
         };
         plots.f2.fillSpectrum(repSpec, 'rgba(15, 23, 42, 0.3)', 20);
-        plots.f2.plotFunction(repSpec, 'var(--samples)');
+        plots.f2.plotFunction(repSpec, '#0f172a');
     }
 
     // --- 3. Reconstructed Signal & Spectrum ---
     if (state.showLPF) {
-        plots.f2.fillRegion(-fs/2, fs/2, 'var(--lpf-fill)');
-        plots.f3.fillRegion(-fs/2, fs/2, 'var(--lpf-fill)');
+        plots.f2.fillRegion(-fs/2, fs/2, 'rgba(2, 132, 199, 0.15)');
+        plots.f3.fillRegion(-fs/2, fs/2, 'rgba(2, 132, 199, 0.15)');
     }
 
     // Recovered Spectrum
@@ -603,7 +607,7 @@ function render() {
         });
 
         Object.values(finalImps).forEach(imp => {
-            plots.f3.plotImpulse(imp.f, imp.a, 'var(--recon)');
+            plots.f3.plotImpulse(imp.f, imp.a, '#d97706');
         });
         
     } else {
@@ -617,7 +621,7 @@ function render() {
             return sum;
         };
         plots.f3.fillSpectrum(recSpec, 'rgba(217, 119, 6, 0.4)', state.showLPF ? fs/2 : 20);
-        plots.f3.plotFunction(recSpec, 'var(--recon)');
+        plots.f3.plotFunction(recSpec, '#d97706');
     }
 
     // Time Domain Reconstruction
@@ -635,7 +639,7 @@ function render() {
     };
 
     if (state.showLPF) {
-        plots.t3.plotFunction(reconstructFn, 'var(--recon)');
+        plots.t3.plotFunction(reconstructFn, '#d97706');
         
         if (state.showSincs) {
             samplePts.forEach(pt => {
@@ -646,7 +650,7 @@ function render() {
     
     // Draw samples on top of reconstruction
     samplePts.forEach(pt => {
-        plots.t3.plotStem(pt.t, pt.v, 'var(--samples)', 3);
+        plots.t3.plotStem(pt.t, pt.v, '#0f172a', 3);
     });
 
     // Show Aliased Alternative (Impersonator)
@@ -660,7 +664,7 @@ function render() {
             });
             return val;
         };
-        plots.t3.plotFunction(aliasFn, 'var(--alias)', [5, 5]);
+        plots.t3.plotFunction(aliasFn, '#dc2626', [5, 5]);
     }
 }
 

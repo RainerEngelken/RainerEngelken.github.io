@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(12).html -->
 <html lang="en"><head>
   <meta name="robots" content="noindex, nofollow"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -43,13 +42,25 @@
                 <div>tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
                 <div><span class="math-italic">x</span> &gt; 0</div>
             </div>
+            <div id="rowAxisPos" class="row">
+                <div>π/2</div>
+                <div><span class="math-italic">x</span> = 0, <span class="math-italic">y</span> &gt; 0</div>
+            </div>
+            <div id="rowAxisNeg" class="row">
+                <div>-π/2</div>
+                <div><span class="math-italic">x</span> = 0, <span class="math-italic">y</span> &lt; 0</div>
+            </div>
             <div id="row2" class="row">
                 <div>π + tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
-                <div><span class="math-italic">x</span> &lt; 0, <span class="math-italic">y</span> &gt; 0</div>
+                <div><span class="math-italic">x</span> &lt; 0, <span class="math-italic">y</span> &ge; 0</div>
             </div>
             <div id="row3" class="row">
                 <div>-π + tan<sup>-1</sup>(<span class="math-italic">y/x</span>)</div>
                 <div><span class="math-italic">x</span> &lt; 0, <span class="math-italic">y</span> &lt; 0</div>
+            </div>
+            <div id="rowOrigin" class="row">
+                <div>undefined</div>
+                <div><span class="math-italic">x</span> = 0, <span class="math-italic">y</span> = 0</div>
             </div>
         </div>
         
@@ -81,14 +92,18 @@
 
         // Raw Atan calculation
         const rawTheta = Math.atan2(p.y, p.x); // Note: JS atan2 handles quadrants, but we will simulate atan(y/x)
-        const mathAtan = Math.atan(p.y/p.x); 
+        const mathAtan = p.x === 0
+            ? (p.y > 0 ? Math.PI / 2 : p.y < 0 ? -Math.PI / 2 : NaN)
+            : Math.atan(p.y / p.x);
         
         // Draw Ghost Vector (The raw tan-1 output)
-        const ghostX = cx + Math.cos(mathAtan) * scale * 0.8;
-        const ghostY = cy - Math.sin(mathAtan) * scale * 0.8;
+        const ghostX = Number.isFinite(mathAtan) ? cx + Math.cos(mathAtan) * scale * 0.8 : cx;
+        const ghostY = Number.isFinite(mathAtan) ? cy - Math.sin(mathAtan) * scale * 0.8 : cy;
         ctx.setLineDash([5, 5]);
         ctx.strokeStyle = '#aaa';
-        ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ghostX, ghostY); ctx.stroke();
+        if (Number.isFinite(mathAtan)) {
+            ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(ghostX, ghostY); ctx.stroke();
+        }
         ctx.setLineDash([]);
 
         // Real Vector
@@ -102,7 +117,9 @@
         // UI Updates
         document.getElementById('outX').innerText = p.x.toFixed(2);
         document.getElementById('outY').innerText = p.y.toFixed(2);
-        document.getElementById('rawAtan').innerText = (mathAtan * 180 / Math.PI).toFixed(1) + "°";
+        document.getElementById('rawAtan').innerText = Number.isFinite(mathAtan)
+            ? (mathAtan * 180 / Math.PI).toFixed(1) + "°"
+            : "undefined at the origin";
         
         updateRows(p.x, p.y);
     }
@@ -110,6 +127,9 @@
     function updateRows(x, y) {
         document.querySelectorAll('.row').forEach(r => r.classList.remove('active'));
         if (x > 0) document.getElementById('row1').classList.add('active');
+        else if (x === 0 && y > 0) document.getElementById('rowAxisPos').classList.add('active');
+        else if (x === 0 && y < 0) document.getElementById('rowAxisNeg').classList.add('active');
+        else if (x === 0 && y === 0) document.getElementById('rowOrigin').classList.add('active');
         else if (x < 0 && y >= 0) document.getElementById('row2').classList.add('active');
         else if (x < 0 && y < 0) document.getElementById('row3').classList.add('active');
     }

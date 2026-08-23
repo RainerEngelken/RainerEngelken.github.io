@@ -8,7 +8,9 @@
     
     <!-- Plotly for plotting, MathJax for rendering equations -->
     <script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script>
+        window.MathJax = { tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] } };
+    </script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
@@ -278,6 +280,7 @@
             k_vals.push(k);
             let ak = sig.getAk(k);
             let bk = sig.getBk(k);
+            // This is the trigonometric harmonic amplitude C_k, not |c_k|.
             mags.push(Math.sqrt(ak*ak + bk*bk));
             // Highlight active modes in Orange, inactive in Grey
             colors.push(k <= N ? ILLINI_ORANGE : GREY); 
@@ -306,14 +309,14 @@
     };
 
     let freqLayout = {
-        title: 'Frequency Domain: Magnitude Spectrum |c_k|',
+        title: 'Frequency Domain: Harmonic Amplitudes C_k',
         xaxis: { 
             title: 'Harmonic Number (k)', 
             range:[-0.5, MAX_N + 0.5],
             gridcolor: '#eee'
         },
         yaxis: { 
-            title: 'Magnitude |c_k|', 
+            title: 'Harmonic amplitude C_k',
             range: [0, 1.4],
             gridcolor: '#eee'
         },
@@ -357,7 +360,7 @@
             x: freqData.k_vals,
             y: freqData.mags,
             type: 'bar',
-            name: '|c_k|',
+            name: 'C_k',
             marker: { color: freqData.colors },
             width: 0.4
         };

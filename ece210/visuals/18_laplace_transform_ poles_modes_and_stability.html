@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(42).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -387,14 +386,16 @@
         }
         return {
             x: clientX - rect.left,
-            y: clientY - rect.top
+            y: clientY - rect.top,
+            width: rect.width,
+            height: rect.height
         };
     }
 
     function handleMouseDown(e) {
         const pos = getPointerPos(e);
-        const sX = unmapX(pos.x, sBounds, canvasS.width);
-        const sY = unmapY(pos.y, sBounds, canvasS.height);
+        const sX = unmapX(pos.x, sBounds, pos.width);
+        const sY = unmapY(pos.y, sBounds, pos.height);
 
         // Check distance to pole(s)
         const hitRadius = 0.5; // in s-plane units
@@ -425,8 +426,8 @@
         if (!state.isDragging) return;
 
         const pos = getPointerPos(e);
-        let newSigma = unmapX(pos.x, sBounds, canvasS.width);
-        let newOmega = unmapY(pos.y, sBounds, canvasS.height);
+        let newSigma = unmapX(pos.x, sBounds, pos.width);
+        let newOmega = unmapY(pos.y, sBounds, pos.height);
 
         // Snapping logic
         if (Math.abs(newSigma) < 0.15) newSigma = 0;
@@ -506,9 +507,9 @@
 
         // Shading LHP (Stable) vs RHP (Unstable)
         const x0 = mapX(0, sBounds, w);
-        ctxS.fillStyle = "var(--stable-bg)";
+        ctxS.fillStyle = "rgba(40, 167, 69, 0.08)";
         ctxS.fillRect(0, 0, x0, h);
-        ctxS.fillStyle = "var(--unstable-bg)";
+        ctxS.fillStyle = "rgba(220, 53, 69, 0.08)";
         ctxS.fillRect(x0, 0, w - x0, h);
 
         drawAxes(ctxS, sBounds, w, h, "σ", "jω");
@@ -597,7 +598,7 @@
 
         // Draw main signal
         ctxT.beginPath();
-        ctxT.strokeStyle = C_UIUC_BLUE = '#13294B';
+        ctxT.strokeStyle = C_BLUE;
         ctxT.lineWidth = 2.5;
 
         for (let px = 0; px <= w; px++) {

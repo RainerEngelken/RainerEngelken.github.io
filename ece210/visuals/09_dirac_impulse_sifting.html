@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(27).html -->
 <html lang="en"><head>
   <meta name="robots" content="noindex, nofollow"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -152,18 +151,6 @@
         .feedback.correct { color: var(--accent-green); }
         .feedback.incorrect { color: var(--accent-red); }
 
-        .instructor-notes {
-            max-width: 1200px;
-            margin: 30px auto;
-            background: var(--panel-bg);
-            padding: 25px;
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-        .instructor-notes h2 { margin-bottom: 15px; color: var(--accent-blue); }
-        .instructor-notes h3 { margin-top: 15px; margin-bottom: 8px; }
-        .instructor-notes ul { margin-left: 20px; margin-bottom: 15px; }
-
         .tooltip {
             position: relative;
             display: inline-block;
@@ -299,29 +286,11 @@
             <div id="eqLimit" style="border-top: 1px solid #e2e8f0; padding-top: 8px; margin-top: 4px;">
                 <span class="math">lim<sub>ε → 0</sub> ∫<sub>a</sub><sup>b</sup> f(t) p<sub>ε</sub>(t - t<sub>0</sub>) dt = ∫<sub>a</sub><sup>b</sup> f(t) δ(t - t<sub>0</sub>) dt = </span> <span class="result" id="resExact" style="color: var(--accent-blue);">0.000</span>
             </div>
+            <div style="margin-top: 10px; color: var(--text-muted); font-size: 0.9rem;">
+                Endpoint convention: an impulse at <span class="math">a</span> or <span class="math">b</span> contributes one-half of <span class="math">f(t<sub>0</sub>)</span>, matching the symmetric-pulse limit.
+            </div>
         </div>
     </div>
-</div>
-
-<div class="instructor-notes">
-    <h2>What this demo is meant to illustrate:</h2>
-    <p>This interactive applet visualizes the mathematical foundation of the Dirac impulse and the sifting property, key concepts in ECE 210 (Analog Signal Processing).</p>
-    
-    <h3>Key Concepts Taught</h3>
-    <ul>
-        <li><strong>The Impulse as a Limit:</strong> By sliding the Pulse Width ($\epsilon$) to 0, students observe the rectangular pulse $p_\epsilon(t)$ getting narrower and taller. The visual reinforcement shows that the <em>area</em> remains constant at 1, converging to the ideal Dirac delta $\delta(t)$.</li>
-        <li><strong>The Sifting Property:</strong> The integral of $f(t)\delta(t-t_0)$ "sifts" out the value of $f(t_0)$. The approximation integral physically calculates the <em>average height</em> of $f(t)$ across the pulse width.</li>
-        <li><strong>Integration Limits Matter:</strong> A common mistake is blindly applying $f(t_0)$ without checking limits. Dragging $t_0$ outside the shaded integration window $[a,b]$ instantly drops the integral to 0.</li>
-    </ul>
-
-    <h3>Typical Misconceptions</h3>
-    <ul>
-        <li><em>"The impulse evaluates to infinity, so the integral blows up."</em> - The applet clearly distinguishes the height ($1/\epsilon$) from the area (1). The highlight of the overlap region maps to the actual numerical value.</li>
-        <li><em>"Sifting works unconditionally."</em> - The live equation explicitly zeros out when $t_0$ exits the $[a,b]$ bounds, enforcing boundary awareness.</li>
-        <li><em>"A real pulse behaves exactly like an impulse."</em> - Leaving $\epsilon &gt; 0$ shows the approximation error (difference between the top and bottom equations).</li>
-    </ul>
-    
-    <p><strong>How to use:</strong> You can drag the vertical lines directly on the canvas to move $t_0$ (orange dashed line) or the limits $a$ and $b$ (blue dashed lines). Use "Challenge Mode" to test prediction skills without seeing the answer first.</p>
 </div>
 
 <script>
@@ -425,8 +394,12 @@
     // Math Functions
     function calculateExact() {
         const f = signals[state.signal];
-        if (state.t0 >= state.a && state.t0 <= state.b) {
+        if (state.a === state.b) return 0;
+        if (state.t0 > state.a && state.t0 < state.b) {
             return f(state.t0);
+        }
+        if (state.t0 === state.a || state.t0 === state.b) {
+            return 0.5 * f(state.t0);
         }
         return 0;
     }
@@ -520,7 +493,7 @@
         ctx.fillStyle = 'rgba(37, 99, 235, 0.08)';
         ctx.fillRect(mapX(state.a), 0, mapX(state.b) - mapX(state.a), h);
         
-        ctx.strokeStyle = 'var(--accent-blue)';
+        ctx.strokeStyle = '#2563eb';
         ctx.setLineDash([5, 5]);
         ctx.beginPath();
         ctx.moveTo(mapX(state.a), 0); ctx.lineTo(mapX(state.a), h);
@@ -530,7 +503,7 @@
 
         // Draw Signal f(t)
         const f = signals[state.signal];
-        ctx.strokeStyle = 'var(--accent-blue)';
+        ctx.strokeStyle = '#2563eb';
         ctx.lineWidth = 2;
         ctx.beginPath();
         for(let px = 0; px <= w; px += 2) {
@@ -549,7 +522,7 @@
             
             // Draw box
             ctx.fillStyle = 'rgba(217, 119, 6, 0.2)';
-            ctx.strokeStyle = 'var(--accent-orange)';
+            ctx.strokeStyle = '#d97706';
             ctx.lineWidth = 1.5;
             
             // Clip height visually so it doesn't break canvas entirely, but indicate it goes up
@@ -574,12 +547,12 @@
             }
 
             // Height label
-            ctx.fillStyle = 'var(--accent-orange)';
+            ctx.fillStyle = '#d97706';
             ctx.fillText(`1/ε = ${pHeight.toFixed(1)}`, mapX(state.t0), mapY(displayHeight) - 8);
 
         } else {
             // Draw Ideal Dirac Arrow
-            ctx.strokeStyle = 'var(--accent-orange)';
+            ctx.strokeStyle = '#d97706';
             ctx.lineWidth = 3;
             ctx.beginPath();
             ctx.moveTo(mapX(state.t0), mapY(0));
@@ -591,7 +564,7 @@
             ctx.moveTo(mapX(state.t0), mapY(yMax - 0.5) - 10);
             ctx.lineTo(mapX(state.t0) - 6, mapY(yMax - 0.5) + 2);
             ctx.lineTo(mapX(state.t0) + 6, mapY(yMax - 0.5) + 2);
-            ctx.fillStyle = 'var(--accent-orange)';
+            ctx.fillStyle = '#d97706';
             ctx.fill();
 
             // Label
@@ -602,14 +575,14 @@
             if (state.t0 >= state.a && state.t0 <= state.b) {
                 ctx.beginPath();
                 ctx.arc(mapX(state.t0), mapY(f(state.t0)), 5, 0, 2*Math.PI);
-                ctx.fillStyle = 'var(--accent-green)';
+                ctx.fillStyle = '#16a34a';
                 ctx.fill();
                 ctx.stroke();
             }
         }
 
         // Draw t0 handle line
-        ctx.strokeStyle = 'var(--accent-orange)';
+        ctx.strokeStyle = '#d97706';
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
         ctx.moveTo(mapX(state.t0), mapY(0));
@@ -618,9 +591,9 @@
         ctx.setLineDash([]);
         
         // Handles for grabbing
-        drawHandle(mapX(state.a), mapY(-0.25), 'a', 'var(--accent-blue)');
-        drawHandle(mapX(state.b), mapY(-0.25), 'b', 'var(--accent-blue)');
-        drawHandle(mapX(state.t0), mapY(-0.25), 't₀', 'var(--accent-orange)');
+        drawHandle(mapX(state.a), mapY(-0.25), 'a', '#2563eb');
+        drawHandle(mapX(state.b), mapY(-0.25), 'b', '#2563eb');
+        drawHandle(mapX(state.t0), mapY(-0.25), 't₀', '#d97706');
     }
 
     function drawHandle(px, py, label, color) {

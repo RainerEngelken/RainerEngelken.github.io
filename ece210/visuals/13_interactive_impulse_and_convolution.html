@@ -36,9 +36,6 @@
     .info-box { background: #e3f2fd; border-left: 4px solid var(--primary); padding: 12px; font-size: 14px; line-height: 1.5; border-radius: 0 4px 4px 0; }
     .equation { font-family: 'Courier New', Courier, monospace; font-size: 15px; text-align: center; color: var(--primary); font-weight: bold; margin: 5px 0; background: #fff; padding: 8px; border-radius: 4px; border: 1px dashed #ccc; }
     
-    .instructor-notes { margin-top: auto; font-size: 13px; line-height: 1.4; color: #555; background: #fff3e0; padding: 15px; border: 1px solid #ffe0b2; border-radius: 6px; }
-    .instructor-notes h3 { margin: 0 0 8px 0; font-size: 14px; color: #e65100; }
-    
     .legend { font-size: 13px; background: #f9f9f9; padding: 10px; border-radius: 6px; border: 1px solid #eee; }
     .legend span { display: inline-block; width: 12px; height: 12px; margin-right: 5px; border-radius: 2px; }
     
@@ -107,14 +104,6 @@
             <div id="legMistake" style="display:none;"><span style="background:var(--err-color)"></span> Mistake Output</div>
         </div>
 
-        <div class="instructor-notes">
-            <h3>Instructor / Pedagogy Notes</h3>
-            <ul style="margin:0; padding-left:15px;">
-                <li><strong>Multiply vs Convolve:</strong> Notice that multiplying by a shifted delta yields a point sample at $t=a$, whereas convolving completely shifts the target function to $t=a$.</li>
-                <li><strong>The Flip & Slide:</strong> Under convolution mode, watch the bottom-left panel. Observe $h(t-\tau)$ flip backward and slide through $x(\tau)$.</li>
-                <li><strong>Adding Widths:</strong> When convolving two pulses, their non-zero widths always sum. Toggle the "Mistake" checkbox to see the common error of taking the maximum width instead.</li>
-            </ul>
-        </div>
     </div>
 
     <div class="main-area">
@@ -444,23 +433,23 @@ function update() {
     document.getElementById('titleG').innerHTML = state.mode === 'conv' ? `Impulse Response <i>h(t)</i>` : `Multiplier <i>h(t)</i>`;
     
     // Draw Inputs
-    drawCanvas('cvsF',[{obj: f, color: 'var(--f-color)'}], {});
-    drawCanvas('cvsG',[{obj: g, color: 'var(--g-color)'}], {});
+    drawCanvas('cvsF',[{obj: f, color: '#2196F3'}], {});
+    drawCanvas('cvsG',[{obj: g, color: '#F44336'}], {});
     
     // Draw Sliding Overlap
     if(state.mode === 'conv') {
         document.getElementById('titleOverlap').innerHTML = `Sliding Overlap: <i>x(τ)</i> and <i>h(${state.t.toFixed(1)} - τ)</i>`;
         let g_shifted = { c: (tau) => g.c(state.t - tau), d: g.d.map(delta => ({pos: state.t - delta.pos, weight: delta.weight})) };
-        drawCanvas('cvsOverlap',[{obj: f, color: 'var(--f-color)'}, {obj: g_shifted, color: 'var(--g-color)'}], { fillOverlap: true, markerOrigin: state.t, xVar: 'τ' });
+        drawCanvas('cvsOverlap',[{obj: f, color: '#2196F3'}, {obj: g_shifted, color: '#F44336'}], { fillOverlap: true, markerOrigin: state.t, xVar: 'τ' });
     } else {
         document.getElementById('titleOverlap').innerHTML = `Evaluation at <i>t = ${state.t.toFixed(1)}</i>`;
-        drawCanvas('cvsOverlap',[{obj: f, color: 'var(--f-color)'}, {obj: g, color: 'var(--g-color)'}], { fillOverlap: true, markerT: state.t, xVar: 't' });
+        drawCanvas('cvsOverlap',[{obj: f, color: '#2196F3'}, {obj: g, color: '#F44336'}], { fillOverlap: true, markerT: state.t, xVar: 't' });
     }
     
     // Draw Output
-    let outSignals = [{obj: out, color: 'var(--out-color)'}];
+    let outSignals = [{obj: out, color: '#9C27B0'}];
     if(state.showMistake) {
-        outSignals.push({obj: mistake, color: 'var(--err-color)', dashed: true});
+        outSignals.push({obj: mistake, color: '#FF9800', dashed: true});
         document.getElementById('legMistake').style.display = 'block';
     } else {
         document.getElementById('legMistake').style.display = 'none';

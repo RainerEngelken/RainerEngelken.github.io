@@ -156,16 +156,6 @@
         .verdict-icon.true { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .verdict-icon.false { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
 
-        /* Modals & Overlays */
-        #instructor-notes {
-            display: none; position: fixed; top: 10%; left: 20%; right: 20%; bottom: 10%;
-            background: white; z-index: 100; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            border-radius: 8px; overflow-y: auto; line-height: 1.5;
-        }
-        #overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 50;
-        }
     </style>
 </head>
 <body>
@@ -175,7 +165,6 @@
             <h1>System Properties Explorer</h1>
             <p>ECE 210: Causality, Linearity, Time-Invariance, and BIBO Stability</p>
         </div>
-        <button class="toggle-btn" onclick="toggleNotes()">Instructor Notes</button>
     </header>
 
     <div id="app-container">
@@ -226,21 +215,6 @@
             
             <div id="properties-list" class="show-def"></div>
         </div>
-    </div>
-
-    <!-- Instructor Notes Modal -->
-    <div id="overlay" onclick="toggleNotes()"></div>
-    <div id="instructor-notes">
-        <h2 style="border-bottom: 2px solid var(--uiuc-orange);">Concept notes</h2>
-        <p>This applet serves as a conceptual simulator to help students diagnose system properties intuitively and formally.</p>
-        <ul>
-            <li><strong>Causality Visualization:</strong> When sliding $t_0$, any dependency mapping to $\tau > t_0$ crosses into the visually red "Future" region, explicitly showing causality violations.</li>
-            <li><strong>BIBO Stability Test:</strong> Toggling the test signal applies the unit step $u(t)$ (a strictly bounded signal). Students can visually observe if the output $y(t)$ grows unbounded (e.g., in the Accumulator or Time-Varying Gain presets).</li>
-            <li><strong>Time Invariance:</strong> Students can use the $t_0$ slider to shift the observation window. For Time-Varying Gain ($t \cdot f(t)$), sliding $t_0$ changes the amplitude of the mapped signal, visually demonstrating shift-variance.</li>
-            <li><strong>Linearity Misconception:</strong> The $f(t)+2$ preset proves that $y=mx+b$ logic fails for linear systems (requires zero-in, zero-out).</li>
-            <li><strong>Predictive Pedagogy:</strong> Forced choice ("Predict Yes/No") requires cognitive commitment before revealing the answer, improving retention over passive reading.</li>
-        </ul>
-        <button class="toggle-btn" onclick="toggleNotes()" style="margin-top:20px;">Close Notes</button>
     </div>
 
 <script>
@@ -516,18 +490,6 @@
         drawCanvas();
     }
 
-    function toggleNotes() {
-        const notes = document.getElementById('instructor-notes');
-        const overlay = document.getElementById('overlay');
-        if(notes.style.display === 'block') {
-            notes.style.display = 'none';
-            overlay.style.display = 'none';
-        } else {
-            notes.style.display = 'block';
-            overlay.style.display = 'block';
-        }
-    }
-
     // -- CANVAS RENDERING --
     function resizeCanvas() {
         const wrapper = document.getElementById('canvas-wrapper');
@@ -580,7 +542,7 @@
         // 3. Current t0 marker on bottom axis
         ctx.beginPath();
         ctx.arc(xT0, botY, 6, 0, Math.PI*2);
-        ctx.fillStyle = 'var(--uiuc-navy)';
+        ctx.fillStyle = '#13294B';
         ctx.fill();
         ctx.font = 'italic 14px serif';
         ctx.fillText("t₀", xT0 - 6, botY + 30);
@@ -596,11 +558,11 @@
             // Highlight top point
             ctx.beginPath();
             ctx.arc(xTop, topY, 6, 0, Math.PI*2);
-            ctx.fillStyle = requiresFuture ? 'var(--danger)' : 'var(--uiuc-orange)';
+            ctx.fillStyle = requiresFuture ? '#dc3545' : '#E84A27';
             ctx.fill();
 
             // Arrow
-            drawArrow(xTop, topY + 12, xT0, botY - 12, requiresFuture ? 'var(--danger)' : 'var(--uiuc-orange)');
+            drawArrow(xTop, topY + 12, xT0, botY - 12, requiresFuture ? '#dc3545' : '#E84A27');
 
         } else if (dep.type === 'interval') {
             const visualStart = Math.max(tMin, dep.start);
@@ -626,7 +588,7 @@
 
         // Causality warning text
         if(requiresFuture) {
-            ctx.fillStyle = 'var(--danger)';
+            ctx.fillStyle = '#dc3545';
             ctx.font = 'bold 15px "Segoe UI", sans-serif';
             ctx.fillText("⚠️ Reaches into future: Non-Causal!", w/2 - 120, (topY+botY)/2);
         }
@@ -635,8 +597,8 @@
         if (showTestSignals) {
             // Signal: unit step u(t)
             const u = (t) => t >= 0 ? 1 : 0;
-            drawSignal(topY, u, 'var(--uiuc-navy)', "f(τ) = u(τ)");
-            drawSignal(botY, (t) => currentPreset.y_eval(t, u), 'var(--success)', "y(t)", true);
+            drawSignal(topY, u, '#13294B', "f(τ) = u(τ)");
+            drawSignal(botY, (t) => currentPreset.y_eval(t, u), '#28a745', "y(t)", true);
         }
 
         function drawAxis(yPos, label, isTop) {
@@ -712,7 +674,7 @@
             ctx.fillText(label, w - padX - 60, axisY - 45);
 
             if(checkBounds && isUnbounded) {
-                ctx.fillStyle = 'var(--danger)';
+                ctx.fillStyle = '#dc3545';
                 ctx.fillText("⚠️ y(t) grows unbounded!", w - padX - 160, axisY - 70);
             }
         }

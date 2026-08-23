@@ -256,38 +256,9 @@
       border-radius: 999px;
       display: inline-block;
     }
-    .teacher {
-      margin-top: 18px;
-      background: linear-gradient(180deg, #fff 0%, #fbfdff 100%);
-      border: 1px solid var(--line);
-      border-radius: 20px;
-      box-shadow: var(--shadow);
-      padding: 16px;
-    }
-    details summary {
-      cursor: pointer;
-      font-weight: 800;
-      font-size: 1rem;
-    }
-    .note-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 16px;
-      margin-top: 14px;
-    }
-    .note-box {
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 12px 14px;
-      background: #fbfdff;
-    }
-    .note-box h4 {
-      margin: 0 0 8px 0;
-      font-size: 0.98rem;
-    }
     .small { font-size: 0.88rem; color: var(--muted); }
     @media (max-width: 1100px) {
-      .controls, .foot, .plot-grid, .note-grid { grid-template-columns: 1fr; }
+      .controls, .foot, .plot-grid { grid-template-columns: 1fr; }
       .plot-card.wide { grid-column: span 1; }
       .control-grid { grid-template-columns: 1fr; }
       .challenge { grid-template-columns: 1fr; }
@@ -446,65 +417,10 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>Quick instructor use</h3></div>
+        <div class="card-head"><h3>Modeling note</h3></div>
         <div class="card-body">
-          <ul class="mini-list">
-            <li>Start with <strong>single cosine below Nyquist</strong> and sweep T until the copies nearly touch.</li>
-            <li>Then switch to <strong>single cosine above Nyquist</strong> to show that the samples do not reveal the original frequency uniquely.</li>
-            <li>Use <strong>sinc-type low-pass</strong> to make the "isolated baseband copy" condition visually obvious.</li>
-            <li>Turn the cutoff too high on purpose to kill the "more bandwidth is always better" misconception.</li>
-          </ul>
+          <p class="small">The cosine line spectra are rendered as narrow Gaussian peaks so they can be plotted numerically. The recoverability verdict uses the ideal Dirac-line model, not the finite-width drawing.</p>
         </div>
-      </div>
-    </section>
-
-    <section class="teacher">
-      <details open>
-        <summary>Instructor notes</summary>
-        <div class="note-grid">
-          <div class="note-box">
-            <h4>Suggested in-class flow</h4>
-            <ol class="mini-list">
-              <li>Ask for a prediction first. Keep challenge mode hidden.</li>
-              <li>Show that changing T changes the replica spacing, not the original spectrum.</li>
-              <li>Point to the central copy and ask whether it is isolated.</li>
-              <li>Only then reveal whether exact reconstruction is possible.</li>
-              <li>Finally vary ω<sub>c</sub> to show that even a recoverable sampling setup can be ruined by a bad reconstruction filter.</li>
-            </ol>
-          </div>
-          <div class="note-box">
-            <h4>How the verdict is decided</h4>
-            <ul class="mini-list">
-              <li><strong>Recoverable</strong> means: the preset is theoretically bandlimited, ω<sub>s</sub> &gt; 2Ω<sub>max</sub>, the filter is ideal, ω<sub>c</sub> includes the full baseband, and ω<sub>c</sub> stays below the nearest neighboring copy.</li>
-              <li><strong>Not recoverable</strong> means at least one of those conditions fails.</li>
-              <li>Non-bandlimited presets can look visually fine at high sample rate, but exact reconstruction still fails in principle.</li>
-            </ul>
-          </div>
-          <div class="note-box">
-            <h4>Preset intent</h4>
-            <ul class="mini-list">
-              <li><strong>Single cosine below Nyquist:</strong> clean success case.</li>
-              <li><strong>Single cosine above Nyquist:</strong> clean alias case.</li>
-              <li><strong>Two-tone:</strong> one more realistic multi-line spectrum.</li>
-              <li><strong>Sinc-type low-pass signal:</strong> true bandlimited continuous signal.</li>
-              <li><strong>Deliberately aliased case:</strong> overlap is obvious and dramatic.</li>
-              <li><strong>Oversampled case:</strong> easy win with wide separation.</li>
-              <li><strong>Gaussian pulse:</strong> non-bandlimited cautionary case.</li>
-            </ul>
-          </div>
-          <div class="note-box">
-            <h4>What to emphasize verbally</h4>
-            <ul class="mini-list">
-              <li>Sampling does not "destroy" information by magic. Information is lost when the repeated copies overlap.</li>
-              <li>The low-pass filter is not guessing. It is selecting one spectral copy.</li>
-              <li>When aliasing occurs, reconstruction returns a different continuous-time signal that is consistent with the same samples.</li>
-              <li>The replica picture is the main story. Everything else follows from it.</li>
-            </ul>
-          </div>
-        </div>
-      </details>
-      <div class="small" style="margin-top:12px;">
-        Self-contained file. No external libraries required.
       </div>
     </section>
   </div>
@@ -1050,6 +966,12 @@
       els.presetDesc.textContent = getPreset().description;
     }
 
+    function resetChallengeForNewState() {
+      state.challengeHidden = true;
+      state.userGuess = null;
+      els.challengeResult.textContent = 'Answer hidden. Make a prediction first.';
+    }
+
     function renderAll() {
       buildNumerics();
       updateReadouts();
@@ -1082,6 +1004,7 @@
       const p = getPreset();
       state.T = p.defaultT;
       state.wc = p.defaultCutoff;
+      resetChallengeForNewState();
       syncControlsFromState();
       renderAll();
     }
@@ -1112,18 +1035,22 @@
       });
       els.tSlider.addEventListener('input', (e) => {
         state.T = Number(e.target.value);
+        resetChallengeForNewState();
         renderAll();
       });
       els.cutoffSlider.addEventListener('input', (e) => {
         state.wc = Number(e.target.value);
+        resetChallengeForNewState();
         renderAll();
       });
       els.idealLPF.addEventListener('change', (e) => {
         state.idealLPF = e.target.checked;
+        resetChallengeForNewState();
         renderAll();
       });
       els.showAlias.addEventListener('change', (e) => {
         state.showAlias = e.target.checked;
+        resetChallengeForNewState();
         renderAll();
       });
       els.resetPresetBtn.addEventListener('click', resetToPreset);

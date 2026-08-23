@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0056)file:///home/rainer/Downloads/ai_studio_code%20(50).html -->
 <html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -545,7 +544,7 @@
             const py2 = h - ((val2 - b.yMin)/(b.yMax - b.yMin)*h);
 
             ctxG.beginPath();
-            ctxG.strokeStyle = 'var(--uiuc-orange)';
+            ctxG.strokeStyle = '#E84A27';
             ctxG.lineWidth = 3;
             ctxG.moveTo(pxCursor, py1);
             ctxG.lineTo(pxCursor, py2);
@@ -593,7 +592,7 @@
                 const aHeight = sign * 40; // Pixel height of arrow
                 
                 ctxH.beginPath();
-                ctxH.strokeStyle = 'var(--uiuc-orange)';
+                ctxH.strokeStyle = '#E84A27';
                 ctxH.lineWidth = 3;
                 ctxH.moveTo(px, y0);
                 ctxH.lineTo(px, y0 - aHeight);
@@ -604,7 +603,7 @@
                 ctxH.lineTo(px + 5, y0 - aHeight + sign*5);
                 ctxH.stroke();
 
-                ctxH.fillStyle = 'var(--uiuc-orange)';
+                ctxH.fillStyle = '#E84A27';
                 ctxH.font = "bold 14px sans-serif";
                 ctxH.fillText(`${imp.area}δ(t)`, px + 8, y0 - aHeight/2);
             });
@@ -642,11 +641,11 @@
         model.impulses.forEach(imp => { if(Math.abs(state.tCursor - imp.t)<0.02) isImp=true; });
 
         if (isImp && state.showImp) {
-            ctxZ.fillStyle = 'var(--uiuc-orange)';
+            ctxZ.fillStyle = '#E84A27';
             ctxZ.font = "bold 18px sans-serif";
             ctxZ.textAlign = "center";
             ctxZ.fillText("Discontinuity (Jump)", w/2, h/2 - 15);
-            ctxZ.fillText("Slope &rarr; &infin;", w/2, h/2 + 15);
+            ctxZ.fillText("Slope → ∞", w/2, h/2 + 15);
             ctxZ.textAlign = "left";
             return;
         }
@@ -704,7 +703,7 @@
         const pyTop = pyC - (dyReal/yRange * h);
 
         ctxZ.beginPath();
-        ctxZ.strokeStyle = 'var(--tangent-color)';
+        ctxZ.strokeStyle = '#28A745';
         ctxZ.lineWidth = 2;
         ctxZ.moveTo(pxC, pyC);
         ctxZ.lineTo(pxRight, pyC);
@@ -715,7 +714,7 @@
         ctxZ.fillStyle = 'rgba(40, 167, 69, 0.1)';
         ctxZ.fill();
 
-        ctxZ.fillStyle = 'var(--tangent-color)';
+        ctxZ.fillStyle = '#28A745';
         ctxZ.font = "bold 14px sans-serif";
         ctxZ.fillText("dt", pxC + (pxRight-pxC)/2 - 10, pyC + 15);
         ctxZ.fillText("dg", pxRight + 5, pyC - (pyC-pyTop)/2 + 5);

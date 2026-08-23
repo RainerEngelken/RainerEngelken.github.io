@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0073)file:///home/rainer/Downloads/210_good_visuals/ai_studio_code%20(11).html -->
 <html lang="en"><head>
   <meta name="robots" content="noindex, nofollow"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     
@@ -139,7 +138,7 @@
                 
                 <b>Exponential:</b> 
                 <span class="math-text">r = √<span class="sqrt">a<sup>2</sup> + b<sup>2</sup></span></span>, 
-                <span class="math-text">θ = tan<sup>-1</sup>(b/a)</span>
+                <span class="math-text">θ = atan2(b, a)</span> (quadrant-aware)
             </div>
         </div>
 
@@ -292,6 +291,12 @@
         const bStr = Math.abs(z.b).toFixed(2);
         const sign = z.b >= 0 ? '+' : '-';
         rectDisp.innerHTML = `Z = ${aStr} ${sign} j${bStr}`;
+
+        if (r === 0) {
+            polarDisp.innerHTML = 'Z = 0 &nbsp; (angle undefined)';
+            eulerVal.innerHTML = 'The phase of the zero complex number is undefined.';
+            return;
+        }
 
         let piFraction = (theta / Math.PI).toFixed(2);
         polarDisp.innerHTML = `Z = ${r.toFixed(2)} e<sup>j(${piFraction}π)</sup>`;
