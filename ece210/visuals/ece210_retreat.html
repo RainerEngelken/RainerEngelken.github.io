@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive ECE 210 visuals</title>
+<style>
+  :root{
+    --bg:#ffffff;
+    --fg:#111111;
+    --muted:#666666;
+    --accent:#ff5f05;
+    --notes-bg:#fff8ef;
+    --notes-border:#f2c08b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--fg);font-family:Arial, Helvetica, sans-serif;overflow:hidden}
+  body{touch-action:pan-y}
+  .slide{display:none;width:100vw;height:100vh;padding:6vh 7vw 10vh;position:relative}
+  .slide.active{display:flex;flex-direction:column;justify-content:flex-start}
+  h1{font-size:4.7rem;line-height:1.04;margin:0 0 1.5rem;font-weight:700;letter-spacing:-0.035em}
+  h2{font-size:4.0rem;line-height:1.06;margin:0 0 1.6rem;font-weight:700;letter-spacing:-0.035em}
+  .subtitle{font-size:2.0rem;line-height:1.3;color:var(--muted);margin-bottom:2.2rem}
+  .big{font-size:2.45rem;line-height:1.28;max-width:1260px}
+  ul{list-style:none;padding:0;margin:0;max-width:1260px}
+  li{font-size:2.4rem;line-height:1.28;margin:0.5rem 0}
+  li::before{content:"•";color:var(--accent);display:inline-block;width:1.3rem;margin-left:-1.3rem}
+  .tiny{font-size:1.15rem;color:var(--muted)}
+  .prompt{
+    font-family:Georgia, 'Times New Roman', serif;
+    font-size:2.15rem;
+    line-height:1.28;
+    max-width:1220px;
+    border-left:8px solid var(--accent);
+    padding-left:1.25rem;
+  }
+  .footer{position:absolute;left:7vw;right:7vw;bottom:3.2vh;display:flex;justify-content:space-between;align-items:flex-end;color:var(--muted);font-size:1.1rem}
+  .accent{color:var(--accent)}
+  .rule{width:110px;height:8px;background:var(--accent);margin:0 0 1.7rem}
+  .ack{font-size:1.85rem;line-height:1.45;color:#333;margin-top:2.3rem;max-width:1100px}
+  .notes{
+    display:none;position:absolute;left:7vw;right:7vw;bottom:7.5vh;background:var(--notes-bg);
+    border:1px solid var(--notes-border);padding:1rem 1.1rem;font-size:1rem;line-height:1.35;color:#333;max-width:1080px;
+  }
+  body.show-notes .notes{display:block}
+  body.show-notes .footer{bottom:1.3vh}
+  .kbd{font-family:monospace;background:#f2f2f2;border:1px solid #ddd;border-radius:4px;padding:0.05rem 0.35rem}
+  @media (max-width:1100px){
+    h1{font-size:3.4rem} h2{font-size:3rem} .subtitle{font-size:1.5rem} .big{font-size:1.8rem} li{font-size:1.75rem} .prompt{font-size:1.55rem}.ack{font-size:1.35rem}
+  }
+</style>
+</head>
+<body>
+
+<section class="slide" data-title="Title">
+  <div class="rule"></div>
+  <h1>Interactive ECE 210 visuals</h1>
+  <div class="subtitle">LLMs as rapid prototyping tools</div>
+  <div class="big">Rainer Engelken<br>ECE Faculty Retreat · May 7, 2026</div>
+  <aside class="notes">
+    Start by being respectful of the course. ECE 210 already has a strong infrastructure: textbook, mature slides, quizzes, Kahoots, and exam materials. This is a supplementary interactive layer, not a replacement.
+  </aside>
+  <div class="footer"><span>← → / space</span><span>1</span></div>
+</section>
+
+<section class="slide" data-title="Problem">
+  <div class="rule"></div>
+  <h2>The bottleneck</h2>
+  <ul>
+    <li>the material is strong</li>
+    <li>the textbook is not interactive</li>
+    <li>students struggle to connect<br>formalism, intuition, and physical meaning</li>
+  </ul>
+  <aside class="notes">
+    Suggested phrasing: Students in my sections were often struggling to link the mathematical formalism to conceptual understanding and physical intuition. Drawings only go so far. I wanted visual explanations students could manipulate.
+  </aside>
+  <div class="footer"><span>set up the need</span><span>2</span></div>
+</section>
+
+<section class="slide" data-title="Examples">
+  <div class="rule"></div>
+  <h2>Examples</h2>
+  <ul>
+    <li>Fourier series</li>
+    <li>Fourier series → Fourier transform</li>
+    <li>convolution</li>
+    <li>s-plane poles → time-domain behavior</li>
+  </ul>
+  <aside class="notes">
+    Use this slide as the bridge into the live browser demos. Show them one by one, but keep each demo very short. Main point: students can vary one thing and see several representations update together.
+  </aside>
+  <div class="footer"><span>live browser examples</span><span>3</span></div>
+</section>
+
+<section class="slide" data-title="Prompt">
+  <div class="rule"></div>
+  <h2>A simple prompt</h2>
+  <div class="prompt">
+    “Make an awesome web applet based on HTML and Javascript that explains complex numbers for my ECE210 students ‘analog signal processing’. Make it interactive, and pedagogically useful. For context, I am attaching the slides of today’s lecture.”
+  </div>
+  <aside class="notes">
+    Say that for simple applets, a short prompt plus attached lecture slides worked surprisingly well. For harder topics, you added more structure: target misconception, required panels, and examples.
+  </aside>
+  <div class="footer"><span>slides help a lot</span><span>4</span></div>
+</section>
+
+<section class="slide" data-title="Workflow">
+  <div class="rule"></div>
+  <h2>Workflow</h2>
+  <div class="big" style="font-size:2.2rem;line-height:1.45;">
+    lecture slides + prompt<br>
+    <span class="accent">→</span> prototype<br>
+    <span class="accent">→</span> simplify<br>
+    <span class="accent">→</span> screenshot + rerun if needed<br>
+    <span class="accent">→</span> audit the math<br>
+    <span class="accent">→</span> publish as supplementary material
+  </div>
+  <div class="tiny" style="margin-top:1.8rem;">Used: ChatGPT + Gemini</div>
+  <aside class="notes">
+    One lesson: asking an LLM to write a super-detailed prompt can work, but often produces overloaded visuals with too many bells and whistles. Simpler was usually better: one concept, a few synchronized views, and few controls.
+  </aside>
+  <div class="footer"><span>prompt → prototype → audit</span><span>5</span></div>
+</section>
+
+<section class="slide" data-title="Caveats">
+  <div class="rule"></div>
+  <h2>Caveats</h2>
+  <ul>
+    <li>not a replacement for study</li>
+    <li>simple beats overloaded</li>
+    <li>polished does not mean correct</li>
+    <li>the instructor keeps intellectual ownership</li>
+  </ul>
+  <aside class="notes">
+    Mention concrete issues: LaTeX rendering can break; circuit geometry can be wrong; the mathematics can be wrong while the visual looks polished. Also mention intellectual debt: generating fancy visuals without fully understanding what they show.
+  </aside>
+  <div class="footer"><span>caveats</span><span>6</span></div>
+</section>
+
+<section class="slide" data-title="Takeaway">
+  <div class="rule"></div>
+  <h2>Takeaway</h2>
+  <div class="big" style="font-size:2.65rem;line-height:1.32;max-width:1250px;">
+    AI helps me build better teaching visuals quickly.<br><br>
+    But correctness, pedagogy, and responsibility stay with us.
+  </div>
+  <div class="ack">
+    Thanks: Cory Snyder · Juan Alvarez · Craig Shultz · Olga Mironenko · Erhan Kudeki · Ivan Abraham
+  </div>
+  <aside class="notes">
+    End calmly. Say: I think this is a good use of AI, helping students connect mathematics to understanding. But the intellectual work is still ours: choosing the concept, knowing where students struggle, checking the mathematics, and deciding what belongs in the course.
+  </aside>
+  <div class="footer"><span><span class="kbd">N</span> notes</span><span>7</span></div>
+</section>
+
+<script>
+(function(){
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let index = 0;
+  function clamp(n){ return Math.max(0, Math.min(slides.length-1, n)); }
+  function show(i, replace=false){
+    index = clamp(i);
+    slides.forEach((s,j)=>s.classList.toggle('active', j===index));
+    const h = '#' + (index+1);
+    if(replace) history.replaceState(null,'',h); else history.pushState(null,'',h);
+    document.title = slides[index].dataset.title + ' · Interactive ECE 210 visuals';
+  }
+  function fromHash(){
+    const n = parseInt((location.hash||'#1').slice(1),10);
+    if(!isNaN(n)) show(n-1, true);
+  }
+  function next(){ show(index+1); }
+  function prev(){ show(index-1); }
+  document.addEventListener('keydown', e=>{
+    if(['ArrowRight','PageDown',' ','Spacebar'].includes(e.key)){ e.preventDefault(); next(); }
+    if(['ArrowLeft','PageUp','Backspace'].includes(e.key)){ e.preventDefault(); prev(); }
+    if(e.key.toLowerCase()==='n'){ document.body.classList.toggle('show-notes'); }
+    if(e.key.toLowerCase()==='f'){ document.documentElement.requestFullscreen?.(); }
+    if(e.key==='Home'){ show(0); }
+    if(e.key==='End'){ show(slides.length-1); }
+  });
+  let startX=null, startY=null;
+  document.addEventListener('touchstart', e=>{ const t=e.changedTouches[0]; startX=t.clientX; startY=t.clientY; }, {passive:true});
+  document.addEventListener('touchend', e=>{
+    if(startX===null) return;
+    const t=e.changedTouches[0]; const dx=t.clientX-startX, dy=t.clientY-startY;
+    if(Math.abs(dx)>60 && Math.abs(dx)>Math.abs(dy)*1.2){ if(dx<0) next(); else prev(); }
+    startX=startY=null;
+  }, {passive:true});
+  window.addEventListener('hashchange', fromHash);
+  fromHash();
+})();
+</script>
+</body>
+</html>
